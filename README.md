@@ -166,7 +166,5 @@ Please follow the code style enforced by ESLint & Prettier. Consider adding unit
 
 For questions or collaboration, open an issue or contact the repository owner.
 
----
 
-> Tip: Want me to also add a CONTRIBUTING.md, CODE_OF_CONDUCT, or basic GitHub Actions workflow for linting/build? I can add them next. 💡
 
