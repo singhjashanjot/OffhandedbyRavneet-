@@ -1,6 +1,9 @@
 # Offhanded — Immersive Art Experiences Platform 🔥
+<img width="1858" height="918" alt="image" src="https://github.com/user-attachments/assets/0e54e176-6f25-4baa-990d-a3e8277717f6" />
+
 
 Professional, modern web application for Offhanded — a brand crafting immersive, meditative art workshops and experiences.
+
 
 ---
 
