@@ -14,6 +14,11 @@ module.exports = {
       
       colors: {
         /* Primary Brand Colors - Warm, Earthy, Calming */
+        "primary": "#1B3022",
+        "background-light": "#FFFFF1",
+        "offhanded-deep": "#2D3E30",
+        "offhanded-forest": "#1B3022",
+        "offhanded-accent": "#B2C0AD",
         /* Primary Brand Colors - Warm, Earthy, Calming */
         brand: {
           50: "#f0f4ef", /* Visible sage tint */
@@ -79,9 +84,11 @@ module.exports = {
       
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
-        display: ["var(--font-arimo)", "Helvetica", "Arial", "sans-serif"],
+        display: ["var(--font-space-grotesk)", "Space Grotesk", "sans-serif"],
+        serif: ["var(--font-playfair)", "Playfair Display", "serif"],
+
       },
-      
+
       fontSize: {
         /* Typography Scale */
         "display-xl": ["4.5rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
