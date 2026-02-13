@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Workshop } from "@/data";
-import { formatPrice, formatDate } from "@/data";
+import { formatPrice, formatDate, workshopCategories } from "@/data";
 
 /* ========================================
    WORKSHOP CARD COMPONENT
@@ -26,9 +26,9 @@ export function WorkshopCard({
   className = "",
   hideFeaturedLayout = false 
 }: WorkshopCardProps) {
-  const isFeatured = !hideFeaturedLayout && (variant === "featured" || workshop.featured);
-  const seatsPercentage = (workshop.availableSeats / workshop.totalSeats) * 100;
-  const isLowSeats = seatsPercentage < 30;
+  const isFeatured = !hideFeaturedLayout && variant === "featured";
+  const isLowSeats = workshop.availableSeats <= 5;
+  const categoryName = workshopCategories.find((c) => c.id === workshop.categoryId)?.name ?? workshop.categoryId;
 
   return (
     <motion.div
@@ -61,7 +61,7 @@ export function WorkshopCard({
             {/* Category Badge */}
             <div className="absolute top-4 left-4 z-20">
               <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 backdrop-blur-md text-brand-800 shadow-sm uppercase tracking-wide">
-                {workshop.category}
+                {categoryName}
               </span>
             </div>
 

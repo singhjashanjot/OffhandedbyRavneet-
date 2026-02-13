@@ -58,7 +58,7 @@ export function UpcomingWorkshopsSection() {
         </div>
 
         <div className="text-center">
-          <Link href="/workshops" className="btn-secondary">
+          <Link href="/workshops" className=" bg-[#fffff5] btn-secondary">
             View All Workshops
           </Link>
         </div>
