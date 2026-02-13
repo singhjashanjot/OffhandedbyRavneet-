@@ -20,7 +20,7 @@ export const testimonials: Testimonial[] = [
     name: "Priya Sharma",
     rating: 5,
     review:
-      "The pottery workshop was absolutely magical! I've never felt so relaxed and creative at the same time. Ravneet's guidance made everything so easy, even for a complete beginner like me.",
+      "The pottery workshop was absolutely magical! I've never felt so relaxed and creative at the same time..",
     workshopType: "Pottery Texture Art",
     date: "2024-01-28",
     featured: true,
@@ -30,7 +30,7 @@ export const testimonials: Testimonial[] = [
     name: "Arjun Mehta",
     rating: 5,
     review:
-      "My wife and I attended the canvas art session for our anniversary. It was the perfect date! The ambiance, the art, and the experience - everything was premium.",
+      "My wife and I attended the canvas art session for our anniversary.",
     workshopType: "Canvas Art",
     date: "2024-01-20",
     featured: true,
@@ -40,7 +40,7 @@ export const testimonials: Testimonial[] = [
     name: "Sneha Kapoor",
     rating: 5,
     review:
-      "I organized a birthday party for my daughter at Offhanded. The kids had an amazing time with the bento cake painting. Highly recommend for children's events!",
+      "I organized a birthday party for my daughter at Offhanded. ",
     workshopType: "Bento Cake Painting",
     date: "2024-01-15",
     featured: true,
@@ -50,7 +50,7 @@ export const testimonials: Testimonial[] = [
     name: "Vikram Singh",
     rating: 5,
     review:
-      "Our corporate team loved the rope on canvas workshop. It was a great team-building activity. Everyone left with a beautiful piece of art and great memories.",
+      "Our corporate team loved the rope on canvas workshop. ",
     workshopType: "Rope on Canvas",
     date: "2024-01-10",
     featured: false,
@@ -60,7 +60,7 @@ export const testimonials: Testimonial[] = [
     name: "Ananya Reddy",
     rating: 5,
     review:
-      "The punch needle session was so therapeutic! I've found my new hobby. The materials provided were top-notch, and the learning curve was very gentle.",
+      "The punch needle session was so therapeutic! I've found my new hobb.",
     workshopType: "Punch Needle Art",
     date: "2024-01-05",
     featured: true,
@@ -70,7 +70,7 @@ export const testimonials: Testimonial[] = [
     name: "Rohit Gupta",
     rating: 5,
     review:
-      "As someone with zero art background, I was nervous. But the welcoming environment and step-by-step guidance made me feel like a real artist by the end!",
+      "As someone with zero art background, I was nervous.",
     workshopType: "Acrylic Art",
     date: "2023-12-28",
     featured: false,
