@@ -78,7 +78,7 @@ export function GalleryPreviewSection() {
 
         {/* View All CTA */}
         <div className="text-center mt-12">
-          <Link href="/gallery" className="btn-secondary">
+          <Link href="/gallery" className=" bg-[#fffff5] btn-secondary">
             View Full Gallery →
           </Link>
         </div>
