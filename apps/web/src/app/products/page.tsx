@@ -2,10 +2,12 @@ import { Header, Footer, SectionHeader } from "@/components";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getActiveProducts } from "@/lib/queries/products";
 
 /* ========================================
    PRODUCTS PAGE
    Art supplies and merchandise store
+   Server Component — fetches from Supabase
 ======================================== */
 
 export const metadata: Metadata = {
@@ -13,39 +15,9 @@ export const metadata: Metadata = {
   description: "Shop art supplies, kits, and Offhanded merchandise. Everything you need for your creative journey.",
 };
 
-// Mock products data
-const products = [
-  {
-    id: "p-001",
-    name: "Pottery Starter Kit",
-    price: 1299,
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80",
-    category: "Kits",
-  },
-  {
-    id: "p-002",
-    name: "Acrylic Paint Set (24 colors)",
-    price: 899,
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&q=80",
-    category: "Supplies",
-  },
-  {
-    id: "p-003",
-    name: "Canvas Board Pack (3 pcs)",
-    price: 449,
-    image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&q=80",
-    category: "Supplies",
-  },
-  {
-    id: "p-004",
-    name: "Punch Needle Complete Kit",
-    price: 1599,
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80",
-    category: "Kits",
-  },
-];
+export default async function ProductsPage() {
+  const products = await getActiveProducts();
 
-export default function ProductsPage() {
   return (
     <>
       <Header />
@@ -65,7 +37,7 @@ export default function ProductsPage() {
         <section className="py-24 bg-white max-w-screen-2xl mx-auto">
           <div className="container-custom">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <Link
                   key={product.id}
                   href={`/products/${product.id}`}
@@ -73,7 +45,7 @@ export default function ProductsPage() {
                 >
                   <div className="relative aspect-square overflow-hidden rounded-t-3xl">
                     <Image
-                      src={product.image}
+                      src={product.image || "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80"}
                       alt={product.name}
                       fill
                       sizes="(max-width: 768px) 50vw, 25vw"
@@ -81,7 +53,7 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="p-4">
-                    <span className="text-caption text-neutral-500">{product.category}</span>
+                    <span className="text-caption text-neutral-500">{product.category || "General"}</span>
                     <h3 className="font-medium text-neutral-900 mt-1 group-hover:text-brand-600 transition-colors">
                       {product.name}
                     </h3>
