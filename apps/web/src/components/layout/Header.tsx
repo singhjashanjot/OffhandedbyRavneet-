@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-
-
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 /* ========================================
    HEADER COMPONENT
-   Floating island design based on user request
+   Floating island design with auth state
 ======================================== */
 
 export function Header() {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const { user, loading, signOut } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -21,11 +21,9 @@ export function Header() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Show header if scrolling up or at the top
       if (currentScrollY < lastScrollY || currentScrollY < 100) {
         setIsVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Hide header if scrolling down and past 100px
         setIsVisible(false);
       }
       
@@ -36,13 +34,25 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
   
-  // Navigation Items Mapping
   const navItems = [
     { href: "/", label: "Home", icon: "home" },
-    { href: "/workshops", label: "Workshops", icon: "grid_view" }, // Mapped from 'Work'
-    { href: "/gallery", label: "Gallery", icon: "gallery_thumbnail" }, // Mapped from 'Gallery'
-    { href: "/about", label: "About", icon: "person" }, // Mapped from 'About'
+    { href: "/workshops", label: "Workshops", icon: "grid_view" },
+    { href: "/gallery", label: "Gallery", icon: "gallery_thumbnail" },
+    { href: "/about", label: "About", icon: "person" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  // Get user initial for avatar
+  const userInitial = user?.user_metadata?.full_name
+    ? user.user_metadata.full_name.charAt(0).toUpperCase()
+    : user?.email
+    ? user.email.charAt(0).toUpperCase()
+    : "U";
 
   return (
     <>
@@ -50,7 +60,6 @@ export function Header() {
         className={`fixed top-8 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none transition-transform duration-500 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[200px]"}`}
       >
         
-        {/* Main Floating Island */}
         <div className="pointer-events-auto flex items-center justify-between gap-4 bg-[#fffff1]/80 backdrop-blur-xl border border-white/20 shadow-xl shadow-black/5 rounded-full px-2 py-2 md:px-3 md:py-2.5 transition-all duration-300 hover:shadow-2xl hover:bg-[#fffff1]/90 hover:scale-[1.01]">
             
             {/* Left: Brand Logo */}
@@ -79,15 +88,12 @@ export function Header() {
                       }
                     `}
                   >
-                    {/* Icon */}
                     <span 
                         className={`material-symbols-outlined text-[20px] ${isActive ? "font-normal" : "font-light"}`}
                         style={{ fontVariationSettings: `'FILL' ${isActive ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}
                     >
                       {item.icon}
                     </span>
-                    
-                    {/* Label (Hidden on mobile generally, or shown if room permits - keeping minimal icons on mobile usually better, but snippet implies text in tooltip/label. I'll show text on active or hover for desktop) */}
                     <span className={`text-xs font-medium hidden md:block ${isActive ? "block" : "hidden group-hover:block"}`}>
                       {item.label}
                     </span>
@@ -96,6 +102,37 @@ export function Header() {
               })}
             </nav>
 
+            {/* Right: Auth Section */}
+            <div className="flex items-center border-l border-[#141514]/10 pl-3">
+              {loading ? (
+                <div className="w-8 h-8 rounded-full bg-neutral-200 animate-pulse" />
+              ) : user ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#2D3E30] text-white flex items-center justify-center text-xs font-semibold">
+                    {userInitial}
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs font-medium text-[#141514]/60 hover:text-[#141514] transition-colors hidden md:block"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium bg-[#2D3E30] text-white hover:bg-[#3D4E40] transition-colors"
+                >
+                  <span 
+                    className="material-symbols-outlined text-[18px]"
+                    style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+                  >
+                    login
+                  </span>
+                  <span className="hidden md:block">Login</span>
+                </Link>
+              )}
+            </div>
 
         </div>
 
