@@ -1,15 +1,51 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Metadata } from "next";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 /* ========================================
    LOGIN PAGE
-   User authentication
+   User authentication with Supabase
 ======================================== */
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const router = useRouter();
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { error } = await signInWithEmail(email, password);
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      // Redirect to intended page or home
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirectTo") || "/";
+      router.push(redirectTo);
+      router.refresh();
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brand-50 flex items-center justify-center p-4 max-w-screen-2xl mx-auto">
       {/* Background Decorations */}
@@ -43,8 +79,18 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-body-sm">
+              {error}
+            </div>
+          )}
+
           {/* Social Login */}
-          <button className="w-full btn bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 mb-4 flex items-center justify-center gap-3">
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full btn bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 mb-4 flex items-center justify-center gap-3"
+          >
             <GoogleIcon />
             Continue with Google
           </button>
@@ -60,7 +106,7 @@ export default function LoginPage() {
           </div>
 
           {/* Login Form */}
-          <form className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
               <label className="block text-body-sm font-medium text-neutral-700 mb-2">
                 Email Address
@@ -69,6 +115,9 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@example.com"
                 className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -85,17 +134,24 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 className="input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
-            <button type="submit" className="btn-primary w-full mt-6">
-              Sign In
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full mt-6 disabled:opacity-50"
+            >
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
           {/* Sign Up Link */}
           <p className="text-center text-body-md text-neutral-500 mt-6">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-brand-600 hover:text-brand-700 font-medium">
               Sign up
             </Link>
