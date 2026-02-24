@@ -1,14 +1,96 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 /* ========================================
    SIGNUP PAGE
-   User registration
+   User registration with Supabase
 ======================================== */
 
 export default function SignupPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const router = useRouter();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!agreedToTerms) {
+      setError("Please agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error, session } = await signUpWithEmail(email, password, {
+      full_name: fullName,
+      phone_number: phone,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else if (session) {
+      // Auto-confirmed — user is signed in, redirect to home
+      router.push("/");
+      router.refresh();
+    } else {
+      // Email verification required
+      setSuccess(true);
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setError(null);
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setError(error.message);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="card p-8 max-w-md text-center"
+        >
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="font-display text-heading-lg text-neutral-900 mb-2">Check Your Email</h2>
+          <p className="text-body-md text-neutral-500 mb-6">
+            We&apos;ve sent a verification link to <strong>{email}</strong>. Click the link to activate your account.
+          </p>
+          <Link href="/login" className="btn-primary inline-block">
+            Back to Login
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-brand-50 flex items-center justify-center p-4 max-w-screen-2xl mx-auto">
       {/* Background Decorations */}
@@ -42,8 +124,18 @@ export default function SignupPage() {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-body-sm">
+              {error}
+            </div>
+          )}
+
           {/* Social Signup */}
-          <button className="w-full btn bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 mb-4 flex items-center justify-center gap-3">
+          <button
+            onClick={handleGoogleSignup}
+            className="w-full btn bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 mb-4 flex items-center justify-center gap-3"
+          >
             <GoogleIcon />
             Continue with Google
           </button>
@@ -59,7 +151,7 @@ export default function SignupPage() {
           </div>
 
           {/* Signup Form */}
-          <form className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div>
               <label className="block text-body-sm font-medium text-neutral-700 mb-2">
                 Full Name
@@ -68,6 +160,9 @@ export default function SignupPage() {
                 type="text"
                 placeholder="Your name"
                 className="input"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
               />
             </div>
 
@@ -79,6 +174,9 @@ export default function SignupPage() {
                 type="email"
                 placeholder="you@example.com"
                 className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -90,6 +188,8 @@ export default function SignupPage() {
                 type="tel"
                 placeholder="+91 98765 43210"
                 className="input"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
 
@@ -101,6 +201,10 @@ export default function SignupPage() {
                 type="password"
                 placeholder="Create a strong password"
                 className="input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
               />
               <p className="text-caption text-neutral-400 mt-1">
                 At least 8 characters with numbers and symbols
@@ -111,6 +215,8 @@ export default function SignupPage() {
               <input
                 type="checkbox"
                 id="terms"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
                 className="mt-1 w-4 h-4 rounded border-neutral-300 text-brand-600 focus:ring-brand-500"
               />
               <label htmlFor="terms" className="text-body-sm text-neutral-600">
@@ -125,8 +231,12 @@ export default function SignupPage() {
               </label>
             </div>
 
-            <button type="submit" className="btn-primary w-full mt-6">
-              Create Account
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full mt-6 disabled:opacity-50"
+            >
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 
