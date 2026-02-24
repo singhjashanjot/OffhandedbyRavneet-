@@ -92,6 +92,7 @@ export const viewport: Viewport = {
 ======================================== */
 
 import SmoothScrolling from "@/components/SmoothScrolling";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 /* ========================================
    ROOT LAYOUT
@@ -108,7 +109,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen bg-[#fffff1] antialiased overflow-x-hidden">
-        <SmoothScrolling>{children}</SmoothScrolling>
+        <AuthProvider>
+          <SmoothScrolling>{children}</SmoothScrolling>
+        </AuthProvider>
       </body>
     </html>
   );
