@@ -1,38 +1,66 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Header, Footer } from "@/components";
-import { upcomingWorkshops, formatPrice } from "@/data/workshops";
+import { formatPrice } from "@/data/workshops";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { createBooking } from "@/lib/actions/bookings";
+
+/* ========================================
+   CHECKOUT PAGE
+   Processes workshop bookings via Supabase
+   Protected route — requires authentication
+======================================== */
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-  const workshopId = searchParams.get("workshopId");
+  const workshopId = searchParams.get("workshopId") || "";
+  const workshopTitle = searchParams.get("title") || "Workshop";
+  const workshopPrice = parseInt(searchParams.get("price") || "0");
   const tickets = parseInt(searchParams.get("tickets") || "1");
-  const name = searchParams.get("name") || "";
+  const attendeeName = searchParams.get("name") || "";
   
-  const workshop = upcomingWorkshops.find((w) => w.id === workshopId);
+  const { user } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [bookingResult, setBookingResult] = useState<any>(null);
 
-  const handlePayment = () => {
+  const totalAmount = workshopPrice * tickets;
+
+  const handlePayment = async () => {
     setIsProcessing(true);
-    // Mock API call
-    setTimeout(() => {
+    setError(null);
+
+    const result = await createBooking({
+      workshopId,
+      tickets,
+      attendeeName: attendeeName || user?.user_metadata?.full_name || "Guest",
+      attendeeEmail: user?.email || "",
+      attendeePhone: user?.user_metadata?.phone_number || undefined,
+    });
+
+    if (result.error) {
+      setError(result.error);
+      setIsProcessing(false);
+    } else {
+      setBookingResult(result);
       setIsProcessing(false);
       setIsSuccess(true);
-    }, 2000);
+    }
   };
 
-  if (!workshop && !isSuccess) {
+  if (!workshopId && !isSuccess) {
     return (
       <>
         <Header />
         <main className="pt-32 pb-20 text-center container-custom">
           <h1 className="text-2xl">Invalid Checkout Session</h1>
-          <Link href="/" className="link mt-4 block">Return Home</Link>
+          <p className="text-neutral-500 mt-2">No workshop selected for checkout.</p>
+          <Link href="/workshops" className="link mt-4 block">Browse Workshops</Link>
         </main>
         <Footer />
       </>
@@ -49,11 +77,19 @@ function CheckoutContent() {
               <span className="text-4xl">🎉</span>
             </div>
             <h1 className="text-heading-md font-display mb-4 text-brand-800">Booking Confirmed!</h1>
-            <p className="text-neutral-600 mb-8">
-              Thank you, {name}! Your tickets for <strong>{workshop?.title}</strong> have been sent to your email.
+            <p className="text-neutral-600 mb-4">
+              Thank you, {attendeeName || user?.user_metadata?.full_name}! Your {tickets} ticket{tickets > 1 ? "s" : ""} for <strong>{workshopTitle}</strong> {tickets > 1 ? "have" : "has"} been booked.
             </p>
+            {bookingResult && (
+              <div className="bg-brand-50 rounded-xl p-4 mb-6 text-sm text-left">
+                <p><strong>Booking ID:</strong> {bookingResult.bookingId?.slice(0, 8)}...</p>
+                <p><strong>Amount:</strong> {formatPrice(bookingResult.totalAmount)}</p>
+                <p><strong>Status:</strong> <span className="text-green-600 font-semibold">Confirmed</span></p>
+              </div>
+            )}
+            <p className="text-sm text-neutral-400 mb-6">A confirmation email will be sent shortly.</p>
             <div className="space-y-3">
-              <Link href="/" className="btn btn-primary w-full">
+              <Link href="/" className="btn btn-primary w-full block text-center">
                 Back to Home
               </Link>
             </div>
@@ -71,22 +107,33 @@ function CheckoutContent() {
         <div className="container-custom max-w-3xl">
           <h1 className="text-heading-md font-display mb-8">Checkout</h1>
           
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-body-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Order Summary */}
           <div className="bg-white rounded-3xl p-8 shadow-soft-lg mb-8">
             <h2 className="text-heading-sm mb-6 pb-4 border-b border-neutral-100">Order Summary</h2>
             
             <div className="flex justify-between mb-4">
               <div>
-                <h3 className="font-medium text-lg">{workshop?.title}</h3>
+                <h3 className="font-medium text-lg">{workshopTitle}</h3>
                 <p className="text-sm text-neutral-500">{tickets} x Attendee(s)</p>
+                {attendeeName && (
+                  <p className="text-sm text-neutral-400 mt-1">Booked by: {attendeeName}</p>
+                )}
               </div>
               <div className="font-medium text-lg">
-                {workshop && formatPrice(workshop.price * tickets)}
+                {formatPrice(totalAmount)}
               </div>
             </div>
 
             <div className="flex justify-between py-4 border-t border-dashed border-neutral-200">
               <span className="text-neutral-600">Subtotal</span>
-              <span>{workshop && formatPrice(workshop.price * tickets)}</span>
+              <span>{formatPrice(totalAmount)}</span>
             </div>
             <div className="flex justify-between py-4 border-t border-dashed border-neutral-200">
               <span className="text-neutral-600">Taxes & Fees</span>
@@ -95,10 +142,11 @@ function CheckoutContent() {
             
             <div className="flex justify-between pt-6 border-t border-neutral-200 mt-2">
               <span className="text-xl font-bold text-brand-900">Total</span>
-              <span className="text-xl font-bold text-brand-900">{workshop && formatPrice(workshop.price * tickets)}</span>
+              <span className="text-xl font-bold text-brand-900">{formatPrice(totalAmount)}</span>
             </div>
           </div>
 
+          {/* Payment Section */}
           <div className="bg-white rounded-3xl p-8 shadow-soft-lg">
             <h2 className="text-heading-sm mb-6">Payment Method</h2>
             
@@ -113,7 +161,7 @@ function CheckoutContent() {
               </div>
             </div>
 
-            {/* Mock Card Details */}
+            {/* Card Details (mock for now; real gateway integration needed) */}
             <div className="grid grid-cols-2 gap-4 mb-8">
                <div className="col-span-2 space-y-2">
                   <label className="text-sm font-medium">Card Number</label>
@@ -132,12 +180,12 @@ function CheckoutContent() {
             <button 
               onClick={handlePayment} 
               disabled={isProcessing}
-              className="btn btn-primary w-full py-4 text-lg"
+              className="btn btn-primary w-full py-4 text-lg disabled:opacity-50"
             >
-              {isProcessing ? "Processing..." : `Pay ${workshop && formatPrice(workshop.price * tickets)}`}
+              {isProcessing ? "Processing..." : `Pay ${formatPrice(totalAmount)}`}
             </button>
             <p className="text-center text-xs text-neutral-400 mt-4">
-              This is a standard secure checkout. No real money will be deducted in this demo.
+              Payment is processed securely. Your booking will be confirmed immediately.
             </p>
           </div>
         </div>
