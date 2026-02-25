@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { Header, Footer } from "@/components";
-import { upcomingWorkshops, formatPrice, formatDate } from "@/data/workshops";
+import { formatPrice, formatDate } from "@/data/workshops";
+import { createBrowserClient } from "@supabase/ssr";
+
+/* ========================================
+   REGISTER PAGE — Fetches workshop from DB
+======================================== */
 
 export default function RegisterPage({
   params,
@@ -14,7 +18,8 @@ export default function RegisterPage({
   params: { id: string };
 }) {
   const router = useRouter();
-  const workshop = upcomingWorkshops.find((w) => w.id === params.id);
+  const [workshop, setWorkshop] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,10 +27,40 @@ export default function RegisterPage({
     phone: "",
   });
 
-  if (!workshop) {
-    notFound(); 
-    return null; /* Client component needs return even after notFound trigger */
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    supabase
+      .from("workshops")
+      .select("*")
+      .eq("id", params.id)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          router.push("/workshops");
+        } else {
+          setWorkshop(data);
+        }
+        setLoading(false);
+      });
+  }, [params.id, router]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="bg-neutral-50 min-h-screen pt-24 pb-20 flex items-center justify-center">
+          <div className="animate-pulse text-neutral-400">Loading…</div>
+        </main>
+        <Footer />
+      </>
+    );
   }
+
+  if (!workshop) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,17 +69,19 @@ export default function RegisterPage({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, save to context/state management
-    // Navigate to checkout
     const query = new URLSearchParams({
       workshopId: workshop.id,
       tickets: tickets.toString(),
       name: formData.name,
       email: formData.email,
     }).toString();
-    
+
     router.push(`/checkout?${query}`);
   };
+
+  const timeDisplay = workshop.start_time
+    ? `${workshop.start_time}${workshop.end_time ? ` – ${workshop.end_time}` : ""}`
+    : "";
 
   return (
     <>
@@ -56,25 +93,29 @@ export default function RegisterPage({
           </Link>
 
           <div className="bg-white rounded-3xl overflow-hidden shadow-soft-lg grid grid-cols-1 md:grid-cols-2">
-            
+
             {/* Left: Summary */}
             <div className="bg-brand-50 p-8 md:p-10 flex flex-col h-full">
               <h1 className="text-heading-md font-display text-brand-900 mb-6">Registration</h1>
-              
+
               <div className="relative aspect-video rounded-2xl overflow-hidden mb-6 shadow-sm">
-                <Image
-                  src={workshop.image}
-                  alt={workshop.title}
-                  fill
-                  className="object-cover"
-                />
+                {workshop.image ? (
+                  <Image
+                    src={workshop.image}
+                    alt={workshop.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-brand-200 to-brand-400" />
+                )}
               </div>
 
               <h2 className="text-xl font-medium mb-2">{workshop.title}</h2>
               <div className="text-sm text-neutral-600 space-y-1 mb-6">
                 <p>📅 {formatDate(workshop.date)}</p>
-                <p>⏰ {workshop.time}</p>
-                <p>📍 {workshop.venue}</p>
+                {timeDisplay && <p>⏰ {timeDisplay}</p>}
+                <p>📍 {workshop.venue_name}</p>
               </div>
 
               <div className="mt-auto pt-6 border-t border-brand-200">
@@ -138,17 +179,17 @@ export default function RegisterPage({
                 <div className="space-y-2">
                   <label htmlFor="tickets" className="text-sm font-medium text-neutral-700">Number of Guests</label>
                   <div className="flex items-center space-x-4">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setTickets(Math.max(1, tickets - 1))}
                       className="w-10 h-10 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-neutral-100"
                     >
                       -
                     </button>
                     <span className="text-xl font-medium w-8 text-center">{tickets}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setTickets(Math.min(10, tickets + 1))}
+                    <button
+                      type="button"
+                      onClick={() => setTickets(Math.min(workshop.available_slots || 10, tickets + 1))}
                       className="w-10 h-10 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-neutral-100"
                     >
                       +
