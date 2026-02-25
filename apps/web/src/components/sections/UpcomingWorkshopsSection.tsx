@@ -1,11 +1,17 @@
 "use client";
 
 import { SectionHeader, WorkshopCard } from "@/components";
-import { upcomingWorkshops } from "@/data";
+import { upcomingWorkshops as staticWorkshops } from "@/data";
+import type { Workshop } from "@/data";
 import Link from "next/link";
 
-export function UpcomingWorkshopsSection() {
-  const featuredWorkshops = upcomingWorkshops.slice(0, 3);
+interface UpcomingWorkshopsSectionProps {
+  workshops?: Workshop[];
+}
+
+export function UpcomingWorkshopsSection({ workshops }: UpcomingWorkshopsSectionProps) {
+  const allWorkshops = workshops && workshops.length > 0 ? workshops : staticWorkshops;
+  const featuredWorkshops = allWorkshops.slice(0, 3);
 
   return (
     <section className="py-24 bg-[#fffff1] max-w-screen-2xl mx-auto">
