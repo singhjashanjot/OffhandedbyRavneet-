@@ -15,6 +15,17 @@ type Review = {
   img: string;
 };
 
+interface DbReviewProp {
+  author_name?: string | null;
+  workshop_type?: string | null;
+  rating: number;
+  comment?: string | null;
+}
+
+interface TestimonialsSectionProps {
+  dbReviews?: DbReviewProp[];
+}
+
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -65,12 +76,23 @@ function Marquee({
   );
 }
 
-function shuffleArray(array: Review[]): Review[] {
-  for (let i = array.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+/**
+ * Deterministic shuffle using a seeded PRNG.
+ * Produces the same order on server and client to avoid hydration mismatch.
+ */
+function shuffleArray(array: Review[], seed = 42): Review[] {
+  let s = seed;
+  const seededRandom = () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(seededRandom() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return array;
+  return arr;
 }
 
 function ReviewCard({ img, name, username, body }: Review) {
@@ -93,29 +115,37 @@ function ReviewCard({ img, name, username, body }: Review) {
   );
 }
 
-export function TestimonialsSection() {
-  const reviews = useMemo<Review[]>(
-    () =>
-      testimonials.map((testimonial) => {
-        const username = `@${testimonial.name.toLowerCase().replace(/\s+/g, "")}`;
-        const img =
-          testimonial.avatar ||
-          `https://avatar.vercel.sh/${encodeURIComponent(
-            testimonial.name.toLowerCase().replace(/\s+/g, "")
-          )}`;
+export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
+  const reviews = useMemo<Review[]>(() => {
+    // If DB reviews are provided, use those
+    if (dbReviews && dbReviews.length > 0) {
+      return dbReviews.map((r) => {
+        const name = r.author_name || "Anonymous";
+        const username = `@${name.toLowerCase().replace(/\s+/g, "")}`;
+        const img = `https://avatar.vercel.sh/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, ""))}`;
+        return { name, username, body: r.comment || "", img };
+      });
+    }
 
-        return {
-          name: testimonial.name,
-          username,
-          body: testimonial.review,
-          img,
-        };
-      }),
-    []
-  );
+    // Fall back to static testimonials
+    return testimonials.map((testimonial) => {
+      const username = `@${testimonial.name.toLowerCase().replace(/\s+/g, "")}`;
+      const img =
+        testimonial.avatar ||
+        `https://avatar.vercel.sh/${encodeURIComponent(
+          testimonial.name.toLowerCase().replace(/\s+/g, "")
+        )}`;
+      return {
+        name: testimonial.name,
+        username,
+        body: testimonial.review,
+        img,
+      };
+    });
+  }, [dbReviews]);
 
   const { firstRow, secondRow } = useMemo(() => {
-    const shuffledReviews = shuffleArray([...reviews]);
+    const shuffledReviews = shuffleArray(reviews);
     const midpoint = Math.ceil(shuffledReviews.length / 2);
     return {
       firstRow: shuffledReviews.slice(0, midpoint),
