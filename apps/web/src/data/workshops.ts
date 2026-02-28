@@ -2,6 +2,7 @@ import { workshopCategories } from "./categories";
 
 export interface Workshop {
   id: string;
+  slug?: string;
   categoryId: string;
   title: string;
   description: string;
