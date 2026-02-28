@@ -89,7 +89,7 @@
   ======================================== */
 
   .card {
-    @apply bg-white rounded-3xl overflow-hidden
+    @apply bg-[#FFFFF5] rounded-3xl overflow-hidden
            shadow-soft transition-all duration-300;
   }
 
