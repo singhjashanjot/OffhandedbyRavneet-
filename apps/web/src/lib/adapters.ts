@@ -95,6 +95,7 @@ export function dbToWorkshop(db: DbWorkshop): Workshop {
 
   return {
     id: db.id,
+    slug: db.slug || undefined,
     categoryId: db.category,
     title: db.title,
     description: db.description,
