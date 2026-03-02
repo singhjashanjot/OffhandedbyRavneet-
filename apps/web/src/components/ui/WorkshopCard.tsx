@@ -39,8 +39,8 @@ export function WorkshopCard({
       className={`${isFeatured ? "md:col-span-2" : ""} ${className} h-full`}
     >
       <Link
-        href={`/events/${workshop.id}`}
-        className="group block h-full bg-white rounded-3xl overflow-hidden shadow-soft hover:shadow-soft-lg transition-all duration-300 transform hover:-translate-y-1"
+        href={`/events/${workshop.slug || workshop.id}`}
+        className="group block h-full bg-[#FFFFF5] rounded-3xl overflow-hidden shadow-soft hover:shadow-soft-lg transition-all duration-300 transform hover:-translate-y-1"
       >
         <div className={`flex flex-col ${isFeatured ? "md:flex-row" : ""} h-full`}>
           {/* Image */}
@@ -88,7 +88,7 @@ export function WorkshopCard({
             </div>
 
             {/* Title */}
-            <h3 className="font-display text-xl md:text-2xl text-neutral-800 mb-3 group-hover:text-brand-700 transition-colors">
+            <h3 className="font-display font-light text-xl md:text-2xl text-neutral-800 mb-3 group-hover:text-brand-700 transition-colors">
               {workshop.title}
             </h3>
 
