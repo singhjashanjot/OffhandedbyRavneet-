@@ -28,7 +28,7 @@ export function SectionHeader({
       transition={{ duration: 0.5 }}
       className={`mb-12 md:mb-16 ${centered ? "text-center" : ""} ${className}`}
     >
-      <h2 className="font-display text-display-sm md:text-display-md text-neutral-900 text-balance">
+      <h2 className="font-display font-light text-display-sm md:text-display-md text-neutral-900 text-balance">
         {title}
       </h2>
       {subtitle && (
