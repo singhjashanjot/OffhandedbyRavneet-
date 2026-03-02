@@ -38,10 +38,10 @@ export function CategoryCard({ category, index, className = "" }: CategoryCardPr
       
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-end p-6">
-        <h3 className="text-white text-xl md:text-2xl font-bold mb-1 drop-shadow-md">
+        <h3 className="text-white text-xl md:text-2xl font-display font-light mb-1 drop-shadow-md">
           {category.name}
         </h3>
-        <p className="text-white/80 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0 drop-shadow-sm line-clamp-2">
+        <p className="text-white/80 text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0 drop-shadow-sm line-clamp-2">
           {category.description}
         </p>
       </div>
