@@ -156,7 +156,7 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
   return (
     <section className="py-24 w-full bg-[#fffff1]">
       <div className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#fffff1]">
-        <h2 className="pointer-events-none px-6 py-10 text-center font-display text-display-sm md:text-display-md text-neutral-900 text-balance">
+        <h2 className="pointer-events-none px-6 py-10 text-center font-display font-light text-display-sm md:text-display-md text-neutral-900 text-balance">
           Here Is What Our Users Have To Say About Us.
         </h2>
 
