@@ -13,14 +13,14 @@ import { motion } from "framer-motion";
 export function HeroSection() {
   return (
     <>
-      <section className="relative w-full p-2 lg:p-4">
-        <div className="relative flex min-h-[calc(100dvh-1rem)] lg:min-h-[calc(100dvh-2rem)] flex-col gap-6 overflow-hidden rounded-[2rem] items-center justify-center p-8 lg:p-24 text-center bg-[#b7c4b0]">
+      <section className="relative w-full p-1 lg:p-3">
+        <div className="relative flex min-h-[calc(100dvh-0.5rem)] lg:min-h-[calc(100dvh-1rem)] flex-col gap-6 overflow-hidden rounded-[10px]  items-center justify-center p-8 lg:p-24 text-center bg-[#b7c4b0]">
           <div className="relative z-10 flex flex-col items-center max-w-4xl">
             <span className="mb-6 inline-flex items-center rounded-full bg-primary/5 px-5 py-2 text-[10px] font-bold text-[#2D3E30] uppercase tracking-[0.2em] border border-primary/10">
               Mindful Creativity
             </span>
-            <h1 className=" text-5xl md:text-7xl lg:text-8xl font-light text-[#2D3E30] tracking-tight mb-8 leading-[1.1]">
-              Art for the <br /><span className="font-serif italic font-medium text-[#2D3E30]">Mindful Soul</span>
+            <h1 className=" text-5xl md:text-7xl lg:text-8xl font-display font-light text-[#2D3E30] tracking-tight mb-8 leading-[1.1]">
+              Art for the <br /><span className="font-display font-light text-[#2D3E30]">Mindful Soul</span>
             </h1>
             <p className="text-primary/80 text-lg md:text-xl font-light max-w-xl mb-12 leading-relaxed">
               Reconnect with your creativity through guided, serene workshops designed to calm the mind and awaken the senses.
@@ -38,7 +38,7 @@ export function HeroSection() {
               </button>
             </div>
           </div>
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBHWVlxO2WUrpawZsC7CdTLGLxxHsaPoYG67cHjI22ySuSAX17nPeq1vfexMa-yBmyi0zBlVuvhhAeYyfCRPehD1ehOWAqCNi366Uu-in_sp8s63bQc75qV_Gm5TPqJCQLycKO9mxVBJKyZc4qn-M_z2aEwNN9VUXQP0skHI28bE9i12Cux0N86HGdJDRWOGjt2fZ48jfM7XOLgOvVTdSu0Zuv8jctjVLqTZtzdKpXunqpyosfW4hGmhnqwmUTYGP0VfNUMQqR7sFTG')" }}></div>
+          <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "url('https://res.cloudinary.com/daoho0jwj/image/upload/v1772198382/WhatsApp_Image_2026-02-20_at_5.55.13_PM_1_oijwzm.jpg')" }}></div>
         </div>
       </section>
     </>
