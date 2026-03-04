@@ -46,7 +46,7 @@ export function FounderSection() {
           >
             <span className="badge-accent mb-4 inline-block">Our Story</span>
             
-            <h2 className="font-display text-display-sm md:text-display-md text-neutral-900 mb-6">
+            <h2 className="font-display font-light text-display-sm md:text-display-md text-neutral-900 mb-6">
               From Science to Soul: The Offhanded Journey
             </h2>
             
