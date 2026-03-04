@@ -35,7 +35,7 @@ export function CategoriesSection() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-[300px]">
         {/* Card 1: Pottery Art Texture - Tall on LG */}
-        <Link href="/experience/pottery-texture" className="group relative overflow-hidden rounded-2xl bg-white dark:bg-surface-dark cursor-pointer lg:row-span-2 lg:col-span-1 border border-stone-100 dark:border-stone-800 block">
+        <Link href="/experience/pottery-texture" className="group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer lg:row-span-2 lg:col-span-1 border border-stone-100 dark:border-stone-800 block">
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
             style={{
@@ -104,7 +104,7 @@ export function CategoriesSection() {
         </Link>
 
         {/* Card 3: Clay Mirror Painting - Small */}
-        <Link href="/experience/clay-mirror-painting" className="group relative overflow-hidden rounded-2xl bg-white dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block">
+        <Link href="/experience/clay-mirror-painting" className="group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block">
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
             style={{
@@ -127,7 +127,7 @@ export function CategoriesSection() {
         </Link>
         
         {/* New Card: Punch Needle - Small */}
-        <Link href="/experience/punch-needle" className="group relative overflow-hidden rounded-2xl bg-white dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block">
+        <Link href="/experience/punch-needle" className="group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block">
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
             style={{
@@ -170,7 +170,7 @@ export function CategoriesSection() {
         </Link>
         
          {/* Card 6: Jute Bag Painting */}
-         <Link href="/experience/jute-bag-painting" className="group relative overflow-hidden rounded-2xl bg-white dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block hidden lg:block">
+         <Link href="/experience/jute-bag-painting" className="group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block hidden lg:block">
            <div
              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
              style={{
