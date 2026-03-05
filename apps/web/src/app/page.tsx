@@ -22,11 +22,19 @@ import { dbToWorkshops } from "@/lib/adapters";
 ======================================== */
 
 export default async function HomePage() {
-  // Fetch data from Supabase (server-side)
-  const [dbWorkshops, dbReviews] = await Promise.all([
-    getUpcomingWorkshops(6),
-    getFeaturedReviews(),
-  ]);
+  // Fetch data from Supabase (server-side) with error handling
+  let dbWorkshops = [];
+  let dbReviews = [];
+
+  try {
+    [dbWorkshops, dbReviews] = await Promise.all([
+      getUpcomingWorkshops(6),
+      getFeaturedReviews(),
+    ]);
+  } catch (error) {
+    console.error("Error fetching data for homepage:", error);
+    // Continue with empty arrays - page will still render
+  }
 
   // Transform DB workshops to frontend Workshop type
   const workshops = dbToWorkshops(dbWorkshops);
