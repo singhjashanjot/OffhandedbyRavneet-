@@ -24,15 +24,15 @@ export default async function BookingsPage() {
       
       <main className="bg-neutral-50 min-h-screen pt-32 pb-24 max-w-screen-2xl mx-auto">
         <div className="container-custom max-w-4xl">
-          <h1 className="text-heading-md font-display mb-8">My Bookings</h1>
+          <h1 className="text-heading-md font-display font-light mb-8">My Bookings</h1>
 
           {bookings.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 shadow-soft text-center">
+            <div className="bg-[#FFFFF5] rounded-3xl p-12 shadow-soft text-center">
               <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-4xl">📋</span>
               </div>
-              <h2 className="text-heading-sm font-display mb-3 text-neutral-700">No Bookings Yet</h2>
-              <p className="text-neutral-500 mb-6">
+              <h2 className="text-heading-sm font-display font-light mb-3 text-neutral-700">No Bookings Yet</h2>
+              <p className="text-neutral-500 font-light mb-6">
                 You haven&apos;t booked any workshops yet. Explore our upcoming sessions!
               </p>
               <Link href="/workshops" className="btn btn-primary">
@@ -44,7 +44,7 @@ export default async function BookingsPage() {
               {bookings.map((booking: any) => (
                 <div
                   key={booking.id}
-                  className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow"
+                  className="bg-[#FFFFF5] rounded-2xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow"
                 >
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Workshop Image */}
@@ -61,7 +61,7 @@ export default async function BookingsPage() {
                     {/* Booking Details */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-display text-xl text-neutral-900">
+                        <h3 className="font-display font-light text-xl text-neutral-900">
                           {booking.workshops?.title || "Workshop"}
                         </h3>
                         <span
