@@ -52,7 +52,7 @@ export default function AboutPage() {
         <section className="py-24 bg-brand-50 max-w-screen-2xl mx-auto">
           <div className="container-custom text-center">
             <span className="badge-accent mb-4 inline-block">Our Story</span>
-            <h1 className="font-display text-display-md md:text-display-lg text-neutral-900 mb-6 text-balance">
+            <h1 className="font-display font-light text-display-md md:text-display-lg text-neutral-900 mb-6 text-balance">
               Art That Heals, Creates, and Connects
             </h1>
             <p className="text-body-lg text-neutral-600 max-w-2xl mx-auto">
@@ -85,7 +85,7 @@ export default function AboutPage() {
         <section className="py-24 bg-brand-50 max-w-screen-2xl mx-auto">
           <div className="container-custom">
             <div className="text-center mb-12">
-              <h2 className="font-display text-display-sm text-neutral-900 mb-4">
+              <h2 className="font-display font-light text-display-sm text-neutral-900 mb-4">
                 What We Stand For
               </h2>
             </div>
@@ -94,7 +94,7 @@ export default function AboutPage() {
               {values.map((value) => (
                 <div key={value.title} className="card p-6 text-center">
                   <div className="text-4xl mb-4">{value.icon}</div>
-                  <h3 className="font-display text-heading-sm text-neutral-900 mb-2">
+                  <h3 className="font-display font-light text-heading-sm text-neutral-900 mb-2">
                     {value.title}
                   </h3>
                   <p className="text-body-md text-neutral-500">{value.description}</p>
