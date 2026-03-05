@@ -27,7 +27,7 @@ export function CTASection({ className = "" }: CTASectionProps) {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto"
         >
-          <h2 className="font-display text-display-sm md:text-display-md mb-6 text-balance text-white">
+          <h2 className="font-display font-light text-display-sm md:text-display-md mb-6 text-balance text-white">
             Ready to Start Your Creative Journey?
           </h2>
           
