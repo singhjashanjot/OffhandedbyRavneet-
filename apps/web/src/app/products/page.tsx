@@ -54,7 +54,7 @@ export default async function ProductsPage() {
                   </div>
                   <div className="p-4">
                     <span className="text-caption text-neutral-500">{product.category || "General"}</span>
-                    <h3 className="font-medium text-neutral-900 mt-1 group-hover:text-brand-600 transition-colors">
+                    <h3 className="font-display font-light text-neutral-900 mt-1 group-hover:text-brand-600 transition-colors">
                       {product.name}
                     </h3>
                     <p className="mt-2 font-semibold text-neutral-900">
