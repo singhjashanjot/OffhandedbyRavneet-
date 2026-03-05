@@ -174,8 +174,8 @@ function CategoryCard({ category, index }: { category: typeof artCategories[0]; 
             alt={category.title}
           />
         </div>
-        <h3 className="text-2xl font-semibold text-[#2D3E30] mb-3">{category.title}</h3>
-        <p className="text-[#2D3E30]/60 text-sm leading-relaxed mb-6">
+        <h3 className="text-2xl font-display font-light text-[#2D3E30] mb-3">{category.title}</h3>
+        <p className="text-[#2D3E30]/60 text-sm font-light leading-relaxed mb-6">
           {category.description}
         </p>
         <span className="bg-[#2D3E30] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded group-hover:bg-[#3e3b2d] transition-colors inline-block">
@@ -309,11 +309,11 @@ export default function AllCategoriesPage() {
             {/* Hero Heading Section */}
             <div className="max-w-4xl w-full text-center pt-[180px] pb-16 md:pb-24">
               <p className="text-[#B2C0AD] font-medium uppercase tracking-[0.3em] text-[10px] mb-4">Volume III — The Art Direction</p>
-              <h1 className="text-[#2D3E30] text-6xl md:text-8xl font-light leading-[0.9] tracking-tighter mb-6 italic">
+              <h1 className="text-[#3D4E40] text-3xl md:text-6xl font-display font-light tracking-tight mb-6">
                 The Curator's List
               </h1>
               <div className="h-px w-24 bg-[#2D3E30]/20 mx-auto mb-8"></div>
-              <p className="text-[#2D3E30]/60 text-lg md:text-xl font-normal leading-relaxed max-w-2xl mx-auto italic">
+              <p className="text-[#2D3E30]/60 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
                 An editorial directory of eighteen masterful art experiences, meticulously selected for the discerning creator.
               </p>
             </div>
