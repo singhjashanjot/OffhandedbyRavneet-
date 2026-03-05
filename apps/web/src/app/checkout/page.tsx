@@ -58,7 +58,7 @@ function CheckoutContent() {
       <>
         <Header />
         <main className="pt-32 pb-20 text-center container-custom">
-          <h1 className="text-2xl">Invalid Checkout Session</h1>
+          <h1 className="text-2xl font-display font-light">Invalid Checkout Session</h1>
           <p className="text-neutral-500 mt-2">No workshop selected for checkout.</p>
           <Link href="/workshops" className="link mt-4 block">Browse Workshops</Link>
         </main>
@@ -72,11 +72,11 @@ function CheckoutContent() {
       <>
         <Header />
         <main className="bg-neutral-50 min-h-screen py-24 flex items-center justify-center max-w-screen-2xl mx-auto">
-          <div className="bg-white p-12 rounded-3xl shadow-soft-lg text-center max-w-lg w-full mx-4">
+          <div className="bg-[#FFFFF5] p-12 rounded-3xl shadow-soft-lg text-center max-w-lg w-full mx-4">
             <div className="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🎉</span>
             </div>
-            <h1 className="text-heading-md font-display mb-4 text-brand-800">Booking Confirmed!</h1>
+            <h1 className="text-heading-md font-display font-light mb-4 text-brand-800">Booking Confirmed!</h1>
             <p className="text-neutral-600 mb-4">
               Thank you, {attendeeName || user?.user_metadata?.full_name}! Your {tickets} ticket{tickets > 1 ? "s" : ""} for <strong>{workshopTitle}</strong> {tickets > 1 ? "have" : "has"} been booked.
             </p>
@@ -105,7 +105,7 @@ function CheckoutContent() {
       <Header />
       <main className="bg-neutral-50 min-h-screen py-24 max-w-screen-2xl mx-auto">
         <div className="container-custom max-w-3xl">
-          <h1 className="text-heading-md font-display mb-8">Checkout</h1>
+          <h1 className="text-heading-md font-display font-light mb-8">Checkout</h1>
           
           {/* Error Message */}
           {error && (
@@ -115,12 +115,12 @@ function CheckoutContent() {
           )}
 
           {/* Order Summary */}
-          <div className="bg-white rounded-3xl p-8 shadow-soft-lg mb-8">
-            <h2 className="text-heading-sm mb-6 pb-4 border-b border-neutral-100">Order Summary</h2>
+          <div className="bg-[#FFFFF5] rounded-3xl p-8 shadow-soft-lg mb-8">
+            <h2 className="text-heading-sm font-display font-light mb-6 pb-4 border-b border-neutral-100">Order Summary</h2>
             
             <div className="flex justify-between mb-4">
               <div>
-                <h3 className="font-medium text-lg">{workshopTitle}</h3>
+                <h3 className="font-display font-light text-lg">{workshopTitle}</h3>
                 <p className="text-sm text-neutral-500">{tickets} x Attendee(s)</p>
                 {attendeeName && (
                   <p className="text-sm text-neutral-400 mt-1">Booked by: {attendeeName}</p>
@@ -147,8 +147,8 @@ function CheckoutContent() {
           </div>
 
           {/* Payment Section */}
-          <div className="bg-white rounded-3xl p-8 shadow-soft-lg">
-            <h2 className="text-heading-sm mb-6">Payment Method</h2>
+          <div className="bg-[#FFFFF5] rounded-3xl p-8 shadow-soft-lg">
+            <h2 className="text-heading-sm font-display font-light mb-6">Payment Method</h2>
             
             <div className="space-y-4 mb-8">
               <div className="p-4 border border-brand-500 bg-brand-50 rounded-xl flex items-center gap-3">
