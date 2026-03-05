@@ -69,7 +69,7 @@ export default async function WorkshopsPage() {
                 <span className="text-[10px] uppercase tracking-[0.5em] text-offhanded-forest/40 mb-3 block">
                   Curated Sessions
                 </span>
-                <h1 className="text-4xl md:text-5xl font-serif text-offhanded-forest italic">
+                <h1 className="text-3xl md:text-5xl font-display font-light tracking-tight text-offhanded-forest">
                   Upcoming Workshops
                 </h1>
               </div>
@@ -101,7 +101,7 @@ export default async function WorkshopsPage() {
                         />
                       </div>
                       <div className="flex flex-col flex-grow px-2">
-                        <h3 className="text-2xl font-serif text-offhanded-forest mb-8 tracking-tight italic">
+                        <h3 className="text-xl md:text-2xl font-display font-light text-offhanded-forest mb-8 tracking-tight">
                           {workshop.title}
                         </h3>
                         <div className="grid grid-cols-2 gap-y-8 mb-10 border-t border-offhanded-forest/[0.05] pt-8">
