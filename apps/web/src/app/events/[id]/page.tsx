@@ -21,11 +21,30 @@ export default async function EventDetailsPage({
 }) {
   const supabase = createClient();
 
-  const { data: workshop, error } = await supabase
+  // Try to fetch by slug first, then by ID (for backward compatibility)
+  let workshop = null;
+  let error = null;
+
+  // First, try fetching by slug
+  const slugResult = await supabase
     .from("workshops")
     .select("*")
-    .eq("id", params.id)
-    .single();
+    .eq("slug", params.id)
+    .maybeSingle();
+
+  if (slugResult.data) {
+    workshop = slugResult.data;
+  } else {
+    // If not found by slug, try by ID
+    const idResult = await supabase
+      .from("workshops")
+      .select("*")
+      .eq("id", params.id)
+      .maybeSingle();
+
+    workshop = idResult.data;
+    error = idResult.error;
+  }
 
   if (error || !workshop) {
     notFound();
@@ -79,7 +98,7 @@ export default async function EventDetailsPage({
             <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider text-brand-900 uppercase bg-brand-200 rounded-full">
               {workshop.workshop_type || "Workshop"}
             </span>
-            <h1 className="text-white text-3xl md:text-5xl font-bold tracking-tight mb-2 leading-tight">
+            <h1 className="text-white text-3xl md:text-5xl font-display font-light tracking-tight mb-2 leading-tight">
               {workshop.title}
             </h1>
             <p className="text-gray-200 text-lg md:text-xl font-light leading-relaxed">
@@ -96,18 +115,18 @@ export default async function EventDetailsPage({
 
             {/* About */}
             <section>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-4">About the Session</h2>
-              <p className="text-neutral-600 text-lg leading-relaxed mb-4">
+              <h2 className="text-2xl font-display font-light text-neutral-900 mb-4">About the Session</h2>
+              <p className="text-neutral-600 text-lg font-light leading-relaxed mb-4">
                 {workshop.long_description || workshop.description}
               </p>
-              <p className="text-neutral-600 text-lg leading-relaxed">
+              <p className="text-neutral-600 text-lg font-light leading-relaxed">
                 Guided by our expert instructors, this session is designed to help you disconnect from the digital world and reconnect with your creativity. Whether you&apos;re a beginner or an experienced artist, you&apos;ll find joy in the process of making.
               </p>
             </section>
 
             {/* What to Expect */}
-            <section className="bg-white border border-neutral-200 rounded-2xl p-6 md:p-8">
-              <h3 className="text-xl font-bold text-neutral-900 mb-6">What to Expect</h3>
+            <section className="bg-[#FFFFF5] border border-neutral-200 rounded-2xl p-6 md:p-8">
+              <h3 className="text-xl font-display font-light text-neutral-900 mb-6">What to Expect</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                 {workshop.what_we_do && workshop.what_we_do.length > 0 ? (
                   workshop.what_we_do.map((item: string, idx: number) => (
@@ -170,7 +189,7 @@ export default async function EventDetailsPage({
                   <div className="absolute bottom-0 right-0 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Expert</div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-neutral-900">{workshop.instructor}</h3>
+                  <h3 className="text-lg font-display font-light text-neutral-900">{workshop.instructor}</h3>
                   <p className="text-brand-700 text-sm font-medium mb-3">Artist & Instructor</p>
                   <p className="text-neutral-600 text-sm leading-relaxed">
                     {workshop.instructor} combines years of experience in fine arts with a passion for teaching. They believe in the healing power of creating with one&apos;s hands and guide students to find their own rhythm.
@@ -183,7 +202,7 @@ export default async function EventDetailsPage({
           {/* Right Column: Sticky Booking Card */}
           <div className="lg:col-span-5 relative">
             <div className="sticky top-24 space-y-6">
-              <div className="bg-white rounded-2xl shadow-soft border border-neutral-100 overflow-hidden">
+              <div className="bg-[#FFFFF5] rounded-2xl shadow-soft border border-neutral-100 overflow-hidden">
                 <div className="p-6 md:p-8">
                   <div className="flex justify-between items-start mb-6">
                     <div>
@@ -273,7 +292,7 @@ export default async function EventDetailsPage({
           <section className="mt-20 mb-12 border-t border-neutral-100 pt-12">
             <div className="flex justify-between items-end mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-neutral-900">You might also like</h2>
+                <h2 className="text-2xl font-display font-light text-neutral-900">You might also like</h2>
                 <p className="text-neutral-500 mt-2">Discover more ways to unwind.</p>
               </div>
               <Link href="/workshops" className="hidden sm:flex items-center gap-1 text-sm font-bold text-brand-700 hover:text-brand-800 transition-colors">
@@ -287,7 +306,7 @@ export default async function EventDetailsPage({
                 <Link
                   href={`/events/${r.id}`}
                   key={r.id}
-                  className="group block bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:shadow-soft-lg transition-all duration-300"
+                  className="group block bg-[#FFFFF5] rounded-2xl overflow-hidden border border-neutral-100 hover:shadow-soft-lg transition-all duration-300"
                 >
                   <div className="h-48 overflow-hidden relative">
                     <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
@@ -302,7 +321,7 @@ export default async function EventDetailsPage({
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="text-lg font-bold text-neutral-900 mb-1 group-hover:text-brand-700 transition-colors truncate">
+                    <h3 className="text-lg font-display font-light text-neutral-900 mb-1 group-hover:text-brand-700 transition-colors truncate">
                       {r.title}
                     </h3>
                     <p className="text-sm text-neutral-500 mb-4 line-clamp-2">{r.description}</p>
@@ -318,7 +337,7 @@ export default async function EventDetailsPage({
         )}
 
         {/* Mobile Fixed Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 z-40 lg:hidden flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-[#FFFFF5] border-t border-neutral-200 p-4 z-40 lg:hidden flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           <div>
             <p className="text-xs text-neutral-500">Total</p>
             <p className="text-xl font-bold text-neutral-900">{formatPrice(workshop.price)}</p>
