@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Header, Footer } from "@/components";
+import { PhoneInput } from "@/components/ui";
 import { motion } from "framer-motion";
 
 /* ========================================
@@ -33,6 +35,22 @@ const contactMethods = [
 ];
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "General Inquiry",
+    message: "",
+  });
+  const [countryCode, setCountryCode] = useState("+91");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement form submission
+    console.log("Form data:", { ...formData, phone: formData.phone ? `${countryCode}${formData.phone}` : "" });
+    alert("Thank you for contacting us! We'll get back to you soon.");
+  };
+
   return (
     <>
       <Header />
@@ -42,7 +60,7 @@ export default function ContactPage() {
         <section className="py-24 bg-brand-50 max-w-screen-2xl mx-auto">
           <div className="container-custom text-center">
             <span className="badge-accent mb-4 inline-block">Get in Touch</span>
-            <h1 className="font-display text-display-md text-neutral-900 mb-6">
+            <h1 className="font-display font-light text-display-md text-neutral-900 mb-6">
               Let's Create Together
             </h1>
             <p className="text-body-lg text-neutral-600 max-w-xl mx-auto">
@@ -58,7 +76,7 @@ export default function ContactPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
               {/* Contact Methods */}
               <div>
-                <h2 className="font-display text-heading-lg text-neutral-900 mb-8">
+                <h2 className="font-display font-light text-heading-lg text-neutral-900 mb-8">
                   Ways to Reach Us
                 </h2>
 
@@ -74,7 +92,7 @@ export default function ContactPage() {
                     >
                       <div className="text-3xl">{method.icon}</div>
                       <div>
-                        <h3 className="font-semibold text-neutral-900">{method.title}</h3>
+                        <h3 className="font-display font-light text-neutral-900">{method.title}</h3>
                         <p className="text-body-sm text-neutral-500 mb-1">{method.description}</p>
                         {method.href ? (
                           <a
@@ -93,7 +111,7 @@ export default function ContactPage() {
 
                 {/* Private Events */}
                 <div className="mt-8 p-6 rounded-2xl bg-neutral-900 text-white">
-                  <h3 className="font-display text-heading-md mb-2">
+                  <h3 className="font-display font-light text-heading-md mb-2">
                     Planning a Private Event?
                   </h3>
                   <p className="text-neutral-300 mb-4">
@@ -112,11 +130,11 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <h2 className="font-display text-heading-lg text-neutral-900 mb-8">
+                <h2 className="font-display font-light text-heading-lg text-neutral-900 mb-8">
                   Send Us a Message
                 </h2>
 
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-body-sm font-medium text-neutral-700 mb-2">
@@ -126,6 +144,9 @@ export default function ContactPage() {
                         type="text"
                         placeholder="John Doe"
                         className="input"
+                        value={formData.name}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                        required
                       />
                     </div>
                     <div>
@@ -136,15 +157,37 @@ export default function ContactPage() {
                         type="email"
                         placeholder="john@example.com"
                         className="input"
+                        value={formData.email}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                        required
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                      Phone Number <span className="text-neutral-400 font-normal">(Optional)</span>
+                    </label>
+                    <PhoneInput
+                      value={formData.phone}
+                      onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))}
+                      countryCode={countryCode}
+                      onCountryCodeChange={setCountryCode}
+                      placeholder="98765 43210"
+                      required={false}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-body-sm font-medium text-neutral-700 mb-2">
                       Subject
                     </label>
-                    <select className="input">
+                    <select 
+                      className="input"
+                      value={formData.subject}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
+                      required
+                    >
                       <option>General Inquiry</option>
                       <option>Workshop Question</option>
                       <option>Private Event Booking</option>
@@ -162,6 +205,9 @@ export default function ContactPage() {
                       rows={5}
                       placeholder="Tell us how we can help..."
                       className="input resize-none"
+                      value={formData.message}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                      required
                     />
                   </div>
 
