@@ -52,7 +52,7 @@ export default function ExperiencePage({
               
               <div className="w-24 h-[1px] bg-brand-200"></div>
               
-              <p className="max-w-md text-xl md:text-2xl font-normal leading-relaxed text-[#4a4a4a] italic opacity-80">
+              <p className="max-w-md text-xl md:text-2xl font-light leading-relaxed text-[#4a4a4a] opacity-80">
                 {category.description}
               </p>
               
@@ -81,7 +81,7 @@ export default function ExperiencePage({
                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-brand-800 mb-2 block">
                    The Offhanded Method
                  </span>
-                 <p className="text-xs text-gray-500 italic leading-relaxed font-medium">
+                 <p className="text-xs text-gray-500 leading-relaxed font-light">
                    Intuition over technical perfection.
                  </p>
                </div>
@@ -95,7 +95,7 @@ export default function ExperiencePage({
             {/* Sticky Left Title */}
             <div className="md:col-span-4 sticky top-32">
               <div className="flex flex-col gap-8">
-                <h2 className="text-4xl md:text-5xl font-light font-display italic leading-tight text-brand-900">
+                <h2 className="text-4xl md:text-5xl font-light font-display leading-tight text-brand-900">
                   The Meditative<br/>Heritage
                 </h2>
                 <div className="h-px w-24 bg-brand-300"></div>
@@ -107,7 +107,7 @@ export default function ExperiencePage({
             
             {/* Scrollable Right Content */}
             <div className="md:col-span-8">
-              <p className="text-xl md:text-2xl leading-[1.7] text-[#141514] opacity-90 first-letter:text-7xl first-letter:font-display first-letter:mr-4 first-letter:float-left first-letter:text-brand-400 first-letter:leading-none">
+              <p className="text-xl md:text-2xl font-light leading-[1.7] text-[#141514] opacity-90 first-letter:text-7xl first-letter:font-display first-letter:mr-4 first-letter:float-left first-letter:text-brand-400 first-letter:leading-none">
                 {category.longDescription || category.description}
               </p>
               
@@ -115,7 +115,7 @@ export default function ExperiencePage({
                  {/* Feature 1 */}
                 <div className="space-y-6">
                   <div className="size-10 rounded-full border border-brand-200 flex items-center justify-center text-brand-500 italic font-display bg-brand-50">01</div>
-                  <h3 className="font-display italic text-2xl text-brand-800">The Art of Texture</h3>
+                  <h3 className="font-display font-light text-2xl text-brand-800">The Art of Texture</h3>
                   <p className="text-base leading-relaxed text-gray-600 font-light">
                     Our workshops explore the history of texture—from the rough-hewn vessels of the Neolithic to the refined minimalism of contemporary ceramics.
                   </p>
@@ -123,7 +123,7 @@ export default function ExperiencePage({
                  {/* Feature 2 */}
                 <div className="space-y-6">
                   <div className="size-10 rounded-full border border-brand-200 flex items-center justify-center text-brand-500 italic font-display bg-brand-50">02</div>
-                  <h3 className="font-display italic text-2xl text-brand-800">Tactile Connection</h3>
+                  <h3 className="font-display font-light text-2xl text-brand-800">Tactile Connection</h3>
                   <p className="text-base leading-relaxed text-gray-600 font-light">
                     Participants are guided through sensory-first techniques, learning to 'see' through their fingertips. This direct engagement fosters mindfulness.
                   </p>
@@ -133,7 +133,7 @@ export default function ExperiencePage({
               {/* Added: What We Do List */}
               {category.whatWeDo && (
                  <div className="mt-16 bg-brand-50/50 p-8 rounded-3xl border border-brand-100">
-                    <h3 className="font-display text-xl mb-6 text-brand-800">Session Highlights</h3>
+                    <h3 className="font-display font-light text-xl mb-6 text-brand-800">Session Highlights</h3>
                     <ul className="space-y-4">
                        {category.whatWeDo.map((item, i) => (
                           <li key={i} className="flex items-center gap-3 text-neutral-600">
@@ -153,7 +153,7 @@ export default function ExperiencePage({
           <div className="max-w-screen-2xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
               <div>
-                <h3 className="text-4xl font-bold font-display italic text-brand-900">
+                <h3 className="text-4xl font-light font-display text-brand-900">
                     PAST {category.name.toUpperCase()} GLIMPSES
                 </h3>
                 <p className="text-sm text-brand-500 font-medium mt-3 tracking-widest uppercase">
@@ -168,7 +168,7 @@ export default function ExperiencePage({
             {/* Bento Grid Gallery */}
             <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-3 gap-2 h-auto md:h-[1000px]">
               {/* Item 1: Large Featured */}
-              <div className="md:col-span-2 md:row-span-2 rounded-3xl bg-white relative overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500">
+              <div className="md:col-span-2 md:row-span-2 rounded-3xl bg-[#FFFFF5] relative overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500">
                 <Image
                     src={category.galleryImages?.[0] || category.image}
                     alt="Gallery 1"
@@ -189,13 +189,13 @@ export default function ExperiencePage({
                  <span className="text-5xl mb-6 opacity-50 group-hover:rotate-12 transition-transform duration-500">
                     💧
                  </span>
-                 <p className="text-lg font-medium italic text-brand-900 leading-relaxed">
+                 <p className="text-lg font-light text-brand-900 leading-relaxed">
                     "Texture is the memory of the touch."
                  </p>
               </div>
 
                {/* Item 3: Small Image */}
-               <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-white relative overflow-hidden group shadow-sm">
+               <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-[#FFFFF5] relative overflow-hidden group shadow-sm">
                  <Image
                     src={category.galleryImages?.[1] || category.image}
                     alt="Gallery 2"
@@ -208,7 +208,7 @@ export default function ExperiencePage({
                </div>
 
                {/* Item 4: Wide Image */}
-               <div className="md:col-span-2 md:row-span-1 rounded-3xl bg-white relative overflow-hidden group shadow-sm">
+               <div className="md:col-span-2 md:row-span-1 rounded-3xl bg-[#FFFFF5] relative overflow-hidden group shadow-sm">
                  <Image
                     src={category.galleryImages?.[2] || category.image}
                     alt="Gallery 3"
@@ -223,7 +223,7 @@ export default function ExperiencePage({
 
                {/* Item 5 & 6 */}
                {category.galleryImages?.slice(3, 5).map((img, idx) => (
-                  <div key={idx} className="md:col-span-1 md:row-span-1 rounded-3xl bg-white relative overflow-hidden group shadow-sm">
+                  <div key={idx} className="md:col-span-1 md:row-span-1 rounded-3xl bg-[#FFFFF5] relative overflow-hidden group shadow-sm">
                     <Image
                         src={img}
                         alt={`Gallery ${idx + 4}`}
