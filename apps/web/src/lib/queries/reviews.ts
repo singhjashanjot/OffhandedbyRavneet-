@@ -33,8 +33,7 @@ export async function getFeaturedReviews() {
       .select("*")
       .eq("is_approved", true)
       .eq("featured", true)
-      .order("created_at", { ascending: false })
-      .limit(6);
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching featured reviews:", error);
