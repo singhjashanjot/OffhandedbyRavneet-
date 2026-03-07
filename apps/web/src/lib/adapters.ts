@@ -48,6 +48,7 @@ interface DbReview {
   workshop_type: string | null;
   rating: number;
   comment: string | null;
+  video_url: string | null;
   is_approved: boolean;
   featured: boolean;
   created_at: string;
