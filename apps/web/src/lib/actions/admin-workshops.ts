@@ -109,7 +109,7 @@ function parseFormData(formData: FormData): WorkshopInput {
       (formData.get("available_slots") as string) || (formData.get("total_slots") as string) || "20",
       10
     ),
-    is_active: formData.get("is_active") === "true",
+    is_active: formData.getAll("is_active").includes("true"),
     duration: (formData.get("duration") as string) || "",
     instructor: (formData.get("instructor") as string) || "",
     level: (formData.get("level") as string) || "Beginner Friendly",
@@ -272,7 +272,7 @@ export async function updateWorkshop(
   redirect("/admin/workshops");
 }
 
-// ── DELETE (soft) ─────────────────────────
+// ── DELETE (soft or hard) ─────────────────
 
 export async function deleteWorkshop(
   workshopId: string
@@ -280,15 +280,16 @@ export async function deleteWorkshop(
   try {
     const { supabase } = await verifyAdmin();
 
-    // Check for existing bookings
-    const { count } = await supabase
+    // Check for ANY existing bookings (not just CONFIRMED) to avoid FK violations
+    const { count, error: countError } = await supabase
       .from("bookings")
       .select("id", { count: "exact", head: true })
-      .eq("workshop_id", workshopId)
-      .eq("status", "CONFIRMED");
+      .eq("workshop_id", workshopId);
 
-    if (count && count > 0) {
-      // Soft-delete only: deactivate workshop, preserve booking data
+    const hasBookings = !countError && count !== null && count > 0;
+
+    if (hasBookings) {
+      // Soft-delete: deactivate workshop, preserve booking data
       const { error } = await supabase
         .from("workshops")
         .update({ is_active: false })
@@ -299,18 +300,36 @@ export async function deleteWorkshop(
       }
     } else {
       // No bookings: safe to hard delete
-      await supabase
+      // Delete images first (child rows)
+      const { error: imgDelError } = await supabase
         .from("workshop_images")
         .delete()
         .eq("workshop_id", workshopId);
 
-      const { error } = await supabase
+      if (imgDelError) {
+        console.error("Error deleting workshop images:", imgDelError);
+      }
+
+      const { error, count: delCount } = await supabase
         .from("workshops")
-        .delete()
+        .delete({ count: "exact" })
         .eq("id", workshopId);
 
       if (error) {
         return { error: `Failed to delete workshop: ${error.message}` };
+      }
+
+      // If delete returned 0 rows, it likely hit an RLS or FK issue
+      if (delCount === 0) {
+        // Fallback: soft-delete instead
+        const { error: deactivateErr } = await supabase
+          .from("workshops")
+          .update({ is_active: false })
+          .eq("id", workshopId);
+
+        if (deactivateErr) {
+          return { error: `Could not delete or deactivate workshop: ${deactivateErr.message}` };
+        }
       }
     }
 
