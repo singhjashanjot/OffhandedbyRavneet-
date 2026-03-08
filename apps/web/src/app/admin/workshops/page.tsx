@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   title: "Manage Workshops | Offhanded Admin",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminWorkshopsPage() {
   const workshops = await getAdminWorkshops();
 
