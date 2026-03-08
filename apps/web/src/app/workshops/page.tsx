@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "Browse our upcoming art workshops. Pottery, canvas, rope painting, and more.",
 };
 
+// Always fetch fresh data so newly-created workshops show immediately
+export const dynamic = "force-dynamic";
+
 export default async function WorkshopsPage() {
   const workshops = (await getActiveWorkshops()) as DbWorkshop[];
 
