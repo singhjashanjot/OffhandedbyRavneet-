@@ -7,7 +7,7 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 import { createWorkshop, updateWorkshop } from "@/lib/actions/admin-workshops";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface WorkshopData {
@@ -72,6 +72,44 @@ const CATEGORIES = [
   "resin",
   "other",
 ];
+
+/** Properly handles the hidden+checkbox pattern for is_active */
+function IsActiveToggle({ defaultChecked }: { defaultChecked: boolean }) {
+  const hiddenRef = useRef<HTMLInputElement>(null);
+
+  // Disable the hidden "false" field on mount when checkbox starts checked
+  useEffect(() => {
+    if (defaultChecked && hiddenRef.current) {
+      hiddenRef.current.disabled = true;
+    }
+  }, [defaultChecked]);
+
+  return (
+    <label className="flex items-center gap-3 cursor-pointer">
+      <input
+        ref={hiddenRef}
+        type="hidden"
+        name="is_active"
+        value="false"
+      />
+      <input
+        type="checkbox"
+        name="is_active"
+        value="true"
+        defaultChecked={defaultChecked}
+        className="w-5 h-5 rounded border-neutral-300 text-[#1B3022] focus:ring-[#1B3022]"
+        onChange={(e) => {
+          if (hiddenRef.current) {
+            hiddenRef.current.disabled = e.target.checked;
+          }
+        }}
+      />
+      <span className="text-sm font-medium text-neutral-700">
+        Active (visible to public)
+      </span>
+    </label>
+  );
+}
 
 export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
   // Build bound action for edit mode
@@ -352,28 +390,7 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
           </div>
 
           <div className="flex items-end">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="hidden"
-                name="is_active"
-                value="false"
-              />
-              <input
-                type="checkbox"
-                name="is_active"
-                value="true"
-                defaultChecked={workshop?.is_active ?? true}
-                className="w-5 h-5 rounded border-neutral-300 text-[#1B3022] focus:ring-[#1B3022]"
-                onChange={(e) => {
-                  // Update the hidden field value based on checkbox
-                  const hidden = e.target.previousElementSibling as HTMLInputElement;
-                  if (hidden) hidden.disabled = e.target.checked;
-                }}
-              />
-              <span className="text-sm font-medium text-neutral-700">
-                Active (visible to public)
-              </span>
-            </label>
+            <IsActiveToggle defaultChecked={workshop?.is_active ?? true} />
           </div>
         </div>
       </section>
