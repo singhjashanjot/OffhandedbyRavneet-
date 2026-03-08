@@ -21,6 +21,9 @@ import { dbToWorkshops } from "@/lib/adapters";
    Server Component — fetches data on server
 ======================================== */
 
+// Always fetch fresh data so newly-created workshops show immediately
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   // Fetch data from Supabase (server-side) with error handling
   let dbWorkshops = [];

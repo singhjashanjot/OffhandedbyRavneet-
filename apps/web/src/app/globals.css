@@ -216,3 +216,13 @@
     aspect-ratio: 16/9;
   }
 }
+
+/* Testimonials marquee scroll */
+@keyframes testimonial-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
