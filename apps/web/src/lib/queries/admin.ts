@@ -75,9 +75,11 @@ export async function getAdminBookings() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select("*, workshops(title, date), payments(amount, status)")
+    .select(
+      "*, workshops(title, date, start_time, venue_name, image), payments(amount, status, currency)"
+    )
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   if (error) {
     console.error("Error fetching admin bookings:", error);
