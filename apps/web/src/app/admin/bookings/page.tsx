@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 
 /* ========================================
    ADMIN — BOOKINGS MANAGEMENT
+   Shows all customer details per booking
 ======================================== */
 
 export const metadata: Metadata = {
@@ -13,42 +14,49 @@ export const metadata: Metadata = {
 export default async function AdminBookingsPage() {
   const bookings = await getAdminBookings();
 
+  const confirmed = bookings.filter((b: any) => b.status === "CONFIRMED").length;
+  const cancelled = bookings.filter((b: any) => b.status === "CANCELLED").length;
+  const pending = bookings.length - confirmed - cancelled;
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-900">Bookings</h1>
-        <p className="text-sm text-neutral-500 mt-1">Recent workshop bookings</p>
+      {/* Header + Stats */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-display font-light text-neutral-900">
+            Bookings
+          </h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            {bookings.length} total bookings
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700">
+            {confirmed} Confirmed
+          </span>
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+            {pending} Pending
+          </span>
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+            {cancelled} Cancelled
+          </span>
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-50 border-b border-neutral-200">
-            <tr>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Attendee</th>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Workshop</th>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Tickets</th>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Amount</th>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Status</th>
-              <th className="text-left px-6 py-4 font-medium text-neutral-600">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {bookings.map((booking: any) => (
-              <tr key={booking.id} className="hover:bg-neutral-50 transition-colors">
-                <td className="px-6 py-4">
-                  <p className="font-medium text-neutral-900">{booking.attendee_name}</p>
-                  <p className="text-xs text-neutral-400">{booking.attendee_email}</p>
-                </td>
-                <td className="px-6 py-4 text-neutral-600">
-                  {booking.workshops?.title || "—"}
-                </td>
-                <td className="px-6 py-4 text-neutral-600 text-center">
-                  {booking.tickets}
-                </td>
-                <td className="px-6 py-4 text-neutral-600">
-                  {booking.payments?.amount ? formatPrice(booking.payments.amount) : "—"}
-                </td>
-                <td className="px-6 py-4">
+      {bookings.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-neutral-200 p-12 text-center">
+          <p className="text-neutral-400">No bookings yet</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {bookings.map((booking: any) => (
+            <div
+              key={booking.id}
+              className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-soft transition-shadow"
+            >
+              {/* Top row: status badge + booking date */}
+              <div className="flex items-center justify-between px-6 py-3 bg-neutral-50 border-b border-neutral-100">
+                <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
                       booking.status === "CONFIRMED"
@@ -60,26 +68,119 @@ export default async function AdminBookingsPage() {
                   >
                     {booking.status}
                   </span>
-                </td>
-                <td className="px-6 py-4 text-neutral-400 text-xs">
+                  <span className="text-xs text-neutral-400">
+                    Booking ID: {booking.id.slice(0, 8)}...
+                  </span>
+                </div>
+                <span className="text-xs text-neutral-400">
                   {new Date(booking.created_at).toLocaleDateString("en-IN", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
-                </td>
-              </tr>
-            ))}
-            {bookings.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-neutral-400">
-                  No bookings yet
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                </span>
+              </div>
+
+              <div className="px-6 py-5">
+                {/* Customer Details */}
+                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                  {/* Left: Customer info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-medium text-neutral-900 mb-1">
+                      {booking.attendee_name || "—"}
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 mt-3">
+                      <DetailRow label="Email" value={booking.attendee_email} />
+                      <DetailRow
+                        label="Phone"
+                        value={booking.attendee_phone}
+                      />
+                      <DetailRow
+                        label="Tickets"
+                        value={`${booking.tickets} ticket${booking.tickets > 1 ? "s" : ""}`}
+                      />
+                      <DetailRow
+                        label="Amount Paid"
+                        value={
+                          booking.payments?.amount
+                            ? formatPrice(booking.payments.amount)
+                            : "—"
+                        }
+                      />
+                      <DetailRow
+                        label="Payment Status"
+                        value={booking.payments?.status || "—"}
+                      />
+                      <DetailRow
+                        label="Remarks"
+                        value={booking.remarks || booking.special_requests || booking.notes}
+                        fallback="No remarks"
+                      />
+                      <DetailRow
+                        label="Age / Age Group"
+                        value={booking.age || booking.age_group}
+                        fallback="Not provided"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right: Workshop info */}
+                  <div className="lg:w-72 flex-shrink-0 bg-neutral-50 rounded-xl p-4">
+                    <p className="text-xs text-neutral-400 uppercase tracking-wider font-semibold mb-2">
+                      Workshop
+                    </p>
+                    <p className="font-medium text-neutral-900 text-sm">
+                      {booking.workshops?.title || "—"}
+                    </p>
+                    <div className="mt-3 space-y-1.5 text-xs text-neutral-500">
+                      {booking.workshops?.date && (
+                        <p>
+                          <span className="text-neutral-400">Date: </span>
+                          {formatDate(booking.workshops.date)}
+                        </p>
+                      )}
+                      {booking.workshops?.start_time && (
+                        <p>
+                          <span className="text-neutral-400">Time: </span>
+                          {booking.workshops.start_time}
+                        </p>
+                      )}
+                      {booking.workshops?.venue_name && (
+                        <p>
+                          <span className="text-neutral-400">Venue: </span>
+                          {booking.workshops.venue_name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  fallback = "—",
+}: {
+  label: string;
+  value?: string | number | null;
+  fallback?: string;
+}) {
+  return (
+    <div className="flex items-baseline gap-2 text-sm">
+      <span className="text-neutral-400 shrink-0 w-28">{label}</span>
+      <span className="text-neutral-700 truncate">
+        {value || fallback}
+      </span>
     </div>
   );
 }
