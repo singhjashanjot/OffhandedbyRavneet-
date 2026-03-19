@@ -64,15 +64,15 @@ export function UpcomingWorkshopsSection({ workshops }: UpcomingWorkshopsSection
   if (!currentWorkshop) return null;
 
   return (
-    <section className="py-24 bg-[#fffff1] max-w-screen-2xl mx-auto">
-      <div className="container-custom">
+    <section className="py-10 md:py-14 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <div>
         <SectionHeader
           title="Upcoming Workshops"
           subtitle="Join us for an immersive art experience. No prior experience needed."
         />
 
         {/* Workshop Cover Card — outer wrapper for overflow clip */}
-        <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-10 h-[650px] md:h-[680px]">
+        <div className="relative w-full  mx-auto overflow-hidden mb-8 h-[440px] md:h-[580px]">
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={currentWorkshop.id}
