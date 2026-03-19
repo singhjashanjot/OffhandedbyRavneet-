@@ -177,13 +177,13 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <section className="py-24 w-full bg-[#fffff1]">
+    <section className="py-10 md:py-14 w-full bg-[#fffff1]">
       <div className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#fffff1]">
         {/* Title */}
-        <h2 className="pointer-events-none px-6 py-10 text-center font-display font-light text-display-sm md:text-display-md text-neutral-900 text-balance">
+        <h2 className="pointer-events-none px-6 py-4 text-center font-display font-light text-display-sm md:text-display-md text-neutral-900 text-balance">
           Here Is What Our Users Have To Say About Us.
         </h2>
-        <div className="h-px w-24 bg-offhanded-accent/40 mx-auto mb-12" />
+        <div className="h-px w-24 bg-offhanded-accent/40 mx-auto mb-6" />
 
         {/* Marquee track */}
         <div
