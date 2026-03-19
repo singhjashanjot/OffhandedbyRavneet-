@@ -27,7 +27,7 @@ export function BrandMarquee() {
   return (
     // Z-INDEX LAYER 1: Main Container
     // Removed red border, kept layout logic
-    <div className="w-full bg-[#fffff1] py-24 border-y border-neutral-100 relative z-30 flex flex-col gap-8 max-w-screen-2xl mx-auto">
+    <div className="w-full bg-[#fffff1] py-8 border-y border-neutral-100 relative z-30 flex flex-col gap-4 max-w-7xl mx-auto">
       
       {/* Z-INDEX LAYER 2: Text Header */}
  
@@ -39,7 +39,7 @@ export function BrandMarquee() {
       
       {/* Z-INDEX LAYER 3: Marquee Container */}
    
-      <div className="relative w-full h-48 z-40 flex items-center overflow-hidden">
+      <div className="relative w-full h-28 z-40 flex items-center overflow-hidden">
         
         <div className="animate-marquee whitespace-nowrap flex flex-row items-center">
           {/* Loop 1: Primary Logos */}
