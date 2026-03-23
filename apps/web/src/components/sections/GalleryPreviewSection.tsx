@@ -45,15 +45,15 @@ const galleryImages = [
 
 export function GalleryPreviewSection() {
   return (
-    <section className="py-24 bg-[#fffff1] max-w-screen-2xl mx-auto">
-      <div className="container-custom">
+    <section className="py-10 md:py-14 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <div>
         <SectionHeader
           title="Moments We've Captured"
           subtitle="A glimpse into the creative journeys shared at our workshops"
         />
 
         {/* Masonry Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 auto-rows-[200px] md:auto-rows-[250px]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 auto-rows-[150px] md:auto-rows-[180px]">
           {galleryImages.map((image, index) => (
             <motion.div
               key={index}
@@ -77,7 +77,7 @@ export function GalleryPreviewSection() {
         </div>
 
         {/* View All CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <Link href="/gallery" className=" bg-[#fffff5] btn-secondary">
             View Full Gallery →
           </Link>
