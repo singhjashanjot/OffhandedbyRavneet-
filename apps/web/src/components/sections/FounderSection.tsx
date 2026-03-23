@@ -11,9 +11,9 @@ import { motion } from "framer-motion";
 
 export function FounderSection() {
   return (
-    <section className="py-32 md:py-40 bg-[#fffff1] max-w-screen-2xl mx-auto">
-      <div className="container-custom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+    <section className="py-12 md:py-16 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -22,7 +22,7 @@ export function FounderSection() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-5 order-2 lg:order-1 flex justify-center lg:justify-end"
           >
-            <div className="relative group w-[400px] p-8">
+            <div className="relative group w-[300px] p-6">
               {/* Subtle border frame */}
               <div className="absolute inset-0 border border-neutral-900/20 rounded-lg group-hover:-inset-2 transition-all duration-500" />
 
