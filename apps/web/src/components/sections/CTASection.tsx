@@ -14,7 +14,7 @@ interface CTASectionProps {
 export function CTASection({ className = "" }: CTASectionProps) {
   return (
     <section
-      className={`relative overflow-hidden py-24 md:py-32 flex items-center justify-center min-h-[60vh] bg-[#fffff1] ${className}`}
+      className={`relative overflow-hidden py-10 md:py-14 flex items-center justify-center min-h-[40vh] bg-[#fffff1] ${className}`}
     >
       {/* Top Left Brush Stroke */}
       <div className="absolute -top-10 -left-10 w-64 h-64 opacity-15 pointer-events-none">
@@ -70,18 +70,18 @@ export function CTASection({ className = "" }: CTASectionProps) {
         </div>
 
         {/* Headline */}
-        <h2 className="font-display font-light text-[#2D3E30] text-4xl md:text-6xl lg:text-7xl mb-8 leading-tight tracking-[-0.02em]">
+        <h2 className="font-display font-light text-[#2D3E30] text-3xl md:text-5xl lg:text-6xl mb-6 leading-tight tracking-[-0.02em]">
           Ready to Start Your <br className="hidden md:block" />{" "}
           <span className="font-normal">Creative Journey?</span>
         </h2>
 
         {/* Sub-headline */}
-        <p className="font-sans text-[#2D3E30]/80 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto leading-relaxed">
+        <p className="font-sans text-[#2D3E30]/80 text-base md:text-lg font-light mb-6 max-w-2xl mx-auto leading-relaxed">
           Drop your idea or the kind of workshop you want us to host below
         </p>
 
         {/* Input Box */}
-        <div className="max-w-lg mx-auto mt-12 w-full relative">
+        <div className="max-w-lg mx-auto mt-6 w-full relative">
           <div className="bg-[#fffff1] rounded-3xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] border border-neutral-200/60 p-4 pb-5">
             <textarea
               rows={3}
