@@ -7,6 +7,8 @@ import Image from "next/image";
 import { Header } from "@/components";
 import { formatPrice, formatDate } from "@/data/workshops";
 import { createBrowserClient } from "@supabase/ssr";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { createBooking } from "@/lib/actions/bookings";
 
 /* ========================================
    REGISTER PAGE — Refactored with new design
@@ -18,10 +20,16 @@ export default function RegisterPage({
   params: { id: string };
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [workshop, setWorkshop] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState(1);
   const [countryCode, setCountryCode] = useState("+91");
+  const [step, setStep] = useState<"register" | "payment" | "success">("register");
+  const [paymentMethod, setPaymentMethod] = useState("gpay");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingResult, setBookingResult] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -93,7 +101,6 @@ export default function RegisterPage({
     
     // Validate required fields
     if (!formData.name.trim() || !formData.email.trim()) {
-      // Find the form and trigger native validation
       const form = document.querySelector("form");
       if (form && !form.checkValidity()) {
         form.reportValidity();
@@ -101,28 +108,37 @@ export default function RegisterPage({
       }
     }
 
-    const queryParams: Record<string, string> = {
-      workshopId: workshop.id,
-      tickets: tickets.toString(),
-      name: formData.name,
-      email: formData.email,
-    };
-    
-    // Add phone only if provided
-    if (formData.phone.trim()) {
-      queryParams.phone = `${countryCode}${formData.phone}`;
-    }
+    // Move to payment step
+    setStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-    // Add age and remarks if provided
-    if (formData.age.trim()) {
-      queryParams.age = formData.age;
-    }
-    if (formData.remarks.trim()) {
-      queryParams.remarks = formData.remarks;
-    }
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    setBookingError(null);
 
-    const query = new URLSearchParams(queryParams).toString();
-    router.push(`/checkout?${query}`);
+    try {
+      const result = await createBooking({
+        workshopId: workshop.id,
+        tickets,
+        attendeeName: formData.name || user?.user_metadata?.full_name || "Guest",
+        attendeeEmail: formData.email || user?.email || "",
+        attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
+      });
+
+      if (result.error) {
+        setBookingError(result.error);
+        setIsProcessing(false);
+      } else {
+        setBookingResult(result);
+        setIsProcessing(false);
+        setStep("success");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } catch {
+      setBookingError("Something went wrong. Please try again.");
+      setIsProcessing(false);
+    }
   };
 
   const timeDisplay = workshop.start_time
@@ -134,6 +150,318 @@ export default function RegisterPage({
   
   // Calculate max guests based on available slots
   const maxGuests = Math.min(workshop.available_slots || 10, 10);
+
+  const totalAmount = workshop.price * tickets;
+  const taxAmount = Math.round(totalAmount * 0.18);
+  const grandTotal = totalAmount + taxAmount;
+
+  // Success / Booking Confirmed view
+  if (step === "success") {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-[#fffff1] pt-32 pb-12 px-4 md:px-0 flex items-center justify-center">
+          <div className="bg-[#F9F9E8] p-10 md:p-12 rounded-2xl border border-[#2c3627]/10 text-center max-w-lg w-full mx-4">
+            <div className="w-20 h-20 bg-[#B2C0AD]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🎉</span>
+            </div>
+            <h1 className="text-[#2c3627] text-3xl md:text-4xl font-display font-light mb-4">
+              Booking Confirmed!
+            </h1>
+            <p className="text-[#2c3627]/70 mb-4 text-base leading-relaxed">
+              Thank you
+              {(formData.name || user?.user_metadata?.full_name) &&
+                `, ${formData.name || user?.user_metadata?.full_name}`}
+              ! Your booking for <strong>{workshop.title}</strong> has been confirmed.
+            </p>
+            {bookingResult && (
+              <div className="bg-[#B2C0AD]/10 rounded-xl p-4 mb-6 text-sm text-left border border-[#2c3627]/5">
+                {bookingResult.bookingId && (
+                  <p className="text-[#2c3627]">
+                    <strong>Booking ID:</strong> {bookingResult.bookingId.slice(0, 8)}...
+                  </p>
+                )}
+                <p className="text-[#2c3627]">
+                  <strong>Amount:</strong> {formatPrice(grandTotal)}
+                </p>
+                <p className="text-[#2c3627]">
+                  <strong>Tickets:</strong> {tickets}
+                </p>
+                <p className="text-[#2c3627]">
+                  <strong>Status:</strong>{" "}
+                  <span className="text-green-700 font-semibold">Confirmed</span>
+                </p>
+              </div>
+            )}
+            <p className="text-sm text-[#2c3627]/40 mb-6">
+              A confirmation email will be sent shortly.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/"
+                className="w-full flex items-center justify-center gap-2 bg-[#2c3627] hover:bg-[#2c3627]/90 text-white h-14 rounded-full font-bold text-base tracking-tight transition-all"
+              >
+                Back to Home
+              </Link>
+              <Link
+                href="/workshops"
+                className="w-full flex items-center justify-center gap-2 border border-[#2c3627]/20 text-[#2c3627] h-14 rounded-full font-bold text-base tracking-tight transition-all hover:bg-[#2c3627]/5"
+              >
+                Browse More Workshops
+              </Link>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  // Payment step view
+  if (step === "payment") {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-[#fffff1] pt-32 pb-12 px-4 md:px-0">
+          <div className="max-w-[900px] mx-auto">
+            {/* Back to registration */}
+            <button
+              onClick={() => setStep("register")}
+              className="flex items-center gap-2 text-[#2c3627]/60 hover:text-[#2c3627] text-sm font-medium mb-8 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Registration
+            </button>
+
+            <div className="flex flex-col gap-3 text-center mb-12">
+              <h1 className="text-[#2c3627] text-4xl md:text-5xl font-display font-light leading-tight tracking-tight">
+                Complete Payment
+              </h1>
+              <p className="text-[#2c3627]/70 text-lg font-light leading-relaxed">
+                Review your details and confirm your booking.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              {/* Left: Order Summary + Attendee + Payment Summary */}
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                {/* Workshop Info */}
+                <div className="rounded-xl p-6 border bg-[#F9F9E8] border-[#2c3627]/10">
+                  <span className="text-[#B2C0AD] text-xs font-bold uppercase tracking-widest">Workshop</span>
+                  <h3 className="text-[#2c3627] text-2xl font-display font-light leading-tight mt-1 mb-4">
+                    {workshop.title}
+                  </h3>
+                  {workshop.image && (
+                    <div className="w-full h-40 rounded-lg overflow-hidden relative mb-4">
+                      <Image src={workshop.image} alt={workshop.title} fill className="object-cover" />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-2 text-sm text-[#2c3627]/70">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-[#B2C0AD]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>{formattedDate}</span>
+                    </div>
+                    {timeDisplay && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-[#B2C0AD]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{timeDisplay}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-[#B2C0AD]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>{workshop.venue_name || workshop.location}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attendee Info */}
+                <div className="rounded-xl p-6 border bg-[#F9F9E8] border-[#2c3627]/10">
+                  <span className="text-[#B2C0AD] text-xs font-bold uppercase tracking-widest">Attendee Details</span>
+                  <div className="mt-3 flex flex-col gap-2 text-sm text-[#2c3627]">
+                    <p><strong>Name:</strong> {formData.name}</p>
+                    <p><strong>Email:</strong> {formData.email}</p>
+                    {formData.phone && <p><strong>Phone:</strong> {countryCode}{formData.phone}</p>}
+                    <p><strong>Guests:</strong> {tickets}</p>
+                    {formData.remarks && <p><strong>Remarks:</strong> {formData.remarks}</p>}
+                  </div>
+                </div>
+
+                {/* Payment Summary — moved here with matching bg */}
+                <div className="rounded-xl p-6 border bg-[#F9F9E8] border-[#2c3627]/10">
+                  <h3 className="text-[#2c3627] text-lg font-bold mb-6">Payment Summary</h3>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#2c3627]/60">{formatPrice(workshop.price)} × {tickets} {tickets === 1 ? "ticket" : "tickets"}</span>
+                      <span className="font-medium text-[#2c3627]">{formatPrice(totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#2c3627]/60">GST (18%)</span>
+                      <span className="font-medium text-[#2c3627]">{formatPrice(taxAmount)}</span>
+                    </div>
+                    <div className="border-t border-[#2c3627]/10 pt-4 flex justify-between items-baseline">
+                      <span className="text-[#2c3627] text-lg font-bold">Total</span>
+                      <span className="text-[#2c3627] text-3xl font-black">{formatPrice(grandTotal)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Payment Method */}
+              <div className="lg:col-span-7">
+                <div className="bg-white/40 backdrop-blur-sm border border-[#2c3627]/10 rounded-xl p-8 shadow-sm">
+                  <h2 className="text-[#2c3627] text-xl font-bold mb-8">Select Payment Method</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    {/* Google Pay */}
+                    <label className="relative cursor-pointer group">
+                      <input
+                        checked={paymentMethod === "gpay"}
+                        onChange={() => setPaymentMethod("gpay")}
+                        className="peer sr-only"
+                        name="payment"
+                        type="radio"
+                      />
+                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors">account_balance_wallet</span>
+                          <div className="size-4 rounded-full border-2 border-[#2c3627]/20 peer-checked:border-[#2c3627] flex items-center justify-center">
+                            <div className="size-2 rounded-full bg-[#2c3627] opacity-0 peer-checked:opacity-100"></div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#2c3627]">Google Pay</p>
+                          <p className="text-xs text-[#2c3627]/50">Fast &amp; Secure</p>
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Paytm */}
+                    <label className="relative cursor-pointer group">
+                      <input
+                        checked={paymentMethod === "paytm"}
+                        onChange={() => setPaymentMethod("paytm")}
+                        className="peer sr-only"
+                        name="payment"
+                        type="radio"
+                      />
+                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors">payments</span>
+                          <div className="size-4 rounded-full border-2 border-[#2c3627]/20 flex items-center justify-center">
+                            <div className="size-2 rounded-full bg-[#2c3627] opacity-0 peer-checked:opacity-100"></div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#2c3627]">Paytm</p>
+                          <p className="text-xs text-[#2c3627]/50">UPI / Wallet</p>
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Credit/Debit Card */}
+                    <label className="relative cursor-pointer group md:col-span-2">
+                      <input
+                        checked={paymentMethod === "card"}
+                        onChange={() => setPaymentMethod("card")}
+                        className="peer sr-only"
+                        name="payment"
+                        type="radio"
+                      />
+                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors text-3xl">credit_card</span>
+                          <div>
+                            <p className="font-bold text-[#2c3627]">Credit / Debit Card</p>
+                            <p className="text-xs text-[#2c3627]/50">Visa, Mastercard, Amex</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 opacity-60">
+                          <span className="material-symbols-outlined">credit_card_heart</span>
+                          <span className="material-symbols-outlined">contactless</span>
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Pay at Event */}
+                    <label className="relative cursor-pointer group md:col-span-2">
+                      <input
+                        checked={paymentMethod === "event"}
+                        onChange={() => setPaymentMethod("event")}
+                        className="peer sr-only"
+                        name="payment"
+                        type="radio"
+                      />
+                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors text-3xl">event_available</span>
+                          <div>
+                            <p className="font-bold text-[#2c3627]">Pay at Event</p>
+                            <p className="text-xs text-[#2c3627]/50">Check-in and pay on site</p>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Error message */}
+                  {bookingError && (
+                    <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                      {bookingError}
+                    </div>
+                  )}
+
+                  {/* Pay Button */}
+                  <button
+                    onClick={handlePayment}
+                    disabled={isProcessing}
+                    className="w-full bg-[#2c3627] text-white py-5 rounded-xl font-black text-lg tracking-wide hover:bg-[#2c3627]/90 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#2c3627]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Pay Total: {formatPrice(grandTotal)}
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-center text-[#2c3627]/40 text-xs mt-6 flex items-center justify-center gap-1">
+                    <span className="material-symbols-outlined text-sm">lock</span>
+                    Encrypted and secure transaction
+                  </p>
+                </div>
+
+                {/* Additional Info */}
+                <div className="mt-8 grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-[#2c3627]/5 rounded-lg border border-[#2c3627]/5">
+                    <h4 className="text-[#2c3627] text-xs font-bold uppercase tracking-wider mb-1">Cancellation</h4>
+                    <p className="text-[#2c3627]/60 text-xs leading-relaxed">Full refund if cancelled 48 hours before the event starts.</p>
+                  </div>
+                  <div className="p-4 bg-[#2c3627]/5 rounded-lg border border-[#2c3627]/5">
+                    <h4 className="text-[#2c3627] text-xs font-bold uppercase tracking-wider mb-1">Need Help?</h4>
+                    <p className="text-[#2c3627]/60 text-xs leading-relaxed">Contact us at hello@offhanded.com for assistance.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -378,7 +706,7 @@ export default function RegisterPage({
                   onClick={handleSubmit as any}
                   className="w-full flex items-center justify-center gap-3 bg-[#2c3627] hover:bg-[#2c3627]/90 text-white h-16 rounded-full font-bold text-lg tracking-tight transition-all shadow-lg hover:shadow-xl hover:shadow-[#2c3627]/20"
                 >
-                  <span>Proceed for Payment</span>
+                  <span>Proceed to Payment</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
