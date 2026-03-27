@@ -12,8 +12,8 @@ import Link from "next/link";
 
 export function CategoriesSection() {
   return (
-    <section className="px-4 py-24 lg:px-12 max-w-screen-2xl mx-auto w-full " id="categories"  >
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+    <section className="px-4 py-10 md:py-14 lg:px-8 max-w-7xl mx-auto w-full" id="categories">
+      <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
         <div className="max-w-xl">
           <h2 className="text-3xl md:text-5xl font-display font-light tracking-tight mb-4 text-text-main light:text-dark">
             Explore our Art Experiences
@@ -33,7 +33,7 @@ export function CategoriesSection() {
         </Link>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-[300px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-[220px]">
         {/* Card 1: Pottery Art Texture - Tall on LG */}
         <Link href="/experience/pottery-texture" className="group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer lg:row-span-2 lg:col-span-1 border border-stone-100 dark:border-stone-800 block">
           <div
