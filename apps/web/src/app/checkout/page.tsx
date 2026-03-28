@@ -30,6 +30,7 @@ function CheckoutContent() {
   const productPrice = parseInt(searchParams.get("price") || "0");
 
   const isProductCheckout = !!productId;
+  const isWorkshopCheckout = !!workshopId && !isProductCheckout;
   const itemTitle = isProductCheckout ? productTitle : workshopTitle;
   const itemPrice = isProductCheckout ? productPrice : workshopPrice;
   const totalAmount = isProductCheckout ? itemPrice : itemPrice * tickets;
@@ -174,13 +175,13 @@ function CheckoutContent() {
             </h1>
           </Link>
           <Link
-            href="/products"
+            href={isWorkshopCheckout ? "/workshops" : "/products"}
             className="text-body-sm font-medium opacity-60 hover:opacity-100 flex items-center gap-1 transition-all text-neutral-900"
           >
             <span className="material-symbols-outlined text-sm">
               arrow_back
             </span>
-            Return to Shop
+            {isWorkshopCheckout ? "Back to Workshops" : "Return to Shop"}
           </Link>
         </header>
 
@@ -192,75 +193,77 @@ function CheckoutContent() {
         )}
 
         <section className="space-y-10">
-          {/* Shipping Section */}
-          <div>
-            <h2 className="font-display text-heading-sm font-bold mb-6 flex items-center gap-2 text-neutral-900">
-              <span className="material-symbols-outlined">local_shipping</span>
-              Shipping Information
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                  placeholder="Jane"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                  placeholder="Doe"
-                />
-              </div>
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                  placeholder="123 Minimalist Way"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                  placeholder="Design District"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                  placeholder="110001"
-                />
+          {/* Shipping Section — only for product purchases */}
+          {isProductCheckout && (
+            <div>
+              <h2 className="font-display text-heading-sm font-bold mb-6 flex items-center gap-2 text-neutral-900">
+                <span className="material-symbols-outlined">local_shipping</span>
+                Shipping Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
+                    placeholder="Jane"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
+                    placeholder="Doe"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                    Street Address
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
+                    placeholder="123 Minimalist Way"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
+                    placeholder="Design District"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
+                    placeholder="110001"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Payment Section */}
           <div>
@@ -323,7 +326,7 @@ function CheckoutContent() {
             disabled={isProcessing}
             className="w-full bg-offhanded-deep text-white py-5 rounded-xl font-bold text-body-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50"
           >
-            {isProcessing ? "Processing..." : "Complete Purchase"}
+            {isProcessing ? "Processing..." : isWorkshopCheckout ? "Confirm Booking" : "Complete Purchase"}
             {!isProcessing && (
               <span className="material-symbols-outlined">arrow_forward</span>
             )}
@@ -374,12 +377,14 @@ function CheckoutContent() {
                   ₹{totalAmount?.toLocaleString("en-IN")}
                 </span>
               </div>
-              <div className="flex justify-between text-body-sm">
-                <span className="opacity-60 text-neutral-600">Shipping</span>
-                <span className="font-medium text-neutral-900">
-                  Calculated at next step
-                </span>
-              </div>
+              {isProductCheckout && (
+                <div className="flex justify-between text-body-sm">
+                  <span className="opacity-60 text-neutral-600">Shipping</span>
+                  <span className="font-medium text-neutral-900">
+                    Calculated at next step
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between text-body-sm">
                 <span className="opacity-60 text-neutral-600">Taxes</span>
                 <span className="font-medium text-neutral-900">
@@ -421,15 +426,16 @@ function CheckoutContent() {
             <div className="mt-12 p-4 rounded-xl border border-offhanded-deep/10 bg-background-light/50">
               <div className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-brand-600">
-                  package_2
+                  {isWorkshopCheckout ? "verified_user" : "package_2"}
                 </span>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-tighter text-neutral-900">
-                    Carbon Neutral Delivery
+                    {isWorkshopCheckout ? "Secure Booking" : "Carbon Neutral Delivery"}
                   </p>
                   <p className="text-[11px] opacity-60 leading-relaxed mt-1 text-neutral-600">
-                    Offhanded offsets 100% of carbon emissions from every
-                    shipment to protect our planet.
+                    {isWorkshopCheckout
+                      ? "Your spot is reserved instantly upon payment. All materials and refreshments included."
+                      : "Offhanded offsets 100% of carbon emissions from every shipment to protect our planet."}
                   </p>
                 </div>
               </div>
