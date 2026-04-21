@@ -87,6 +87,7 @@ module.exports = {
         display: ["var(--font-space-grotesk)", "Space Grotesk", "sans-serif"],
         serif: ["var(--font-playfair)", "Playfair Display", "serif"],
         condensed: ["var(--font-bebas-neue)", "Bebas Neue", "Impact", "sans-serif"],
+        canela: ["Canela", "Georgia", "serif"],
       },
 
       fontSize: {

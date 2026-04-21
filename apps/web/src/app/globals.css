@@ -3,6 +3,19 @@
 @tailwind utilities;
 
 /* ========================================
+   CANELA FONT (Commercial Type)
+   Place your Canela-Black.woff2 in /public/fonts/
+======================================== */
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/Canela-Black.woff2") format("woff2"),
+       url("/fonts/Canela-Black.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ========================================
    OFFHANDED GLOBAL STYLES
    Premium, Calm, Minimal Design System
 ======================================== */
@@ -119,7 +132,7 @@
   }
 
   .container-custom {
-    @apply max-w-screen-2xl mx-auto;
+    @apply max-w-7xl mx-auto px-4 md:px-6 lg:px-8;
   }
 
   /* ========================================
