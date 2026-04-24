@@ -20,11 +20,10 @@ export function HeroSection() {
               Mindful Creativity
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-light text-[#2D3E30] tracking-tight mb-5 leading-[1.1]">
-              Art for the <br /><span className="font-display font-light text-[#2D3E30]">Mindful Soul</span>
+            An experience for  <br /><span className="font-display font-light text-[#2D3E30]">Wandering souls</span>
             </h1>
             <p className="text-primary/80 text-base md:text-lg font-light max-w-lg mb-8 leading-relaxed">
-              Reconnect with your creativity through guided, serene workshops designed to calm the mind and awaken the senses.
-            </p>
+Slow down, explore, and rediscover the joy of creating in a calm, supportive space.            </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link
                 href="/workshops" 
