@@ -33,8 +33,7 @@ export default function AboutPage() {
             Est. 2023
           </span>
           <h1 className="font-display font-light text-5xl md:text-7xl leading-tight max-w-3xl text-[#2D3E30]">
-            A sanctuary for artistic expression and
-            mindful creation.
+           Where creativity meets calmness, and every creation tells a story.
           </h1>
         </section>
 
@@ -53,10 +52,9 @@ export default function AboutPage() {
               </div>
               <div className="w-full md:w-1/2 md:ml-auto">
                 <p className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed">
-                  A collective of artists dedicated to the slow-living movement
-                  and tactile creativity. We believe that the hand is the most
-                  direct extension of the heart, bridging the gap between soul
-                  and substance.
+                  We are a collective of creators, dreamers, and art enthusiasts who believe creativity isn’t a skill reserved for a few -it’s a vibe everyone carries within.
+From beginners picking up a brush for the first time to experienced artists refining their flow, we welcome all.
+
                 </p>
               </div>
             </div>
@@ -72,12 +70,28 @@ export default function AboutPage() {
                 </h3>
               </div>
               <div className="w-full md:w-1/2 md:mr-auto">
-                <p className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-left md:text-right">
-                  Curating immersive workshops that bridge the gap between
-                  traditional craft and modern life. From ceramics to textiles,
-                  we provide the space to learn, unlearn, and rediscover the joy
-                  of making.
-                </p>
+                <div className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-left space-y-6">
+                  <p>
+                    We design and host premium art workshops that go beyond the
+                    usual &quot;learn and leave&quot; format.
+                  </p>
+
+                  <div className="space-y-4">
+                    <p>Think:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                      <li>Hands-on, immersive sessions</li>
+                      <li>Curated themes inspired by global art movements</li>
+                      <li>High-quality, internationally sourced materials</li>
+                      <li>Guided mentorship with a chill, no-pressure environment</li>
+                    </ul>
+                  </div>
+
+                  <p>
+                    Whether it&apos;s pottery, painting, texture art, or
+                    experimental forms — we focus on the process as much as the
+                    final piece. Because honestly, the magic is in the making.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -92,12 +106,19 @@ export default function AboutPage() {
                 </h3>
               </div>
               <div className="w-full md:w-1/2 md:ml-auto">
-                <p className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed">
-                  Authenticity, artistic integrity, and the magic of creating
-                  something with your own hands. We value the evolution of the
-                  maker more than the final result, celebrating the
-                  imperfections of the journey.
-                </p>
+                <div className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-right space-y-6">
+                  <p>We&apos;re here to:</p>
+                  <ul className="list-disc space-y-2 pl-6 text-left md:pl-0 md:list-none">
+                    <li className="md:text-right">Break the fear of &quot;not being good enough&quot;</li>
+                    <li className="md:text-right">Turn creative curiosity into confidence</li>
+                    <li className="md:text-right">Build a community where art feels accessible, not intimidating</li>
+                  </ul>
+                  <p>
+                    In a fast-paced world, we offer a pause — a space where you
+                    can unplug, get your hands messy, and reconnect with your
+                    creative side.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

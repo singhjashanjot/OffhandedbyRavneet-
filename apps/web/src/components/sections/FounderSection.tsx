@@ -69,8 +69,8 @@ export function FounderSection() {
               
               <p>
                 That's when Offhanded was born. What started as a personal pursuit of creative healing 
-                has grown into a community of <strong className="text-neutral-900">600+ participants</strong> 
-                who've discovered the joy of meditative art.
+                has grown into a community of <strong className="text-neutral-900">1000+ participants</strong> 
+                who've discovered the joy of experiencing art.
               </p>
               
               <p>
