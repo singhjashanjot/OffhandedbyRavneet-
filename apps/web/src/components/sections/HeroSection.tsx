@@ -33,7 +33,7 @@ Slow down, explore, and rediscover the joy of creating in a calm, supportive spa
               </Link>
               <button className="flex items-center justify-center rounded-full h-11 px-8 bg-transparent hover:bg-primary/5 text-primary text-sm font-bold uppercase tracking-widest transition-all duration-300 border border-primary/20">
                 <span className="material-symbols-outlined mr-2 text-xl">play_circle</span>
-                Watch Film
+                Workshop Visuals
               </button>
             </div>
           </div>
