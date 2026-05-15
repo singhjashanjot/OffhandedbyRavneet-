@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 const stats = [
-  { number: "600", label: "Participants Joined" },
+  { number: "1100", label: "Participants Joined" },
   { number: "50", label: "Workshops Hosted" },
   { number: "15", label: "Art Disciplines" },
   { number: "1", label: "Year of Magic" },
@@ -52,8 +52,7 @@ export default function AboutPage() {
               </div>
               <div className="w-full md:w-1/2 md:ml-auto">
                 <p className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed">
-                  We are a collective of creators, dreamers, and art enthusiasts who believe creativity isn’t a skill reserved for a few -it’s a vibe everyone carries within.
-From beginners picking up a brush for the first time to experienced artists refining their flow, we welcome all.
+                  We’re not just a workshop brand, we’re a creative space where ideas breathe, hands create, and stories come alive. Rooted in passion and shaped by global standards, we bring art experiences that feel both personal and world-class.
 
                 </p>
               </div>
@@ -72,25 +71,10 @@ From beginners picking up a brush for the first time to experienced artists refi
               <div className="w-full md:w-1/2 md:mr-auto">
                 <div className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-left space-y-6">
                   <p>
-                    We design and host premium art workshops that go beyond the
-                    usual &quot;learn and leave&quot; format.
+                   We host premium art workshops designed to feel immersive, inspiring, and fun. Think hands-on sessions, globally inspired themes, quality materials, and relaxed mentorship. From pottery and painting to texture and experimental art, we focus on the joy of creating — because the real magic isn’t just the final piece, it’s the process 
                   </p>
 
-                  <div className="space-y-4">
-                    <p>Think:</p>
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Hands-on, immersive sessions</li>
-                      <li>Curated themes inspired by global art movements</li>
-                      <li>High-quality, internationally sourced materials</li>
-                      <li>Guided mentorship with a chill, no-pressure environment</li>
-                    </ul>
-                  </div>
-
-                  <p>
-                    Whether it&apos;s pottery, painting, texture art, or
-                    experimental forms — we focus on the process as much as the
-                    final piece. Because honestly, the magic is in the making.
-                  </p>
+                 
                 </div>
               </div>
             </div>
@@ -106,17 +90,10 @@ From beginners picking up a brush for the first time to experienced artists refi
                 </h3>
               </div>
               <div className="w-full md:w-1/2 md:ml-auto">
-                <div className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-right space-y-6">
-                  <p>We&apos;re here to:</p>
-                  <ul className="list-disc space-y-2 pl-6 text-left md:pl-0 md:list-none">
-                    <li className="md:text-right">Break the fear of &quot;not being good enough&quot;</li>
-                    <li className="md:text-right">Turn creative curiosity into confidence</li>
-                    <li className="md:text-right">Build a community where art feels accessible, not intimidating</li>
-                  </ul>
+                <div className="font-sans text-[#2D3E30]/80 text-xl md:text-2xl font-light leading-relaxed text-left space-y-6">
+                  
                   <p>
-                    In a fast-paced world, we offer a pause — a space where you
-                    can unplug, get your hands messy, and reconnect with your
-                    creative side.
+                   We’re here to break the fear of “not being good enough”, turn creative curiosity into confidence, build a community where art feels accessible, not intimidating. In a fast-paced world, we offer a pause — a space where you can unplug, get your hands messy, and reconnect with your creative side.
                   </p>
                 </div>
               </div>
@@ -162,7 +139,7 @@ From beginners picking up a brush for the first time to experienced artists refi
           {/* Large Image */}
           <div className="w-full aspect-[21/9] bg-brand-300/20 overflow-hidden rounded-lg relative">
             <Image
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3XZyE1CmFiicskZuHNaAgwh1xcHkYblwayVAENloixtJvZdC4suxSjalZN1uzmRarvAYOZLIi3xZGd0--7-y_caBnCplalmqID23XdMduVlLzOHNOszeBYq4fri7TDOgd5zpyxrZiLU7hJZLjH64rXd0uZVlJi7IlyrpU9bqp4-fRxX3UZeHkECAcLiFkyLwOmJWQOBnnvmKIzBCw-T6gE-OdbLpLKDdQUPKfTu9R3Sy-QiQrP13VgcRchnzFizsVx_bELzgRHcHP"
+              src="https://res.cloudinary.com/daoho0jwj/image/upload/v1778868393/WhatsApp_Image_2026-05-15_at_11.36.10_PM_jndlvs.jpg"
               alt="Artists working around a large wooden table in a sunlit studio"
               fill
               className="object-cover grayscale opacity-80 mix-blend-multiply"

@@ -28,7 +28,7 @@ export function FounderSection() {
 
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-2xl">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUNQ0aukkABh2ZilMljirFERmXNuIulq0vCmwI34mwY8oAEdChk51q_GdK1iIf85Ssr1K3uuF3mX7drqN3KA6gauFrm7AMRMCShrFyYj5uZ5GAsdUJj9tmBqtK9xDc4p37kqRKevDfzJtVZ43K0belrzFEppcYsawOvFNlcyIcDp1bJ29sAZ-TEB1gYR2NpLFCgxfCLDqn-eQC7BnmEcasB-meseN8B0oQg-grQLQ-NdaahytTc3OuoWaAZjDZX4QUQ5o8mu4iadFK"
+                  src="https://res.cloudinary.com/daoho0jwj/image/upload/v1778867803/IMG_8389_zpdwk5.jpg"
                   alt="Portrait of Ravneet in a creative studio"
                   fill
                   sizes="400px"
