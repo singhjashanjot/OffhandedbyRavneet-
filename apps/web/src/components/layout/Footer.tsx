@@ -1,123 +1,229 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { footerNavigation } from "@/data";
 
 /* ========================================
    FOOTER COMPONENT
-   Minimal footer with large brand text & halftone effect
+   Modern footer inspired by shadcnblocks/footer31
+   Large heading + nav columns + newsletter + brand text
 ======================================== */
 
-const excludeLabels = ["Facebook", "WhatsApp", "About Us"];
+const navigationLinks = [
+  { label: "Home", href: "/" },
+  { label: "Workshops", href: "/workshops" },
+  { label: "Products", href: "/products" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
 
-const footerLinks = [
-  ...footerNavigation.social.map((s) => ({ label: s.label, href: s.href, external: true })),
-  ...footerNavigation.company.map((c) => ({ label: c.label, href: c.href, external: false })),
-  ...footerNavigation.legal.map((l) => ({ label: l.label, href: l.href, external: false })),
-].filter((item) => !excludeLabels.includes(item.label));
+const socialLinks = [
+  { label: "Instagram", href: "https://instagram.com/offhandedbyravneet", external: true },
+  { label: "Facebook", href: "https://facebook.com/offhanded", external: true },
+  { label: "WhatsApp", href: "https://wa.me/919876543210", external: true },
+];
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement newsletter subscription
+    if (email.trim()) {
+      alert("Thank you for subscribing!");
+      setEmail("");
+    }
+  };
+
   return (
-    <footer className="relative overflow-hidden" style={{ backgroundColor: "#FFFFF1" }}>
-      {/* Top Navigation Bar */}
-      <div className="relative z-10 px-6 md:px-10 py-8 mt-16 flex items-center justify-between">
-        {/* Logo + Tagline */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="font-display text-lg font-semibold tracking-tight text-neutral-900"
-          >
-            Offhanded
-          </Link>
-          <span className="text-neutral-400 text-sm hidden sm:inline">
-            · Made with care
-          </span>
+    <footer
+      className="relative overflow-hidden"
+      style={{ backgroundColor: "#FFFFF1" }}
+    >
+      <div className="px-6 md:px-12 lg:px-20 pt-20 pb-8">
+        {/* ─── Top Section: Heading + Nav Columns ─── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+          {/* Left: Large Heading */}
+          <div>
+            <h2
+              className="font-display font-light leading-[1.05] tracking-tight"
+              style={{
+                fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+                color: "#3D4E40",
+              }}
+            >
+              Creativity, handmade
+              <br />
+              with heart
+            </h2>
+          </div>
+
+          {/* Right: Navigation + Social Columns */}
+          <div className="grid grid-cols-2 gap-8 lg:justify-end">
+            {/* Pages Column */}
+            <nav className="flex flex-col gap-3">
+              {navigationLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 w-fit"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Social Column */}
+            <nav className="flex flex-col gap-3">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 inline-flex items-center gap-1.5 w-fit"
+                >
+                  {link.label}
+                  {/* External link arrow */}
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="opacity-60"
+                  >
+                    <path
+                      d="M3.5 1.5H10.5V8.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.5 1.5L1.5 10.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              ))}
+            </nav>
+          </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
-          {footerLinks.map((item) =>
-            item.external ? (
+        {/* ─── Middle Section: Support + Newsletter | Location + Legal ─── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 mt-16 lg:mt-24">
+          {/* Left: Support + Newsletter */}
+          <div className="space-y-10">
+            {/* Get Support */}
+            <div>
+              <p className="text-sm text-neutral-500 mb-1.5">Get Support :</p>
               <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
+                href="mailto:hello@offhanded.in"
+                className="text-sm text-neutral-900 hover:text-neutral-600 transition-colors duration-200 underline underline-offset-4 decoration-neutral-300"
               >
-                {item.label}
+                hello@offhanded.in
               </a>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <p className="text-sm text-neutral-500 mb-4">
+                Sign up for upcoming workshops   :
+              </p>
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className="flex items-center border-b border-neutral-300 pb-2 max-w-md"
               >
-                {item.label}
-              </Link>
-            )
-          )}
-        </nav>
-      </div>
+                <input
+                  type="email"
+                  placeholder="EMAIL*"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="flex-1 bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 outline-none tracking-wide"
+                  style={{ letterSpacing: "0.05em" }}
+                />
+                <button
+                  type="submit"
+                  className="ml-4 text-neutral-900 hover:text-neutral-600 transition-colors duration-200 flex-shrink-0"
+                  aria-label="Subscribe to newsletter"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12H19"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13 6L19 12L13 18"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
 
-      {/* Brand Text placed just above the halftone effect */}
-      <div className="relative z-10 flex items-center justify-center px-4 pt-24 md:pt-28">
-        <h2
-          className="font-canela text-center uppercase leading-none select-none"
-          style={{
-            fontSize: "clamp(3rem, 10vw, 10rem)",
-            fontWeight: 900,
-            letterSpacing: "-0.02em",
-            transform: "scaleY(2)",
-            background: "linear-gradient(to bottom, #2D3E30 0%, #2D3E3080 60%, transparent 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
-          Offhanded
-        </h2>
-      </div>
+          {/* Right: Location + Legal */}
+          <div className="grid grid-cols-2 gap-8 lg:justify-end">
+            {/* Location */}
+            <div>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                Punjab
+                <br />
+                India, Asia
+              </p>
+            </div>
 
-      {/* Halftone Dot Pattern Effect */}
-      <div className="relative w-full -mt-4" style={{ height: "clamp(100px, 15vw, 200px)" }}>
-        <HalftonePattern />
+            {/* Legal Links */}
+            <nav className="flex flex-col gap-2">
+              {footerNavigation.legal.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 w-fit"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* ─── Bottom: Large Brand Name ─── */}
+        <div className="mt-16 lg:mt-24 w-full overflow-hidden pt-4">
+          <h2
+            className="font-display font-light leading-none select-none text-center whitespace-nowrap"
+            style={{
+              fontSize: "clamp(4rem, 10.5vw, 16rem)",
+              letterSpacing: "-0.09em",
+              color: "#3D4E40",
+              opacity: 0.5,
+              transform: "scaleY(1.1)",
+              transformOrigin: "bottom",
+            }}
+          >
+            offhandedbyravneet
+          </h2>
+        </div>
       </div>
     </footer>
-  );
-}
-
-/* ========================================
-   HALFTONE PATTERN COMPONENT
-   Creates a halftone dot gradient effect
-======================================== */
-
-function HalftonePattern() {
-  const rows = 20;
-  const cols = 120;
-
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full"
-      viewBox={`0 0 ${cols * 10} ${rows * 10}`}
-      preserveAspectRatio="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {Array.from({ length: rows }, (_, row) =>
-        Array.from({ length: cols }, (_, col) => {
-          const progress = row / (rows - 1);
-          const radius = 0.5 + progress * 4;
-          const opacity = progress * progress;
-          return (
-            <circle
-              key={`${row}-${col}`}
-              cx={col * 10 + 5}
-              cy={row * 10 + 5}
-              r={radius}
-              fill="#2D3E30"
-              opacity={opacity}
-            />
-          );
-        })
-      )}
-    </svg>
   );
 }
