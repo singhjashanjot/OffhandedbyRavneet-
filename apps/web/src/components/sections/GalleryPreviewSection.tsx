@@ -45,7 +45,7 @@ const galleryImages = [
 
 export function GalleryPreviewSection() {
   return (
-    <section className="py-10 md:py-14 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+    <section className="pt-20 md:pt-28 pb-10 md:pb-14 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
       <div>
         <SectionHeader
           title="Moments We've Captured"

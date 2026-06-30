@@ -64,7 +64,7 @@ export function UpcomingWorkshopsSection({ workshops }: UpcomingWorkshopsSection
   if (!currentWorkshop) return null;
 
   return (
-    <section className="py-10 md:py-14 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+    <section className="py-20 md:py-28 bg-[#fffff1] max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
       <div>
         <SectionHeader
           title="Upcoming Workshops"
@@ -203,7 +203,7 @@ export function UpcomingWorkshopsSection({ workshops }: UpcomingWorkshopsSection
         </nav>
 
         {/* View All */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-3">
           <Link href="/workshops" className="bg-[#fffff5] btn-secondary">
             View All Workshops
           </Link>

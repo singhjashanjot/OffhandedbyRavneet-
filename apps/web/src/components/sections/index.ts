@@ -6,6 +6,8 @@ export { HeroSection } from "./HeroSection";
 export { CategoriesSection } from "./CategoriesSection";
 export { UpcomingWorkshopsSection } from "./UpcomingWorkshopsSection";
 
+export { ProductsSection } from "./ProductsSection";
+
 export { GalleryPreviewSection } from "./GalleryPreviewSection";
 export { TestimonialsSection } from "./TestimonialsSection";
 export { FounderSection } from "./FounderSection";

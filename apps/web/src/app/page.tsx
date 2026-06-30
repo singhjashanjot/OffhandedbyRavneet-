@@ -4,7 +4,7 @@ import {
   HeroSection,
   CategoriesSection,
   UpcomingWorkshopsSection,
-
+  ProductsSection,
   GalleryPreviewSection,
   TestimonialsSection,
   FounderSection,
@@ -58,6 +58,9 @@ export default async function HomePage() {
 
         {/* Upcoming Workshops - From Supabase DB */}
         <UpcomingWorkshopsSection workshops={workshops} />
+
+        {/* Products - Featured art supplies & merchandise */}
+        <ProductsSection />
 
         {/* Gallery Preview - Past workshop visuals */}
         <GalleryPreviewSection />
