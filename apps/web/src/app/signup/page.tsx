@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -26,6 +26,8 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const { signUpWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,8 +72,8 @@ export default function SignupPage() {
       setError(errorMessage);
       setLoading(false);
     } else if (session) {
-      // Auto-confirmed — user is signed in, redirect to home
-      router.push("/");
+      // Auto-confirmed — user is signed in, redirect to intended page
+      router.push(redirectTo);
       router.refresh();
     } else {
       // Email verification required
@@ -81,12 +83,12 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
-    setError(null);
-    const { error } = await signInWithGoogle();
-    if (error) {
-      setError(error.message);
-    }
-  };
+      setError(null);
+      const { error } = await signInWithGoogle(redirectTo);
+      if (error) {
+        setError(error.message);
+      }
+    };
 
   if (success) {
     return (
@@ -108,7 +110,7 @@ export default function SignupPage() {
           <p className="text-sm text-slate-500 mb-6">
             Note: If you don&apos;t see the email, check your spam folder or contact support.
           </p>
-          <Link href="/login" className="inline-block w-full bg-[#92a08a] hover:bg-[#2c3627] text-white font-semibold py-3 rounded-xl transition-all">
+          <Link href={`/login${redirectTo !== "/" ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="inline-block w-full bg-[#92a08a] hover:bg-[#2c3627] text-white font-semibold py-3 rounded-xl transition-all">
             Back to Login
           </Link>
         </motion.div>

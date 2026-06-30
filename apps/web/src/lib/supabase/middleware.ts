@@ -56,10 +56,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Auth routes: redirect authenticated users to home
+  // Auth routes: redirect authenticated users to their intended page (or home)
   if (user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    const redirectTo = request.nextUrl.searchParams.get("redirectTo");
+    url.pathname = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

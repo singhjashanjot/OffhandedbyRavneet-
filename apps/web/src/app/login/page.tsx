@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -12,7 +12,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
    Redesigned with glassmorphism and decorative elements
 ======================================== */
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,21 +34,18 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      // Redirect to intended page or home
-      const params = new URLSearchParams(window.location.search);
-      const redirectTo = params.get("redirectTo") || "/";
+      // Redirect to intended page (e.g. /checkout) or home
       router.push(redirectTo);
-      router.refresh();
     }
   };
 
   const handleGoogleLogin = async () => {
-    setError(null);
-    const { error } = await signInWithGoogle();
-    if (error) {
-      setError(error.message);
-    }
-  };
+      setError(null);
+      const { error } = await signInWithGoogle(redirectTo);
+      if (error) {
+        setError(error.message);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-[#fffff1] flex flex-col relative overflow-hidden">
@@ -219,6 +218,14 @@ export default function LoginPage() {
       {/* Footer Decoration */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#92a08a]/20 to-transparent"></div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#fffff1] flex items-center justify-center"><p className="text-slate-400">Loading...</p></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
 
