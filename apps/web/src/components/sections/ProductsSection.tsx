@@ -94,7 +94,7 @@ export function ProductsSection() {
       >
         <motion.div
           style={{ opacity }}
-          className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12"
+          className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-8 md:pb-12"
         >
           {/* Decorative blur circles */}
           <div className="absolute top-10 right-10 w-48 h-48 rounded-full bg-white/[0.04] blur-3xl pointer-events-none" />
