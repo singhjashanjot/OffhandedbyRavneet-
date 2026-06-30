@@ -93,7 +93,7 @@ function CheckoutContent() {
           <h1 className="text-heading-md font-display font-light">
             Invalid Checkout Session
           </h1>
-          <p className="text-neutral-500 mt-2">
+          <p className="font-sans text-neutral-500 mt-2">
             No item selected for checkout.
           </p>
           <Link href="/products" className="link mt-4 block">
@@ -118,7 +118,7 @@ function CheckoutContent() {
             <h1 className="text-heading-md font-display font-light mb-4 text-brand-800">
               {isProductCheckout ? "Order Confirmed!" : "Booking Confirmed!"}
             </h1>
-            <p className="text-neutral-600 mb-4">
+            <p className="font-sans text-neutral-600 mb-4">
               Thank you
               {(firstName || attendeeName || user?.user_metadata?.full_name) &&
                 `, ${firstName || attendeeName || user?.user_metadata?.full_name}`}
@@ -126,7 +126,7 @@ function CheckoutContent() {
               <strong>{itemTitle}</strong> has been confirmed.
             </p>
             {bookingResult && (
-              <div className="bg-brand-50 rounded-xl p-4 mb-6 text-sm text-left">
+              <div className="bg-brand-50 rounded-xl p-4 mb-6 text-sm font-sans text-left">
                 <p>
                   <strong>{isProductCheckout ? "Order ID" : "Booking ID"}:</strong>{" "}
                   {(bookingResult.orderId || bookingResult.bookingId)?.slice(0, 8)}...
@@ -141,7 +141,7 @@ function CheckoutContent() {
                 </p>
               </div>
             )}
-            <p className="text-sm text-neutral-400 mb-6">
+            <p className="font-sans text-sm text-neutral-400 mb-6">
               A confirmation email will be sent shortly.
             </p>
             <div className="space-y-3">
@@ -176,7 +176,7 @@ function CheckoutContent() {
           </Link>
           <Link
             href={isWorkshopCheckout ? "/workshops" : "/products"}
-            className="text-body-sm font-medium opacity-60 hover:opacity-100 flex items-center gap-1 transition-all text-neutral-900"
+            className="font-sans text-body-sm font-medium opacity-60 hover:opacity-100 flex items-center gap-1 transition-all text-neutral-900"
           >
             <span className="material-symbols-outlined text-sm">
               arrow_back
@@ -187,7 +187,7 @@ function CheckoutContent() {
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-body-sm">
+          <div className="font-sans mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-body-sm">
             {error}
           </div>
         )}
@@ -202,7 +202,7 @@ function CheckoutContent() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     First Name
                   </label>
                   <input
@@ -214,7 +214,7 @@ function CheckoutContent() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     Last Name
                   </label>
                   <input
@@ -226,7 +226,7 @@ function CheckoutContent() {
                   />
                 </div>
                 <div className="flex flex-col gap-2 md:col-span-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     Street Address
                   </label>
                   <input
@@ -238,7 +238,7 @@ function CheckoutContent() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     City
                   </label>
                   <input
@@ -250,7 +250,7 @@ function CheckoutContent() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     Postal Code
                   </label>
                   <input
@@ -281,7 +281,7 @@ function CheckoutContent() {
             </div>
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                   Card Number
                 </label>
                 <div className="relative">
@@ -297,7 +297,7 @@ function CheckoutContent() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     Expiry Date
                   </label>
                   <input
@@ -307,7 +307,7 @@ function CheckoutContent() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
                     CVV
                   </label>
                   <input
@@ -324,14 +324,14 @@ function CheckoutContent() {
           <button
             onClick={handlePayment}
             disabled={isProcessing}
-            className="w-full bg-offhanded-deep text-white py-5 rounded-xl font-bold text-body-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50"
+            className="w-full bg-offhanded-deep text-white py-5 rounded-xl font-sans font-bold text-body-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50"
           >
             {isProcessing ? "Processing..." : isWorkshopCheckout ? "Confirm Booking" : "Complete Purchase"}
             {!isProcessing && (
               <span className="material-symbols-outlined">arrow_forward</span>
             )}
           </button>
-          <p className="text-center text-xs opacity-50 flex items-center justify-center gap-1 text-neutral-600">
+          <p className="font-sans text-center text-xs opacity-50 flex items-center justify-center gap-1 text-neutral-600">
             <span className="material-symbols-outlined text-xs">
               shield_lock
             </span>
@@ -357,13 +357,13 @@ function CheckoutContent() {
                 </div>
               </div>
               <div className="flex flex-col justify-center flex-1">
-                <h4 className="font-bold text-neutral-900">{itemTitle}</h4>
+                <h4 className="font-sans font-bold text-neutral-900">{itemTitle}</h4>
                 {!isProductCheckout && tickets > 1 && (
-                  <p className="text-body-sm opacity-60 italic text-neutral-600">
+                  <p className="font-sans text-body-sm opacity-60 italic text-neutral-600">
                     {tickets} Ticket{tickets > 1 ? "s" : ""}
                   </p>
                 )}
-                <p className="font-bold mt-2 text-neutral-900">
+                <p className="font-sans font-bold mt-2 text-neutral-900">
                   ₹{itemPrice?.toLocaleString("en-IN")}
                 </p>
               </div>
@@ -371,27 +371,27 @@ function CheckoutContent() {
 
             {/* Pricing Breakdown */}
             <div className="border-t border-offhanded-deep/10 pt-6 space-y-4">
-              <div className="flex justify-between text-body-sm">
+              <div className="flex justify-between text-body-sm font-sans">
                 <span className="opacity-60 text-neutral-600">Subtotal</span>
                 <span className="font-medium text-neutral-900">
                   ₹{totalAmount?.toLocaleString("en-IN")}
                 </span>
               </div>
               {isProductCheckout && (
-                <div className="flex justify-between text-body-sm">
+                <div className="flex justify-between text-body-sm font-sans">
                   <span className="opacity-60 text-neutral-600">Shipping</span>
                   <span className="font-medium text-neutral-900">
                     Calculated at next step
                   </span>
                 </div>
               )}
-              <div className="flex justify-between text-body-sm">
+              <div className="flex justify-between text-body-sm font-sans">
                 <span className="opacity-60 text-neutral-600">Taxes</span>
                 <span className="font-medium text-neutral-900">
                   ₹{taxAmount?.toLocaleString("en-IN")}
                 </span>
               </div>
-              <div className="pt-4 border-t border-offhanded-deep/20 flex justify-between items-baseline">
+              <div className="pt-4 border-t border-offhanded-deep/20 flex justify-between items-baseline font-sans">
                 <span className="text-body-lg font-bold text-neutral-900">
                   Total
                 </span>
@@ -399,7 +399,7 @@ function CheckoutContent() {
                   <span className="text-heading-md font-black text-neutral-900">
                     ₹{(totalAmount + taxAmount)?.toLocaleString("en-IN")}
                   </span>
-                  <p className="text-[10px] uppercase tracking-widest opacity-40 text-neutral-600">
+                  <p className="font-sans text-[10px] uppercase tracking-widest opacity-40 text-neutral-600">
                     INR Included
                   </p>
                 </div>
@@ -416,7 +416,7 @@ function CheckoutContent() {
                   className="flex-1 bg-transparent border border-offhanded-deep/20 rounded-lg px-4 py-2 text-body-sm focus:ring-1 focus:ring-offhanded-deep outline-none text-neutral-900"
                   placeholder="Promo Code"
                 />
-                <button className="bg-offhanded-deep/10 text-offhanded-deep px-4 py-2 rounded-lg text-body-sm font-bold hover:bg-offhanded-deep/20 transition-all">
+                <button className="bg-offhanded-deep/10 text-offhanded-deep px-4 py-2 rounded-lg text-body-sm font-sans font-bold hover:bg-offhanded-deep/20 transition-all">
                   Apply
                 </button>
               </div>
@@ -429,10 +429,10 @@ function CheckoutContent() {
                   {isWorkshopCheckout ? "verified_user" : "package_2"}
                 </span>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-tighter text-neutral-900">
+                  <p className="font-sans text-xs font-bold uppercase tracking-tighter text-neutral-900">
                     {isWorkshopCheckout ? "Secure Booking" : "Carbon Neutral Delivery"}
                   </p>
-                  <p className="text-[11px] opacity-60 leading-relaxed mt-1 text-neutral-600">
+                  <p className="font-sans text-[11px] opacity-60 leading-relaxed mt-1 text-neutral-600">
                     {isWorkshopCheckout
                       ? "Your spot is reserved instantly upon payment. All materials and refreshments included."
                       : "Offhanded offsets 100% of carbon emissions from every shipment to protect our planet."}
@@ -452,7 +452,7 @@ export default function CheckoutPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-brand-50">
-          <p>Loading checkout...</p>
+          <p className="font-sans">Loading checkout...</p>
         </div>
       }
     >

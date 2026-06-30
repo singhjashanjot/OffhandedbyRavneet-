@@ -34,7 +34,7 @@ export default async function ProductsPage() {
               <h1 className="font-display text-neutral-900 text-display-md md:text-display-lg font-light leading-[1.1] tracking-tighter">
                 The Curated{" "}
                 <br />
-                <span className="italic font-serif">Aesthetics of Artistry</span>
+                <span className="font-display tracking-tight">Aesthetics of Artistry</span>
               </h1>
               <p className="font-sans text-neutral-500 text-body-lg font-normal leading-relaxed max-w-lg mt-4">
                 A minimalist selection of high-end art supplies and handmade
@@ -117,41 +117,8 @@ export default async function ProductsPage() {
             })}
           </div>
 
-          {/* Bottom Section — Ceramic Series + Pagination */}
-          <div className="mt-32 pt-12 border-t border-offhanded-accent/30 flex flex-col md:flex-row justify-between items-end gap-12">
-            <div className="flex flex-col gap-4">
-              <h4 className="font-display text-neutral-900 text-heading-lg font-light tracking-tight">
-                The Ceramic Series
-              </h4>
-              <p className="font-sans text-neutral-400 max-w-sm text-body-sm">
-                Every piece is hand-thrown in our studio, reflecting the subtle
-                imperfections of the process.
-              </p>
-              <Link
-                href="#"
-                className="inline-flex items-center gap-2 text-neutral-900 text-xs font-bold uppercase tracking-widest hover:text-brand-600 transition-colors mt-2"
-              >
-                Explore Series
-                <span className="material-symbols-outlined text-sm">
-                  arrow_forward
-                </span>
-              </Link>
-            </div>
-            <div className="flex gap-4">
-              <button className="size-10 rounded-full border border-offhanded-accent flex items-center justify-center text-neutral-900 hover:border-neutral-900 transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  chevron_left
-                </span>
-              </button>
-              <button className="size-10 rounded-full border border-offhanded-accent flex items-center justify-center text-neutral-900 hover:border-neutral-900 transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  chevron_right
-                </span>
-              </button>
-            </div>
           </div>
-        </div>
-      </main>
+                </main>
 
       <Footer />
     </>
