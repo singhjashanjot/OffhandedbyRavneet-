@@ -16,6 +16,7 @@ export function Header() {
   const { user, loading, signOut } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,11 +38,13 @@ export function Header() {
   const navItems = [
     { href: "/", label: "Home", icon: "home" },
     { href: "/workshops", label: "Workshops", icon: "grid_view" },
+    { href: "/products", label: "Products", icon: "storefront" },
     { href: "/gallery", label: "Gallery", icon: "gallery_thumbnail" },
     { href: "/about", label: "About", icon: "person" },
   ];
 
   const handleSignOut = async () => {
+    setShowSignOutConfirm(false);
     await signOut();
     router.push("/");
     router.refresh();
@@ -111,12 +114,35 @@ export function Header() {
                   <div className="w-8 h-8 rounded-full bg-[#2D3E30] text-white flex items-center justify-center text-xs font-semibold">
                     {userInitial}
                   </div>
-                  <button
-                    onClick={handleSignOut}
-                    className="text-xs font-medium text-[#141514]/60 hover:text-[#141514] transition-colors hidden md:block"
-                  >
-                    Sign Out
-                  </button>
+                  <div className="relative hidden md:block">
+                    <button
+                      onClick={() => setShowSignOutConfirm(!showSignOutConfirm)}
+                      className="text-xs font-medium text-[#141514]/60 hover:text-[#141514] transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                    
+                    {/* Sign Out Confirmation Popover */}
+                    {showSignOutConfirm && (
+                      <div className="absolute top-full mt-3 right-0 bg-white border border-[#141514]/10 shadow-xl shadow-black/5 rounded-2xl p-3 min-w-[180px] z-50 flex flex-col gap-2">
+                        <p className="text-xs font-medium text-center text-[#141514]">Sign out of your account?</p>
+                        <div className="flex justify-between gap-2 mt-1">
+                          <button 
+                            onClick={() => setShowSignOutConfirm(false)}
+                            className="flex-1 px-3 py-2 text-xs font-medium rounded-xl border border-[#141514]/10 hover:bg-[#141514]/5 text-[#141514] transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            onClick={handleSignOut}
+                            className="flex-1 px-3 py-2 text-xs font-medium rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                          >
+                            Sign out
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <Link

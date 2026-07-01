@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ClickPowerUp } from "@/components/ui/click-powerup";
+import { useRouter } from "next/navigation";
 
 /* ========================================
    HERO SECTION
    Main landing section with brand intro
 ======================================== */
 
-
-
 export function HeroSection() {
+  const router = useRouter();
+
   return (
     <>
       <section className="relative w-full p-1 lg:p-2">
@@ -24,17 +26,21 @@ export function HeroSection() {
             </h1>
             <p className="text-primary/80 text-base md:text-lg font-light max-w-lg mb-8 leading-relaxed">
 Slow down, explore, and rediscover the joy of creating in a calm, supportive space.            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link
-                href="/workshops" 
-                className="flex items-center justify-center rounded-full h-11 px-8 bg-[#2D3E30] hover:bg-primary/80 text-[#fffff1] text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-xl shadow-primary/10 transform hover:-translate-y-0.5"
+            <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto mt-4">
+              <ClickPowerUp 
+                onClick={() => router.push("/workshops")}
+                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest "
               >
                 Explore Workshops
-              </Link>
-              <button className="flex items-center justify-center rounded-full h-11 px-8 bg-transparent hover:bg-primary/5 text-primary text-sm font-bold uppercase tracking-widest transition-all duration-300 border border-primary/20">
-                <span className="material-symbols-outlined mr-2 text-xl">play_circle</span>
-                Workshop Visuals
-              </button>
+              </ClickPowerUp>
+              <ClickPowerUp 
+                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-xl">play_circle</span>
+                  Workshop Visuals
+                </div>
+              </ClickPowerUp>
             </div>
           </div>
           <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "url('https://res.cloudinary.com/daoho0jwj/image/upload/v1772198382/WhatsApp_Image_2026-02-20_at_5.55.13_PM_1_oijwzm.jpg')" }}></div>

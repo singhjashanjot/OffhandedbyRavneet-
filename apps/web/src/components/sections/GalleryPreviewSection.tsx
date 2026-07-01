@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/ui";
+import { ActionPill } from "@/components/ui/action-pill";
 
 /* ========================================
    GALLERY PREVIEW SECTION
@@ -12,53 +13,53 @@ import { SectionHeader } from "@/components/ui";
 
 const galleryImages = [
   {
-    src: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80",
-    alt: "Pottery workshop in progress",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic",
+    alt: "Art moment",
     className: "h-64",
   },
   {
-    src: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&q=80",
-    alt: "Canvas painting session",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_2774_zvfqy7.heic",
+    alt: "Creative workshop",
     className: "h-96",
   },
   {
-    src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&q=80",
-    alt: "Acrylic art creation",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_0627_mqmp5e.heic",
+    alt: "Making art",
     className: "h-80",
   },
   {
-    src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-    alt: "Rope art workshop",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_6955_qypkz3.heic",
+    alt: "Offhanded session",
     className: "h-72",
   },
   {
-    src: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80",
-    alt: "Cake decoration class",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636489/IMG_5521_qdzurw.heic",
+    alt: "Workshop creation",
     className: "h-[26rem]",
   },
   {
-    src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80",
-    alt: "Group workshop session",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636488/IMG_5556_swiq5g.heic",
+    alt: "Artistic moment",
     className: "h-[18rem]",
   },
   {
-    src: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=400&q=80",
-    alt: "Painting setup",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636486/IMG_1987_hb6ecj.heic",
+    alt: "Creativity",
     className: "h-[22rem]",
   },
   {
-    src: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&q=80",
-    alt: "Art gallery display",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636417/IMG_8310_yojqor.heic",
+    alt: "Clay craft",
     className: "h-72",
   },
   {
-    src: "https://images.unsplash.com/photo-1459908676235-8cb9336604f0?w=400&q=80",
-    alt: "Crafting session",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636416/IMG_8301_b3dqiw.heic",
+    alt: "Pottery moment",
     className: "h-96",
   },
   {
-    src: "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?w=400&q=80",
-    alt: "Colorful painting",
+    src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636390/IMG_8297_ivhitf.heic",
+    alt: "Workshop memory",
     className: "h-80",
   },
 ];
@@ -97,10 +98,10 @@ export function GalleryPreviewSection() {
         </div>
 
         {/* View All CTA */}
-        <div className="text-center mt-8">
-          <Link href="/gallery" className=" bg-[#fffff5] btn-secondary">
-            View Full Gallery →
-          </Link>
+        <div className="text-center mt-8 flex justify-center">
+          <ActionPill href="/gallery">
+            View Full Gallery
+          </ActionPill>
         </div>
       </div>
     </section>

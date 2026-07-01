@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "@/components";
+import { ActionPill } from "@/components/ui/action-pill";
 import { upcomingWorkshops as staticWorkshops, formatDate } from "@/data";
 import type { Workshop } from "@/data";
 
@@ -203,10 +204,10 @@ export function UpcomingWorkshopsSection({ workshops }: UpcomingWorkshopsSection
         </nav>
 
         {/* View All */}
-        <div className="text-center mt-3">
-          <Link href="/workshops" className="bg-[#fffff5] btn-secondary">
+        <div className="text-center mt-3 flex justify-center">
+          <ActionPill href="/workshops">
             View All Workshops
-          </Link>
+          </ActionPill>
         </div>
       </div>
     </section>

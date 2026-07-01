@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ActionPill } from "@/components/ui/action-pill";
 
 /* ========================================
    FOUNDER SECTION
@@ -80,9 +81,9 @@ export function FounderSection() {
             </div>
 
             <div className="mt-10">
-              <Link href="/about" className="btn-primary">
-                Read Our Full Story →
-              </Link>
+              <ActionPill href="/about">
+                Read Our Full Story
+              </ActionPill>
             </div>
           </motion.div>
         </div>

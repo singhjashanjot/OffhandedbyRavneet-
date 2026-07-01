@@ -28,9 +28,8 @@ function Card({ href, image, label, title, description, aspect }: CardProps) {
           ? "aspect-[8/7]"
           : "aspect-[4/3]";
   return (
-    <Link
-      href={href}
-      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark cursor-pointer border border-stone-100 dark:border-stone-800 block ${aspectClass} mb-4`}
+    <div
+      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark border border-stone-100 dark:border-stone-800 block ${aspectClass} mb-4`}
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
@@ -46,7 +45,7 @@ function Card({ href, image, label, title, description, aspect }: CardProps) {
           {description}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -54,77 +53,77 @@ export function CategoriesSection() {
   const cards: CardProps[] = [
     // Column 1 — 3 cards
     {
-      href: "/experience/pottery-texture",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAuKVNovUVJnEUUHB18B1Ypi73XvB9b7xYe_e2eNn7tqGYVhzWHsxqOY7rkikKNJ_0HvpkWyRJ0sMc2glVBu7Pd_RBau-XlUO_1hnWmVC3rHpmBqYS5JHtPaZ7HVSF4qcdc5_qoKHMP4DBUNp5YG-2gzA_0gaqH5TXyylejQ7d2i4DuC9o__DOn10FqwBBndF_zNccccIavt5avRccPSS46zY9B_id2Z8y1MYSUkS6sDSRNaNDHyeQxRyw8nH-SyMWoIid2oMiDqDAR",
-      label: "Tactile Harmony",
-      title: "Pottery Art Texture",
-      description: "Shape earth with your hands, finding rhythm in the circular motion of the wheel.",
+      href: "/experience/canvas-painting",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic",
+      label: "White Space",
+      title: "Canvas Painting",
+      description: "The freedom of white space. Express your inner landscape through pigment and movement.",
       aspect: "tall",
     },
     {
       href: "/experience/punch-needle",
-      image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631430/IMG_3254_vjcfvh.heic",
       label: "Textured Threads",
       title: "Punch Needle",
       description: "Learn the meditative craft of punch needle embroidery.",
       aspect: "tall",
     },
     {
-      href: "/experience/cake-painting",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80",
-      label: "Edible Canvas",
-      title: "Cake Painting",
-      description: "Decorate delicious cakes with artistic painting techniques.",
+      href: "/experience/texture-art",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631445/IMG_6955_dacuj6.heic",
+      label: "Depth & Light",
+      title: "Texture Art",
+      description: "Layering light and shadow through the delicate medium of handmade textures.",
       aspect: "tall",
     },
     // Column 2 — 3 cards
     {
-      href: "/experience/canvas-painting",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCSCFiZ8evmlz60E4OO6fY8FnCR-OQudvyZbPYjpSah2k_lTA8cFYgdxesyUASWGp0Dv8lpUydzZBoWSAYXcISXxYiNHNPjKwciJCRtyXGBZAzHG1z1u0ytxk9vUWC6OXnTarFw6mQ21LliNGxfER68CodfVLC9HumlIy04xIZc9_seMpIqtCGvBwASCzZ-IofWyJ9hNN353dXQP68-ii-rgGkYwh9vhyX5Cs0N-S4c_1ZG_yJAX5MZlHZ011TOx9lIvOJoZaBYZcVQ",
-      label: "White Space",
-      title: "Canvas Painting",
-      description: "The freedom of white space. Express your inner landscape through pigment and movement.",
+      href: "/experience/tote-bag",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636327/IMG_7643_lgemfy.heic",
+      label: "Wearable Art",
+      title: "Tote Bag",
+      description: "Customize eco-friendly tote bags with your own hand-painted designs.",
       aspect: "portrait",
     },
     {
-      href: "/experience/textured-art",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAw3b1f7a6lWfdbEgo5tdd_p0R3MrUTulESqHaGtyEps371KiGZiZAHx9v1CQfM_erChYIYj1odYN9NrcODXjFsVllVze91aV9xIKDmPDpZr4saUDlSoYA284Z2ibXwY0CezSugydv3u74HHXlOEwnAXCl5tUAijnm1wdPvzwiczkxoiJfZMGWdz0MEUy89nOmVxb3QN89YfvKWyvTqNjQwO8Y24nX_CRMvE3csMS-wh-dF7lNTTtUR6tvQ1vc7SXISU98pCN9fuiTV",
-      label: "Depth & Light",
-      title: "Textured Art",
-      description: "Layering light and shadow through the delicate medium of handmade papers.",
+      href: "/experience/pottery",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636416/IMG_8301_b3dqiw.heic",
+      label: "Tactile Harmony",
+      title: "Pottery",
+      description: "Shape earth with your hands, finding rhythm in the circular motion of the wheel.",
       aspect: "portrait",
     },
     {
-      href: "/experience/bento-cake-painting",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=800&q=80",
+      href: "/experience/trinket-tray",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631443/IMG_0627_huujuz.heic",
       label: "Mini Masterpiece",
-      title: "Bento Cake Painting",
-      description: "Create adorable, Instagram-worthy mini bento cakes.",
+      title: "Trinket Tray Making + Painting",
+      description: "Create and paint adorable, functional clay trinket trays for your home.",
       aspect: "square",
     },
-    // Column 3 — 3 cards (Fluid Art ends here, aligned with Punch Needle in col1)
+    // Column 3 — 3 cards
     {
-      href: "/experience/clay-mirror-painting",
-      image: "https://images.unsplash.com/photo-1522775559573-2f63d04af08f?w=800&q=80",
+      href: "/experience/block-print",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631433/IMG_0497_rinstb.heic",
+      label: "Rhythmic Patterns",
+      title: "Block Print Station",
+      description: "Explore traditional block printing to create intricate, repeating patterns.",
+      aspect: "tall",
+    },
+    {
+      href: "/experience/clay-mirror",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631396/IMG_5184_h8wfsi.heic",
       label: "Molding Patience",
-      title: "Clay Mirror Painting",
+      title: "Clay Mirror",
       description: "Create intricate cultural designs with clay and mirrors.",
       aspect: "tall",
     },
     {
-      href: "/experience/jute-bag-painting",
-      image: "https://images.unsplash.com/photo-1501472312651-726afe119ff1?w=800&q=80",
-      label: "Sustainable Style",
-      title: "Jute Bag Painting",
-      description: "Customize eco-friendly jute bags with your own hand-painted designs.",
-      aspect: "tall",
-    },
-    {
-      href: "/experience/fluid-art",
-      image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&q=80",
-      label: "Mesmerizing Flow",
-      title: "Fluid Art",
-      description: "Explore mesmerizing flow patterns with acrylic pouring techniques and vibrant colors.",
+      href: "/experience/fabric-painting",
+      image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631448/IMG_1467_hf5f8c.heic",
+      label: "Textile Canvas",
+      title: "Fabric Painting",
+      description: "Transform plain fabrics into vibrant works of art using specialized fabric paints.",
       aspect: "tall",
     },
   ];

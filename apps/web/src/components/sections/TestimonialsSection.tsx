@@ -17,20 +17,14 @@ import { motion, AnimatePresence } from "framer-motion";
    Cards fan out in a tight arc with heavy overlap
 ======================================== */
 
-// Royalty-free video clips
+// Actual customer videos - Optimized via Cloudinary
 const DUMMY_VIDEOS = [
-  "https://videos.pexels.com/video-files/3209211/3209211-uhd_2560_1440_25fps.mp4",
-  "https://videos.pexels.com/video-files/3209176/3209176-uhd_2560_1440_25fps.mp4",
-  "https://videos.pexels.com/video-files/856294/856294-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/856116/856116-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/856029/856029-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/855282/855282-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4",
-  "https://videos.pexels.com/video-files/855564/855564-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/855706/855706-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/856082/856082-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/855396/855396-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/854228/854228-hd_1920_1080_30fps.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637684/IMG_6206_xfuwiy.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637676/IMG_9971_zcrbzt.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637676/IMG_0430_gvsgpo.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637658/IMG_0438_ycf6aa.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637657/IMG_0426_x45ufu.mp4",
+  "https://res.cloudinary.com/daoho0jwj/video/upload/c_scale,w_600,f_auto,q_auto/v1779637656/IMG_1997_a5gfwu.mp4",
 ];
 
 // Static reviews – enough to fill out 11+ cards
@@ -81,26 +75,26 @@ function getResponsiveConfig(containerWidth: number) {
   const isMobile = containerWidth < 480;
   const isTablet = containerWidth >= 480 && containerWidth < 900;
 
-  // Cards are narrower so more fit on screen
+  // Cards are a bit wider for better breathing room
   const cardWidth = isMobile
-    ? Math.min(containerWidth * 0.45, 160)
+    ? Math.min(containerWidth * 0.45, 170)
     : isTablet
-      ? Math.min(containerWidth * 0.28, 220)
-      : Math.min(containerWidth * 0.18, 260);
+      ? Math.min(containerWidth * 0.28, 230)
+      : Math.min(containerWidth * 0.20, 280);
 
-  // TIGHT spacing — heavy overlap between cards
-  const cardSpacing = isMobile ? 28 : isTablet ? 55 : 85;
+  // WIDER spacing — giving videos breathing room and stretching the section
+  const cardSpacing = isMobile ? 50 : isTablet ? 100 : 160;
   // Vertical offset per step — very subtle arch like the reference
-  const verticalOffset = isMobile ? 4 : isTablet ? 6 : 8;
+  const verticalOffset = isMobile ? 5 : isTablet ? 8 : 12;
   // Gentle scale decrease so far cards are still visible
   const scaleStep = isMobile ? 0.08 : isTablet ? 0.065 : 0.055;
   // Rotation per step
-  const rotationOffset = isMobile ? -6 : isTablet ? -10 : -12;
+  const rotationOffset = isMobile ? -5 : isTablet ? -8 : -10;
   // Deep perspective
   const perspective = isMobile ? 900 : isTablet ? 1200 : 1500;
   // Brightness dims gradually
   const brightnessStep = isMobile ? 0.08 : 0.06;
-  const minHeight = isMobile ? 420 : isTablet ? 520 : 650;
+  const minHeight = isMobile ? 450 : isTablet ? 550 : 700;
 
   return {
     cardWidth,
@@ -173,44 +167,194 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
+function VideoCardInner({
+  review,
+  isCenter,
+  isHovered,
+  isAnyHovered,
+  config,
+}: {
+  review: Review;
+  isCenter: boolean;
+  isHovered: boolean;
+  isAnyHovered: boolean;
+  config: ReturnType<typeof getResponsiveConfig>;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  // Play/pause logic based on hover states
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isAnyHovered) {
+        if (isHovered) {
+          if (isPlaying) videoRef.current.play().catch(() => {});
+          else videoRef.current.pause();
+        } else {
+          videoRef.current.pause();
+        }
+      } else {
+        // Default state: all videos play
+        videoRef.current.play().catch(() => {});
+        setIsMuted(true);
+        setIsPlaying(true);
+      }
+    }
+  }, [isAnyHovered, isHovered, isPlaying]);
+
+  // Restart video from beginning when hovered
+  useEffect(() => {
+    if (isHovered && videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+  }, [isHovered]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsMuted(!isMuted);
+  };
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsPlaying(!isPlaying);
+  };
+
+  return (
+    <>
+      <video
+        ref={videoRef}
+        src={review.videoUrl}
+        loop
+        playsInline
+        muted
+        preload="metadata"
+        draggable={false}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transition: "transform 700ms",
+          borderRadius: "20px",
+          transform: isHovered ? "scale(1.05)" : "scale(1)",
+        }}
+      />
+
+      {/* Controls */}
+      {isCenter && (
+        <div 
+          className="absolute top-4 right-4 flex items-center gap-2 z-50 transition-opacity duration-300"
+          style={{ opacity: isHovered || !isPlaying || !isMuted ? 1 : 0 }}
+        >
+          <button
+            onClick={togglePlay}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">
+              {isPlaying ? "pause" : "play_arrow"}
+            </span>
+          </button>
+          <button
+            onClick={toggleMute}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">
+              {isMuted ? "volume_off" : "volume_up"}
+            </span>
+          </button>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {isCenter && (
+          <motion.div
+            initial={false}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%)",
+              pointerEvents: "none",
+              borderRadius: "20px",
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {isCenter && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            border: "2px solid rgba(255,255,255,0.15)",
+            borderRadius: "20px",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: config.isMobile ? "14px" : "20px",
+          pointerEvents: "none",
+        }}
+      >
+        <h3
+          className="font-condensed uppercase tracking-wide"
+          style={{
+            fontSize: config.isMobile ? "0.9rem" : "1.15rem",
+            lineHeight: 1.1,
+            color: "#e8d5b5",
+          }}
+        >
+          {review.name}
+        </h3>
+        <p
+          className="font-sans"
+          style={{
+            fontSize: "0.65rem",
+            color: "rgba(255,255,255,0.65)",
+            marginTop: "5px",
+          }}
+        >
+          {review.workshopType}
+        </p>
+      </div>
+    </>
+  );
+}
+
 /* ════════════════════════════════════════
    MAIN COMPONENT
    ════════════════════════════════════════ */
 
 export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
-  /* Build reviews array — aim for 11-13 cards */
+  /* Build reviews array — exactly matching the 6 videos */
   const reviews = useMemo<Review[]>(() => {
-    let source: {
-      name: string;
-      workshopType: string;
-      comment: string;
-      videoUrl?: string;
-    }[] = [];
-
-    if (dbReviews && dbReviews.length > 0) {
-      source = dbReviews.map((r) => ({
-        name: r.author_name || "Anonymous",
-        workshopType: r.workshop_type || "Art Workshop",
-        comment: r.comment || "",
-        videoUrl: r.video_url || undefined,
-      }));
-      // Pad to at least 11
-      while (source.length < 11) {
-        source.push(
-          ...STATIC_REVIEWS.slice(0, 11 - source.length)
-        );
-      }
-    } else {
-      source = [...STATIC_REVIEWS];
-    }
+    // For now, strictly use the provided 6 videos
+    const source = STATIC_REVIEWS.slice(0, DUMMY_VIDEOS.length);
 
     return source.map((s, i) => ({
       name: s.name,
       workshopType: s.workshopType,
       comment: s.comment,
-      videoUrl: s.videoUrl || DUMMY_VIDEOS[i % DUMMY_VIDEOS.length],
+      videoUrl: DUMMY_VIDEOS[i],
     }));
-  }, [dbReviews]);
+  }, []);
 
   /* State */
   const [activeIndex, setActiveIndex] = useState(0);
@@ -248,14 +392,14 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
     }
   }, [reviews.length, activeIndex]);
 
-  /* Auto-play timer — cycles every 3 seconds */
+  /* Auto-play timer — cycles every 2.5 seconds */
   useEffect(() => {
     if (!isAutoPlaying || reviews.length === 0) return;
     autoPlayRef.current = setInterval(() => {
       startTransition(() =>
         setActiveIndex((prev) => (prev + 1) % reviews.length)
       );
-    }, 3000);
+    }, 2500);
     return () => {
       if (autoPlayRef.current !== null) clearInterval(autoPlayRef.current);
     };
@@ -324,13 +468,17 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
 
   const handleHoverStart = useCallback(
     (index: number) => {
+      stopAutoPlay();
       if (!config.isMobile)
         startTransition(() => setHoveredIndex(index));
     },
-    [config.isMobile]
+    [config.isMobile, stopAutoPlay]
   );
   const handleHoverEnd = useCallback(() => {
-    startTransition(() => setHoveredIndex(null));
+    startTransition(() => {
+      setHoveredIndex(null);
+      setIsAutoPlaying(true);
+    });
   }, []);
 
   /* Drag handlers */
@@ -489,6 +637,7 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
             transformStyle: "preserve-3d",
             overflow: "visible",
             isolation: "isolate",
+            transform: `translateX(${reviews.length % 2 === 0 ? config.cardSpacing / 2 : 0}px)`
           }}
         >
           {reviews.map((review, index) => {
@@ -548,96 +697,13 @@ export function TestimonialsSection({ dbReviews }: TestimonialsSectionProps) {
                 }}
                 whileDrag={{ cursor: "grabbing" }}
               >
-                {/* Video */}
-                <video
-                  src={review.videoUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  draggable={false}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 700ms",
-                    borderRadius: "20px",
-                    transform: isHovered
-                      ? "scale(1.05)"
-                      : "scale(1)",
-                  }}
+                <VideoCardInner
+                  review={review}
+                  isCenter={position.isCenter}
+                  isHovered={isHovered}
+                  isAnyHovered={hoveredIndex !== null}
+                  config={config}
                 />
-
-                {/* Gradient overlay on center card */}
-                <AnimatePresence>
-                  {position.isCenter && (
-                    <motion.div
-                      initial={false}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%)",
-                        pointerEvents: "none",
-                        borderRadius: "20px",
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-
-                {/* Subtle border highlight on center card */}
-                {position.isCenter && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      border:
-                        "2px solid rgba(255,255,255,0.15)",
-                      borderRadius: "20px",
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-
-                {/* Name / workshop overlay */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    padding: config.isMobile
-                      ? "14px"
-                      : "20px",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <h3
-                    className="font-condensed uppercase tracking-wide"
-                    style={{
-                      fontSize: config.isMobile
-                        ? "0.9rem"
-                        : "1.15rem",
-                      lineHeight: 1.1,
-                      color: "#e8d5b5",
-                    }}
-                  >
-                    {review.name}
-                  </h3>
-                  <p
-                    className="font-sans"
-                    style={{
-                      fontSize: "0.65rem",
-                      color: "rgba(255,255,255,0.65)",
-                      marginTop: "5px",
-                    }}
-                  >
-                    {review.workshopType}
-                  </p>
-                </div>
               </motion.div>
             );
           })}

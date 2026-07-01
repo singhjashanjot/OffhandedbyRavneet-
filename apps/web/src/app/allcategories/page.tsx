@@ -159,9 +159,8 @@ function CategoryCard({ category, index }: { category: typeof artCategories[0]; 
   const displayNumber = String(category.id).padStart(2, "0");
 
   return (
-    <Link
-      href={`/experience/${category.slug}`}
-      className={`flex flex-col gap-6 ${marginClass} group cursor-pointer`}
+    <div
+      className={`flex flex-col gap-6 ${marginClass} group`}
     >
       <div className="border-b border-[#B2C0AD] pb-6 relative">
         <span className="text-6xl font-extralight text-[#2D3E30]/10 absolute -top-10 -left-2 select-none group-hover:text-[#B2C0AD]/30 transition-colors">
@@ -178,11 +177,8 @@ function CategoryCard({ category, index }: { category: typeof artCategories[0]; 
         <p className="text-[#2D3E30]/60 text-sm font-light leading-relaxed mb-6">
           {category.description}
         </p>
-        <span className="bg-[#2D3E30] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded group-hover:bg-[#3e3b2d] transition-colors inline-block">
-          View Workshop
-        </span>
       </div>
-    </Link>
+    </div>
   );
 }
 
