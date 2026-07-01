@@ -2,39 +2,28 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Header, Footer } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { createBooking } from "@/lib/actions/bookings";
 
-/* ========================================
-   CHECKOUT PAGE
-   Handles both workshop bookings and product purchases
-   Protected route — requires authentication
-======================================== */
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-
-  // Workshop params
   const workshopId = searchParams.get("workshopId") || "";
   const workshopTitle = searchParams.get("title") || "";
-  const workshopPrice = parseInt(searchParams.get("price") || "0");
   const tickets = parseInt(searchParams.get("tickets") || "1");
   const attendeeName = searchParams.get("name") || "";
-
-  // Product params
   const productId = searchParams.get("productId") || "";
   const productTitle = searchParams.get("title") || "";
-  const productPrice = parseInt(searchParams.get("price") || "0");
 
   const isProductCheckout = !!productId;
   const isWorkshopCheckout = !!workshopId && !isProductCheckout;
   const itemTitle = isProductCheckout ? productTitle : workshopTitle;
-  const itemPrice = isProductCheckout ? productPrice : workshopPrice;
-  const totalAmount = isProductCheckout ? itemPrice : itemPrice * tickets;
-  const taxAmount = Math.round(totalAmount * 0.18); // 18% GST
 
   const { user } = useAuth();
 
@@ -42,70 +31,120 @@ function CheckoutContent() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingResult, setBookingResult] = useState<any>(null);
-
-  // Form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [promoCode, setPromoCode] = useState("");
+
+  const loadRazorpayScript = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
 
   const handlePayment = async () => {
+    if (isProcessing) return;
     setIsProcessing(true);
     setError(null);
 
-    if (!isProductCheckout && workshopId) {
-      // Workshop booking flow
-      const result = await createBooking({
-        workshopId,
-        tickets,
-        attendeeName:
-          attendeeName || user?.user_metadata?.full_name || "Guest",
-        attendeeEmail: user?.email || "",
-        attendeePhone: user?.user_metadata?.phone_number || undefined,
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error("Payment gateway failed to load. Please refresh and try again.");
+
+      const body = isWorkshopCheckout
+        ? { workshopId, tickets }
+        : { productId, quantity: 1 };
+
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
-      if (result.error) {
-        setError(result.error);
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.error || "Failed to create order.");
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Offhanded",
+        description: orderData.description,
+        order_id: orderData.orderId,
+        prefill: orderData.prefill,
+        theme: { color: "#2c3627" },
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                paymentId: orderData.paymentId,
+                workshopId: isWorkshopCheckout ? workshopId : undefined,
+                tickets: isWorkshopCheckout ? tickets : undefined,
+                attendeeName: attendeeName || user?.user_metadata?.full_name || "",
+                attendeeEmail: user?.email || "",
+                productId: isProductCheckout ? productId : undefined,
+                quantity: isProductCheckout ? 1 : undefined,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed.");
+
+            setBookingResult({
+              bookingId: verifyData.bookingId,
+              totalAmount: orderData.amount / 100,
+            });
+            setIsSuccess(true);
+          } catch (err: any) {
+            setError(err.message || "Verification failed. Please contact support.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setError("Payment was cancelled. You can try again.");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response: any) => {
         setIsProcessing(false);
-      } else {
-        setBookingResult(result);
-        setIsProcessing(false);
-        setIsSuccess(true);
-      }
-    } else {
-      // Product purchase flow (placeholder — integrate payment gateway)
-      setTimeout(() => {
-        setIsProcessing(false);
-        setIsSuccess(true);
-        setBookingResult({ orderId: crypto.randomUUID(), totalAmount: totalAmount + taxAmount });
-      }, 1500);
+        setError(`Payment failed: ${response.error?.description || "Unknown error. Please try again."}`);
+      });
+      rzp.open();
+    } catch (err: any) {
+      setIsProcessing(false);
+      setError(err.message || "Something went wrong. Please try again.");
     }
   };
 
-  // No valid session
   if (!workshopId && !productId && !isSuccess) {
     return (
       <>
         <Header />
         <main className="pt-32 pb-20 text-center container-custom">
-          <h1 className="text-heading-md font-display font-light">
-            Invalid Checkout Session
-          </h1>
-          <p className="font-sans text-neutral-500 mt-2">
-            No item selected for checkout.
-          </p>
-          <Link href="/products" className="link mt-4 block">
-            Browse Products
-          </Link>
+          <h1 className="text-heading-md font-display font-light">Invalid Checkout Session</h1>
+          <p className="font-sans text-neutral-500 mt-2">No item selected for checkout.</p>
+          <Link href="/products" className="link mt-4 block">Browse Products</Link>
         </main>
         <Footer />
       </>
     );
   }
 
-  // Success state
   if (isSuccess) {
     return (
       <>
@@ -127,31 +166,15 @@ function CheckoutContent() {
             </p>
             {bookingResult && (
               <div className="bg-brand-50 rounded-xl p-4 mb-6 text-sm font-sans text-left">
-                <p>
-                  <strong>{isProductCheckout ? "Order ID" : "Booking ID"}:</strong>{" "}
-                  {(bookingResult.orderId || bookingResult.bookingId)?.slice(0, 8)}...
-                </p>
-                <p>
-                  <strong>Amount:</strong> ₹
-                  {bookingResult.totalAmount?.toLocaleString("en-IN")}
-                </p>
-                <p>
-                  <strong>Status:</strong>{" "}
-                  <span className="text-green-600 font-semibold">Confirmed</span>
-                </p>
+                <p><strong>{isProductCheckout ? "Order ID" : "Booking ID"}:</strong>{" "}{bookingResult.bookingId?.slice(0, 8)}...</p>
+                <p><strong>Amount:</strong> ₹{bookingResult.totalAmount?.toLocaleString("en-IN")}</p>
+                <p><strong>Status:</strong>{" "}<span className="text-green-600 font-semibold">Confirmed ✓</span></p>
               </div>
             )}
-            <p className="font-sans text-sm text-neutral-400 mb-6">
-              A confirmation email will be sent shortly.
-            </p>
-            <div className="space-y-3">
-              <Link
-                href={isProductCheckout ? "/products" : "/"}
-                className="btn btn-primary w-full block text-center"
-              >
-                {isProductCheckout ? "Back to Shop" : "Back to Home"}
-              </Link>
-            </div>
+            <p className="font-sans text-sm text-neutral-400 mb-6">A confirmation email will be sent shortly.</p>
+            <Link href={isProductCheckout ? "/products" : "/"} className="btn btn-primary w-full block text-center">
+              {isProductCheckout ? "Back to Shop" : "Back to Home"}
+            </Link>
           </div>
         </main>
         <Footer />
@@ -159,33 +182,20 @@ function CheckoutContent() {
     );
   }
 
-  // Main checkout form
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background-light">
-      {/* Left Column: Shipping & Payment */}
       <main className="flex-1 px-6 py-12 lg:px-20 lg:py-16 max-w-3xl mx-auto w-full">
-        {/* Mini header */}
         <header className="mb-12 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-3xl text-neutral-900">
-              offline_bolt
-            </span>
-            <h1 className="font-display text-heading-md font-black tracking-tighter uppercase italic text-neutral-900">
-              Offhanded
-            </h1>
+            <span className="material-symbols-outlined text-3xl text-neutral-900">offline_bolt</span>
+            <h1 className="font-display text-heading-md font-black tracking-tighter uppercase italic text-neutral-900">Offhanded</h1>
           </Link>
-          <Link
-            href={isWorkshopCheckout ? "/workshops" : "/products"}
-            className="font-sans text-body-sm font-medium opacity-60 hover:opacity-100 flex items-center gap-1 transition-all text-neutral-900"
-          >
-            <span className="material-symbols-outlined text-sm">
-              arrow_back
-            </span>
+          <Link href={isWorkshopCheckout ? "/workshops" : "/products"} className="font-sans text-body-sm font-medium opacity-60 hover:opacity-100 flex items-center gap-1 transition-all text-neutral-900">
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
             {isWorkshopCheckout ? "Back to Workshops" : "Return to Shop"}
           </Link>
         </header>
 
-        {/* Error message */}
         {error && (
           <div className="font-sans mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-body-sm">
             {error}
@@ -193,7 +203,6 @@ function CheckoutContent() {
         )}
 
         <section className="space-y-10">
-          {/* Shipping Section — only for product purchases */}
           {isProductCheckout && (
             <div>
               <h2 className="font-display text-heading-sm font-bold mb-6 flex items-center gap-2 text-neutral-900">
@@ -202,228 +211,95 @@ function CheckoutContent() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="Jane"
-                  />
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">First Name</label>
+                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900" placeholder="Jane" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="Doe"
-                  />
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">Last Name</label>
+                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900" placeholder="Doe" />
                 </div>
                 <div className="flex flex-col gap-2 md:col-span-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    Street Address
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="123 Minimalist Way"
-                  />
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">Street Address</label>
+                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900" placeholder="123 Minimalist Way" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="Design District"
-                  />
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">City</label>
+                  <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900" placeholder="Design District" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="110001"
-                  />
+                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">Postal Code</label>
+                  <input type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900" placeholder="110001" />
                 </div>
               </div>
             </div>
           )}
 
-          {/* Payment Section */}
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-display text-heading-sm font-bold flex items-center gap-2 text-neutral-900">
                 <span className="material-symbols-outlined">payments</span>
-                Payment Details
+                Payment
               </h2>
-              <div className="flex gap-2 opacity-40">
-                <span className="material-symbols-outlined">credit_card</span>
-                <span className="material-symbols-outlined">
-                  account_balance_wallet
-                </span>
+              <div className="flex gap-2 items-center opacity-60">
+                <span className="material-symbols-outlined">lock</span>
+                <span className="font-sans text-xs text-neutral-600">Secured by Razorpay</span>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Card Number
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className="w-full rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="0000 0000 0000 0000"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined opacity-40">
-                    lock
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="MM/YY"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="font-sans text-xs font-semibold uppercase tracking-wider opacity-70">
-                    CVV
-                  </label>
-                  <input
-                    type="password"
-                    className="rounded-lg px-4 py-3 focus:ring-1 focus:ring-offhanded-deep outline-none border border-offhanded-accent bg-transparent transition-all text-neutral-900"
-                    placeholder="***"
-                  />
-                </div>
-              </div>
+            <div className="rounded-xl border border-offhanded-accent/50 bg-offhanded-accent/10 p-6 text-center text-neutral-600 font-sans text-body-sm">
+              <span className="material-symbols-outlined text-2xl mb-2 block opacity-40">credit_card</span>
+              All payment methods (Cards, UPI, NetBanking, Wallets) are handled securely by Razorpay.
             </div>
           </div>
 
-          {/* Complete Purchase Button */}
           <button
+            id="pay-now-btn"
             onClick={handlePayment}
             disabled={isProcessing}
-            className="w-full bg-offhanded-deep text-white py-5 rounded-xl font-sans font-bold text-body-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50"
+            className="w-full bg-offhanded-deep text-white py-5 rounded-xl font-sans font-bold text-body-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing..." : isWorkshopCheckout ? "Confirm Booking" : "Complete Purchase"}
-            {!isProcessing && (
-              <span className="material-symbols-outlined">arrow_forward</span>
+            {isProcessing ? (
+              <>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Processing...
+              </>
+            ) : (
+              <>
+                {isWorkshopCheckout ? "Confirm & Pay" : "Complete Purchase"}
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </>
             )}
           </button>
           <p className="font-sans text-center text-xs opacity-50 flex items-center justify-center gap-1 text-neutral-600">
-            <span className="material-symbols-outlined text-xs">
-              shield_lock
-            </span>
-            Secure SSL Encrypted Checkout
+            <span className="material-symbols-outlined text-xs">shield_lock</span>
+            256-bit SSL Encrypted · Secured by Razorpay
           </p>
         </section>
       </main>
 
-      {/* Right Column: Order Summary */}
       <aside className="w-full lg:w-[450px] bg-offhanded-accent/30 p-8 lg:p-12 border-l border-offhanded-accent/50">
         <div className="lg:sticky lg:top-12">
-          <h3 className="font-display text-heading-sm font-bold mb-8 text-neutral-900">
-            Order Summary
-          </h3>
+          <h3 className="font-display text-heading-sm font-bold mb-8 text-neutral-900">Order Summary</h3>
           <div className="space-y-6">
-            {/* Product Item */}
             <div className="flex gap-4">
-              <div className="w-24 h-24 bg-offhanded-accent rounded-xl overflow-hidden flex-shrink-0">
-                <div className="w-full h-full bg-offhanded-accent/50 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-3xl text-neutral-600">
-                    inventory_2
-                  </span>
-                </div>
+              <div className="w-24 h-24 bg-offhanded-accent rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <span className="material-symbols-outlined text-3xl text-neutral-600">inventory_2</span>
               </div>
               <div className="flex flex-col justify-center flex-1">
                 <h4 className="font-sans font-bold text-neutral-900">{itemTitle}</h4>
                 {!isProductCheckout && tickets > 1 && (
-                  <p className="font-sans text-body-sm opacity-60 italic text-neutral-600">
-                    {tickets} Ticket{tickets > 1 ? "s" : ""}
-                  </p>
+                  <p className="font-sans text-body-sm opacity-60 italic text-neutral-600">{tickets} Tickets</p>
                 )}
-                <p className="font-sans font-bold mt-2 text-neutral-900">
-                  ₹{itemPrice?.toLocaleString("en-IN")}
-                </p>
               </div>
             </div>
-
-            {/* Pricing Breakdown */}
-            <div className="border-t border-offhanded-deep/10 pt-6 space-y-4">
-              <div className="flex justify-between text-body-sm font-sans">
-                <span className="opacity-60 text-neutral-600">Subtotal</span>
-                <span className="font-medium text-neutral-900">
-                  ₹{totalAmount?.toLocaleString("en-IN")}
-                </span>
-              </div>
-              {isProductCheckout && (
-                <div className="flex justify-between text-body-sm font-sans">
-                  <span className="opacity-60 text-neutral-600">Shipping</span>
-                  <span className="font-medium text-neutral-900">
-                    Calculated at next step
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between text-body-sm font-sans">
-                <span className="opacity-60 text-neutral-600">Taxes</span>
-                <span className="font-medium text-neutral-900">
-                  ₹{taxAmount?.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="pt-4 border-t border-offhanded-deep/20 flex justify-between items-baseline font-sans">
-                <span className="text-body-lg font-bold text-neutral-900">
-                  Total
-                </span>
-                <div className="text-right">
-                  <span className="text-heading-md font-black text-neutral-900">
-                    ₹{(totalAmount + taxAmount)?.toLocaleString("en-IN")}
-                  </span>
-                  <p className="font-sans text-[10px] uppercase tracking-widest opacity-40 text-neutral-600">
-                    INR Included
-                  </p>
-                </div>
-              </div>
+            <div className="border-t border-offhanded-deep/10 pt-6">
+              <p className="font-sans text-body-sm text-neutral-500 text-center">
+                Final amount will be confirmed at checkout.
+              </p>
             </div>
-
-            {/* Promo Code */}
-            <div className="mt-10">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="flex-1 bg-transparent border border-offhanded-deep/20 rounded-lg px-4 py-2 text-body-sm focus:ring-1 focus:ring-offhanded-deep outline-none text-neutral-900"
-                  placeholder="Promo Code"
-                />
-                <button className="bg-offhanded-deep/10 text-offhanded-deep px-4 py-2 rounded-lg text-body-sm font-sans font-bold hover:bg-offhanded-deep/20 transition-all">
-                  Apply
-                </button>
-              </div>
-            </div>
-
-            {/* Trust Badge */}
-            <div className="mt-12 p-4 rounded-xl border border-offhanded-deep/10 bg-background-light/50">
+            <div className="mt-10 p-4 rounded-xl border border-offhanded-deep/10 bg-background-light/50">
               <div className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-brand-600">
                   {isWorkshopCheckout ? "verified_user" : "package_2"}
@@ -435,7 +311,7 @@ function CheckoutContent() {
                   <p className="font-sans text-[11px] opacity-60 leading-relaxed mt-1 text-neutral-600">
                     {isWorkshopCheckout
                       ? "Your spot is reserved instantly upon payment. All materials and refreshments included."
-                      : "Offhanded offsets 100% of carbon emissions from every shipment to protect our planet."}
+                      : "Offhanded offsets 100% of carbon emissions from every shipment."}
                   </p>
                 </div>
               </div>
@@ -449,13 +325,11 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-brand-50">
-          <p className="font-sans">Loading checkout...</p>
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-brand-50">
+        <p className="font-sans">Loading checkout...</p>
+      </div>
+    }>
       <CheckoutContent />
     </Suspense>
   );

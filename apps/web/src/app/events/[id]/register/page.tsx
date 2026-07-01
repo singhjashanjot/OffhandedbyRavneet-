@@ -8,7 +8,10 @@ import { Header } from "@/components";
 import { formatPrice, formatDate } from "@/data/workshops";
 import { createBrowserClient } from "@supabase/ssr";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { createBooking } from "@/lib/actions/bookings";
+
+declare global {
+  interface Window { Razorpay: any; }
+}
 
 /* ========================================
    REGISTER PAGE — Refactored with new design
@@ -26,7 +29,6 @@ export default function RegisterPage({
   const [tickets, setTickets] = useState(1);
   const [countryCode, setCountryCode] = useState("+91");
   const [step, setStep] = useState<"register" | "payment" | "success">("register");
-  const [paymentMethod, setPaymentMethod] = useState("gpay");
   const [isProcessing, setIsProcessing] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingResult, setBookingResult] = useState<any>(null);
@@ -113,31 +115,92 @@ export default function RegisterPage({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const loadRazorpayScript = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
   const handlePayment = async () => {
+    if (isProcessing) return;
     setIsProcessing(true);
     setBookingError(null);
 
     try {
-      const result = await createBooking({
-        workshopId: workshop.id,
-        tickets,
-        attendeeName: formData.name || user?.user_metadata?.full_name || "Guest",
-        attendeeEmail: formData.email || user?.email || "",
-        attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
-      });
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error("Payment gateway failed to load. Please refresh and try again.");
 
-      if (result.error) {
-        setBookingError(result.error);
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workshopId: workshop.id, tickets }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.error || "Failed to create order.");
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Offhanded",
+        description: orderData.description,
+        order_id: orderData.orderId,
+        prefill: {
+          name: formData.name || user?.user_metadata?.full_name || "",
+          email: formData.email || user?.email || "",
+          contact: formData.phone ? `${countryCode}${formData.phone}` : "",
+        },
+        theme: { color: "#2c3627" },
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                paymentId: orderData.paymentId,
+                workshopId: workshop.id,
+                tickets,
+                attendeeName: formData.name || user?.user_metadata?.full_name || "",
+                attendeeEmail: formData.email || user?.email || "",
+                attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed.");
+
+            setBookingResult({ bookingId: verifyData.bookingId, totalAmount: orderData.amount / 100 });
+            setIsProcessing(false);
+            setStep("success");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err: any) {
+            setBookingError(err.message || "Verification failed. Please contact support.");
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setBookingError("Payment was cancelled. You can try again.");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (res: any) => {
         setIsProcessing(false);
-      } else {
-        setBookingResult(result);
-        setIsProcessing(false);
-        setStep("success");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    } catch {
-      setBookingError("Something went wrong. Please try again.");
+        setBookingError(`Payment failed: ${res.error?.description || "Please try again."}`);
+      });
+      rzp.open();
+    } catch (err: any) {
       setIsProcessing(false);
+      setBookingError(err.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -314,100 +377,15 @@ export default function RegisterPage({
                 </div>
               </div>
 
-              {/* Right: Payment Method */}
+              {/* Right: Payment */}
               <div className="lg:col-span-7">
                 <div className="bg-white/40 backdrop-blur-sm border border-[#2c3627]/10 rounded-xl p-8 shadow-sm">
-                  <h2 className="text-[#2c3627] text-xl font-bold mb-8">Select Payment Method</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    {/* Google Pay */}
-                    <label className="relative cursor-pointer group">
-                      <input
-                        checked={paymentMethod === "gpay"}
-                        onChange={() => setPaymentMethod("gpay")}
-                        className="peer sr-only"
-                        name="payment"
-                        type="radio"
-                      />
-                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
-                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors">account_balance_wallet</span>
-                          <div className="size-4 rounded-full border-2 border-[#2c3627]/20 peer-checked:border-[#2c3627] flex items-center justify-center">
-                            <div className="size-2 rounded-full bg-[#2c3627] opacity-0 peer-checked:opacity-100"></div>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="font-bold text-[#2c3627]">Google Pay</p>
-                          <p className="text-xs text-[#2c3627]/50">Fast &amp; Secure</p>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Paytm */}
-                    <label className="relative cursor-pointer group">
-                      <input
-                        checked={paymentMethod === "paytm"}
-                        onChange={() => setPaymentMethod("paytm")}
-                        className="peer sr-only"
-                        name="payment"
-                        type="radio"
-                      />
-                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
-                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors">payments</span>
-                          <div className="size-4 rounded-full border-2 border-[#2c3627]/20 flex items-center justify-center">
-                            <div className="size-2 rounded-full bg-[#2c3627] opacity-0 peer-checked:opacity-100"></div>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="font-bold text-[#2c3627]">Paytm</p>
-                          <p className="text-xs text-[#2c3627]/50">UPI / Wallet</p>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Credit/Debit Card */}
-                    <label className="relative cursor-pointer group md:col-span-2">
-                      <input
-                        checked={paymentMethod === "card"}
-                        onChange={() => setPaymentMethod("card")}
-                        className="peer sr-only"
-                        name="payment"
-                        type="radio"
-                      />
-                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors text-3xl">credit_card</span>
-                          <div>
-                            <p className="font-bold text-[#2c3627]">Credit / Debit Card</p>
-                            <p className="text-xs text-[#2c3627]/50">Visa, Mastercard, Amex</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 opacity-60">
-                          <span className="material-symbols-outlined">credit_card_heart</span>
-                          <span className="material-symbols-outlined">contactless</span>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Pay at Event */}
-                    <label className="relative cursor-pointer group md:col-span-2">
-                      <input
-                        checked={paymentMethod === "event"}
-                        onChange={() => setPaymentMethod("event")}
-                        className="peer sr-only"
-                        name="payment"
-                        type="radio"
-                      />
-                      <div className="p-5 border-2 border-[#2c3627]/5 rounded-xl bg-white peer-checked:border-[#2c3627] peer-checked:bg-[#2c3627]/5 transition-all flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="material-symbols-outlined text-[#2c3627]/40 group-hover:text-[#2c3627]/70 transition-colors text-3xl">event_available</span>
-                          <div>
-                            <p className="font-bold text-[#2c3627]">Pay at Event</p>
-                            <p className="text-xs text-[#2c3627]/50">Check-in and pay on site</p>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
+                  <h2 className="text-[#2c3627] text-xl font-bold mb-4">Payment</h2>
+                  <div className="mb-8 p-5 border border-[#2c3627]/10 rounded-xl bg-[#F9F9E8] text-center">
+                    <span className="material-symbols-outlined text-3xl text-[#2c3627]/30 mb-2 block">credit_card</span>
+                    <p className="text-[#2c3627]/70 text-sm leading-relaxed">
+                      All payment methods — Cards, UPI, NetBanking, Wallets — are handled securely by <strong>Razorpay</strong>.
+                    </p>
                   </div>
 
                   {/* Error message */}
