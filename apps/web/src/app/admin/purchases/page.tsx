@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: "Purchases | Offhanded Admin",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPurchasesPage() {
   const { payments, bookings, orders } = await getAdminPurchases();
 

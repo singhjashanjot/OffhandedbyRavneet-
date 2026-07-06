@@ -1,41 +1,33 @@
-import { getAdminWorkshops } from "@/lib/queries/admin";
+import { getAdminProducts } from "@/lib/queries/admin";
 import { formatPrice, formatDate } from "@/data/workshops";
-import { WorkshopActions } from "@/components/admin/WorkshopActions";
-import { AdminWorkshopBulkActions } from "@/components/admin/AdminWorkshopBulkActions";
+import { ProductActions } from "@/components/admin/ProductActions";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-/* ========================================
-   ADMIN — WORKSHOPS MANAGEMENT
-======================================== */
-
 export const metadata: Metadata = {
-  title: "Manage Workshops | Offhanded Admin",
+  title: "Manage Products | Offhanded Admin",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminWorkshopsPage() {
-  const workshops = await getAdminWorkshops();
+export default async function AdminProductsPage() {
+  const products = await getAdminProducts();
 
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-serif text-neutral-900">Workshops</h1>
+          <h1 className="text-2xl font-serif text-neutral-900">Products</h1>
           <p className="text-sm text-neutral-500 mt-1">
-            {workshops.length} workshops total
+            {products.length} products total
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <AdminWorkshopBulkActions />
-          <Link
-            href="/admin/workshops/new"
-            className="px-5 py-2.5 bg-[#1B3022] text-white rounded-xl font-medium text-sm hover:bg-[#2a4a35] transition-colors flex items-center gap-2"
-          >
-            <span className="text-lg">+</span> Add Workshop
-          </Link>
-        </div>
+        <Link
+          href="/admin/products/new"
+          className="px-5 py-2.5 bg-[#1B3022] text-white rounded-xl font-medium text-sm hover:bg-[#2a4a35] transition-colors flex items-center gap-2"
+        >
+          <span className="text-lg">+</span> Add Product
+        </Link>
       </div>
 
       <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
@@ -43,16 +35,16 @@ export default async function AdminWorkshopsPage() {
           <thead className="bg-neutral-50 border-b border-neutral-200">
             <tr>
               <th className="text-left px-6 py-4 font-medium text-neutral-600">
-                Workshop
+                Product
               </th>
               <th className="text-left px-6 py-4 font-medium text-neutral-600">
-                Date
+                Category
               </th>
               <th className="text-left px-6 py-4 font-medium text-neutral-600">
                 Price
               </th>
               <th className="text-left px-6 py-4 font-medium text-neutral-600">
-                Slots
+                Stock
               </th>
               <th className="text-left px-6 py-4 font-medium text-neutral-600">
                 Status
@@ -63,75 +55,79 @@ export default async function AdminWorkshopsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100">
-            {workshops.map((workshop: any) => (
+            {products.map((product: any) => (
               <tr
-                key={workshop.id}
+                key={product.id}
                 className="hover:bg-neutral-50 transition-colors"
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    {workshop.image && (
-                      <img
-                        src={workshop.image}
-                        alt={workshop.title}
-                        className="w-10 h-10 rounded-lg object-cover"
-                      />
-                    )}
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-400">📦</div>
+                      )}
+                    </div>
                     <div>
                       <p className="font-medium text-neutral-900">
-                        {workshop.title}
+                        {product.name}
                       </p>
-                      <p className="text-xs text-neutral-400">
-                        {workshop.venue_name || "No venue"}
+                      <p className="text-xs text-neutral-400 truncate max-w-[200px]">
+                        {product.description || "No description"}
                       </p>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-neutral-600">
-                  {workshop.date ? formatDate(workshop.date) : "TBD"}
+                  {product.category || "General"}
                 </td>
                 <td className="px-6 py-4 text-neutral-600">
-                  {formatPrice(workshop.price)}
+                  {formatPrice(product.price)}
                 </td>
                 <td className="px-6 py-4">
                   <span
                     className={`font-medium ${
-                      workshop.available_slots <= 5
+                      product.stock_quantity <= 5
                         ? "text-red-600"
                         : "text-neutral-700"
                     }`}
                   >
-                    {workshop.available_slots} / {workshop.total_slots}
+                    {product.stock_quantity} left
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      workshop.is_active
+                      product.is_active
                         ? "bg-green-50 text-green-700"
                         : "bg-neutral-100 text-neutral-500"
                     }`}
                   >
-                    {workshop.is_active ? "Active" : "Inactive"}
+                    {product.is_active ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <WorkshopActions workshopId={workshop.id} />
+                  <ProductActions productId={product.id} isActive={product.is_active} />
                 </td>
               </tr>
             ))}
-            {workshops.length === 0 && (
+            {products.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
                   className="px-6 py-12 text-center text-neutral-400"
                 >
-                  No workshops yet.{" "}
+                  No products yet.{" "}
                   <Link
-                    href="/admin/workshops/new"
+                    href="/admin/products/new"
                     className="text-[#1B3022] underline"
                   >
-                    Create your first workshop
+                    Create your first product
                   </Link>
                 </td>
               </tr>

@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/queries/admin";
 
 const adminNav = [
   { name: "Dashboard", href: "/admin", icon: "📊" },
+  { name: "Products", href: "/admin/products", icon: "📦" },
   { name: "Workshops", href: "/admin/workshops", icon: "🎨" },
   { name: "Bookings", href: "/admin/bookings", icon: "📋" },
   { name: "Purchases", href: "/admin/purchases", icon: "💰" },

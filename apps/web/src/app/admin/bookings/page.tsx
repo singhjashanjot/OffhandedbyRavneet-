@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: "Bookings | Offhanded Admin",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminBookingsPage() {
   const bookings = await getAdminBookings();
 
@@ -115,9 +117,17 @@ export default async function AdminBookingsPage() {
                         value={booking.payments?.status || "—"}
                       />
                       <DetailRow
-                        label="Remarks"
-                        value={booking.remarks || booking.special_requests || booking.notes}
-                        fallback="No remarks"
+                        label="Payment Mode"
+                        value={booking.payments?.provider_payment_id ? `Razorpay (Netbanking/UPI)` : "—"}
+                      />
+                      <DetailRow
+                        label="Payment ID"
+                        value={booking.payments?.provider_payment_id || "—"}
+                      />
+                      <DetailRow
+                        label="Remarks / Info"
+                        value={booking.remarks || booking.special_requests || booking.notes || booking.attendee_notes}
+                        fallback="No remarks provided by user"
                       />
                       <DetailRow
                         label="Age / Age Group"

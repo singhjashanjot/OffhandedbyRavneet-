@@ -15,6 +15,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
+import {
+  sendBookingConfirmationToCustomer,
+  sendNewBookingAlertToOwner,
+  sendProductConfirmationToCustomer,
+  sendProductAlertToOwner,
+} from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -247,6 +253,75 @@ export async function POST(request: NextRequest) {
       }
 
       bookingId = booking.id;
+
+      /* --------------------------------------------------
+         Send emails — fire and forget but with visible logs
+      -------------------------------------------------- */
+      const finalName = attendeeName || user.user_metadata?.full_name || "Guest";
+      const finalEmail = attendeeEmail || user.email || "";
+
+      console.log(`[email] Attempting to send emails for booking ${booking.id} to ${finalEmail}`);
+
+      // Fetch workshop details then send both emails
+      supabase
+        .from("workshops")
+        .select("title, date, start_time, end_time, venue_name")
+        .eq("id", payment.reference_id)
+        .single()
+        .then(({ data: ws, error: wsErr }) => {
+          if (wsErr) {
+            console.error("[email] Failed to fetch workshop details:", wsErr);
+          }
+
+          const workshopDate = ws?.date
+            ? new Date(ws.date).toLocaleDateString("en-IN", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "Asia/Kolkata",
+              })
+            : "";
+          const workshopTime = ws?.start_time
+            ? `${ws.start_time}${ws.end_time ? ` – ${ws.end_time}` : ""}`
+            : "";
+          const workshopTitle = ws?.title || "Workshop";
+          const workshopVenue = ws?.venue_name || "";
+
+          console.log(`[email] Workshop fetched: "${workshopTitle}", sending to customer: ${finalEmail}`);
+
+          // Customer confirmation
+          sendBookingConfirmationToCustomer({
+            customerName: finalName,
+            customerEmail: finalEmail,
+            workshopTitle,
+            workshopDate,
+            workshopTime,
+            workshopVenue,
+            tickets: ticketCount,
+            amountPaid: payment.amount,
+            bookingId: booking.id,
+          })
+            .then((r) => console.log("[email] ✅ Customer confirmation sent:", r))
+            .catch((e) => console.error("[email] ❌ Customer confirmation FAILED:", e));
+
+          // Owner alert
+          sendNewBookingAlertToOwner({
+            customerName: finalName,
+            customerEmail: finalEmail,
+            customerPhone: attendeePhone,
+            workshopTitle,
+            workshopDate,
+            workshopTime,
+            tickets: ticketCount,
+            amountPaid: payment.amount,
+            bookingId: booking.id,
+          })
+            .then((r) => console.log("[email] ✅ Owner alert sent:", r))
+            .catch((e) => console.error("[email] ❌ Owner alert FAILED:", e));
+        })
+        .catch((e) => console.error("[email] Workshop fetch failed:", e));
+
     } else if (payment.purpose === "PRODUCT") {
       const qty = Number(quantity) || 1;
 
@@ -256,11 +331,15 @@ export async function POST(request: NextRequest) {
         .insert({
           user_id: user.id,
           payment_id: paymentId,
-          status: "CONFIRMED",
+          status: "PENDING",
           total_amount: payment.amount,
         })
         .select("id")
         .single();
+
+      if (orderError) {
+        console.error("[verify] orderError creating product order:", orderError);
+      }
 
       if (!orderError && order) {
         // Create order item
@@ -277,6 +356,33 @@ export async function POST(request: NextRequest) {
             quantity: qty,
             price_snapshot: product.price,
           });
+
+          // Send product emails
+          const finalName = user.user_metadata?.full_name || "Guest";
+          const finalEmail = user.email || "";
+          console.log(`[email] Sending product emails for order ${order.id} to ${finalEmail}`);
+
+          sendProductConfirmationToCustomer({
+            customerName: finalName,
+            customerEmail: finalEmail,
+            productName: product.name,
+            quantity: qty,
+            amountPaid: payment.amount,
+            orderId: order.id,
+          })
+            .then((r) => console.log("[email] ✅ Product customer email sent:", r))
+            .catch((e) => console.error("[email] ❌ Product customer email FAILED:", e));
+
+          sendProductAlertToOwner({
+            customerName: finalName,
+            customerEmail: finalEmail,
+            productName: product.name,
+            quantity: qty,
+            amountPaid: payment.amount,
+            orderId: order.id,
+          })
+            .then((r) => console.log("[email] ✅ Product owner alert sent:", r))
+            .catch((e) => console.error("[email] ❌ Product owner alert FAILED:", e));
         }
         bookingId = order.id;
       }

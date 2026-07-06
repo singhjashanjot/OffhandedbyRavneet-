@@ -123,10 +123,14 @@ export async function getAdminUsers() {
 export async function getAdminPurchases() {
   const supabase = createClient();
 
-  // Fetch all payments with related user profiles
+  // Fetch all user profiles first to map them manually
+  const { data: users } = await supabase.from("users_profile").select("id, full_name, email");
+  const userMap = new Map((users || []).map(u => [u.id, u]));
+
+  // Fetch all payments
   const { data: payments, error: paymentsError } = await supabase
     .from("payments")
-    .select("*, users_profile:user_id(full_name, email)")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -138,7 +142,7 @@ export async function getAdminPurchases() {
   // Fetch bookings with workshop titles
   const { data: bookings, error: bookingsError } = await supabase
     .from("bookings")
-    .select("*, workshops(title, date), users_profile:user_id(full_name, email), payments(amount, status, provider_order_id, provider_payment_id)")
+    .select("*, workshops(title, date), payments(amount, status, provider_order_id, provider_payment_id)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -149,7 +153,7 @@ export async function getAdminPurchases() {
   // Fetch product orders with items
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
-    .select("*, users_profile:user_id(full_name, email), payments(amount, status), order_items(quantity, price_snapshot, products(name))")
+    .select("*, payments(amount, status), order_items(quantity, price_snapshot, products(name))")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -157,9 +161,30 @@ export async function getAdminPurchases() {
     console.error("Error fetching orders:", ordersError);
   }
 
+  // Map users to the records manually
+  const mapUser = (record: any) => ({
+    ...record,
+    users_profile: userMap.get(record.user_id) || null
+  });
+
   return {
-    payments: payments || [],
-    bookings: bookings || [],
-    orders: orders || [],
+    payments: (payments || []).map(mapUser),
+    bookings: (bookings || []).map(mapUser),
+    orders: (orders || []).map(mapUser),
   };
+}
+
+/** Get all products for admin management */
+export async function getAdminProducts() {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching admin products:", error);
+    return [];
+  }
+  return data;
 }
