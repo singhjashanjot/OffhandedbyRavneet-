@@ -263,12 +263,14 @@ export async function POST(request: NextRequest) {
       console.log(`[email] Attempting to send emails for booking ${booking.id} to ${finalEmail}`);
 
       // Fetch workshop details then send both emails
-      supabase
-        .from("workshops")
-        .select("title, date, start_time, end_time, venue_name")
-        .eq("id", payment.reference_id)
-        .single()
-        .then(({ data: ws, error: wsErr }) => {
+      const sendEmails = async () => {
+        try {
+          const { data: ws, error: wsErr } = await supabase
+            .from("workshops")
+            .select("title, date, start_time, end_time, venue_name")
+            .eq("id", payment.reference_id)
+            .single();
+
           if (wsErr) {
             console.error("[email] Failed to fetch workshop details:", wsErr);
           }
@@ -319,8 +321,12 @@ export async function POST(request: NextRequest) {
           })
             .then((r) => console.log("[email] ✅ Owner alert sent:", r))
             .catch((e) => console.error("[email] ❌ Owner alert FAILED:", e));
-        })
-        .catch((e) => console.error("[email] Workshop fetch failed:", e));
+        } catch (e) {
+          console.error("[email] Workshop fetch failed:", e);
+        }
+      };
+
+      sendEmails();
 
     } else if (payment.purpose === "PRODUCT") {
       const qty = Number(quantity) || 1;
