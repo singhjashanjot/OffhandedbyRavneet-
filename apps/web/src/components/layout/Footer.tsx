@@ -25,7 +25,7 @@ const socialLinks = [
   { label: "WhatsApp", href: "https://wa.me/919876543210", external: true },
 ];
 
-export function Footer() {
+export function Footer({ transparent = false }: { transparent?: boolean } = {}) {
   const [email, setEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -40,7 +40,7 @@ export function Footer() {
   return (
     <footer
       className="relative overflow-hidden"
-      style={{ backgroundColor: "#FFFFF1" }}
+      style={{ backgroundColor: transparent ? "transparent" : "#FFFFF1" }}
     >
       <div className="px-6 md:px-12 lg:px-20 pt-20 pb-8">
         {/* ─── Top Section: Heading + Nav Columns ─── */}
