@@ -10,7 +10,7 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key_for_build");
 
 const FROM = `${process.env.FROM_NAME || "Offhanded by Ravneet"} <${process.env.FROM_EMAIL || "onboarding@resend.dev"}>`;
 const REPLY_TO = process.env.REPLY_TO_EMAIL || process.env.OWNER_EMAIL || "";
