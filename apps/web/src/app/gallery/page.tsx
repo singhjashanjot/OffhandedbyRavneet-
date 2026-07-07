@@ -18,17 +18,13 @@ export const metadata: Metadata = {
 export default async function GalleryPage() {
   const galleryItems = await getGalleryItems();
 
-  const categories = Array.from(
-    new Set(galleryItems.map((item: any) => item.category).filter(Boolean))
-  );
-
   return (
     <>
       <Header />
 
       <main className="pt-24">
         {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-20 py-16 lg:py-24">
+        <section className="max-w-7xl mx-auto px-6 lg:px-20 pt-16 lg:pt-24 pb-6 lg:pb-8">
           <h2 className="font-display font-light text-5xl lg:text-7xl tracking-tight text-[#2D3E30] mb-6">
             Moments in Motion
           </h2>
@@ -42,7 +38,6 @@ export default async function GalleryPage() {
         {/* Gallery Grid */}
         <GalleryGrid
           items={galleryItems}
-          categories={categories as string[]}
         />
       </main>
 

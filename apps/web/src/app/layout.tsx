@@ -100,10 +100,11 @@ export const viewport: Viewport = {
 
 import SmoothScrolling from "@/components/SmoothScrolling";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { GlobalBackground } from "@/components";
 
 /* ========================================
    ROOT LAYOUT
-======================================== */
+========================================================= */
 
 export default function RootLayout({
   children,
@@ -115,10 +116,15 @@ export default function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-screen bg-[#fffff1] antialiased overflow-x-hidden">
-        <AuthProvider>
-          <SmoothScrolling>{children}</SmoothScrolling>
-        </AuthProvider>
+      <body className="min-h-screen bg-[#FFFFF0] antialiased overflow-x-hidden relative">
+        <GlobalBackground />
+
+        {/* Content Wrapper */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <AuthProvider>
+            <SmoothScrolling>{children}</SmoothScrolling>
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );

@@ -21,7 +21,6 @@ interface GalleryItem {
 
 interface GalleryGridProps {
   items: GalleryItem[];
-  categories: string[];
 }
 
 /*
@@ -117,16 +116,10 @@ const DUMMY_IMAGES = [
   "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1770430209/Offhanded_transparent_Black_1_tkvdt8.png"
 ];
 
-export function GalleryGrid({ items, categories }: GalleryGridProps) {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-
-  const filteredItems = activeCategory
-    ? items.filter((item) => item.category === activeCategory)
-    : items;
-
+export function GalleryGrid({ items }: GalleryGridProps) {
   // Generate 60 items by merging DB items and mock items
   const gridItems = useMemo(() => {
-    const list = [...filteredItems];
+    const list = [...items];
     let imgIdx = 0;
     while (list.length < DUMMY_IMAGES.length) {
       list.push({
@@ -140,40 +133,11 @@ export function GalleryGrid({ items, categories }: GalleryGridProps) {
       imgIdx++;
     }
     return list;
-  }, [filteredItems]);
+  }, [items]);
 
   return (
     <>
-      {/* Category Filters */}
-      {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 lg:px-20 mb-16">
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setActiveCategory(null)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                activeCategory === null
-                  ? "bg-[#2D3E30] text-[#fffff1]"
-                  : "bg-brand-100 text-[#2D3E30] hover:bg-brand-200"
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === cat
-                    ? "bg-[#2D3E30] text-[#fffff1]"
-                    : "bg-brand-100 text-[#2D3E30] hover:bg-brand-200"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+
 
       {/* Pinterest-style Masonry Gallery Grid */}
       <section className="max-w-7xl mx-auto px-6 lg:px-20 pb-20">

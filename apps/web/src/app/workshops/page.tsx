@@ -18,7 +18,7 @@ export default async function WorkshopsPage() {
 
   return (
     <>
-      <div className="bg-background-light min-h-screen text-offhanded-deep selection:bg-offhanded-forest selection:text-white overflow-x-hidden font-display">
+      <div className="bg-transparent min-h-screen text-offhanded-deep selection:bg-offhanded-forest selection:text-white overflow-x-hidden font-display">
         <Header />
 
         <main className="relative pt-24 min-h-screen">
@@ -95,7 +95,7 @@ export default async function WorkshopsPage() {
 
                 return (
                   <Link key={workshop.id} href={`/events/${workshop.id}`} className="block">
-                    <div className="bg-[#FFFFF5] border border-offhanded-forest/[0.08] rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-700 group flex flex-col h-full">
+                    <div className="bg-[#EEE7D0] border border-offhanded-forest/[0.08] rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-700 group flex flex-col h-full">
                       <div className="aspect-[16/10] overflow-hidden rounded-xl mb-6">
                         <img
                           alt={workshop.title}
@@ -104,39 +104,39 @@ export default async function WorkshopsPage() {
                         />
                       </div>
                       <div className="flex flex-col flex-grow px-2">
-                        <h3 className="text-xl md:text-2xl font-display font-light text-offhanded-forest mb-8 tracking-tight">
+                        <h3 className="text-2xl md:text-3xl font-display font-light text-offhanded-forest mb-6 tracking-tight">
                           {workshop.title}
                         </h3>
-                        <div className="grid grid-cols-2 gap-y-8 mb-10 border-t border-offhanded-forest/[0.05] pt-8">
+                        <div className="grid grid-cols-2 gap-y-6 mb-8 border-t border-offhanded-forest/[0.05] pt-6">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] uppercase tracking-[0.2em] text-offhanded-forest/40">
+                            <span className="text-[11px] uppercase tracking-[0.2em] text-offhanded-forest/40">
                               Date
                             </span>
-                            <span className="text-[12px] uppercase tracking-wider font-medium text-offhanded-forest">
+                            <span className="text-[14px] uppercase tracking-wider font-medium text-offhanded-forest">
                               {formatDate(workshop.date)}
                             </span>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] uppercase tracking-[0.2em] text-offhanded-forest/40">
+                            <span className="text-[11px] uppercase tracking-[0.2em] text-offhanded-forest/40">
                               Venue
                             </span>
-                            <span className="text-[12px] uppercase tracking-wider font-medium text-offhanded-forest">
+                            <span className="text-[14px] uppercase tracking-wider font-medium text-offhanded-forest">
                               {workshop.venue_name}
                             </span>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] uppercase tracking-[0.2em] text-offhanded-forest/40">
+                            <span className="text-[11px] uppercase tracking-[0.2em] text-offhanded-forest/40">
                               Duration
                             </span>
-                            <span className="text-[12px] uppercase tracking-wider font-medium text-offhanded-forest">
+                            <span className="text-[14px] uppercase tracking-wider font-medium text-offhanded-forest">
                               {workshop.duration || "2 Hours"}
                             </span>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] uppercase tracking-[0.2em] text-offhanded-forest/40">
+                            <span className="text-[11px] uppercase tracking-[0.2em] text-offhanded-forest/40">
                               Price
                             </span>
-                            <span className="text-[12px] uppercase tracking-wider font-medium text-offhanded-forest">
+                            <span className="text-[14px] uppercase tracking-wider font-medium text-offhanded-forest">
                               {formatPrice(workshop.price)}
                             </span>
                           </div>
@@ -145,13 +145,13 @@ export default async function WorkshopsPage() {
                         {/* Availability Badge */}
                         {workshop.available_slots <= 5 && (
                           <div className="mb-4">
-                            <span className="text-[10px] uppercase tracking-wider font-semibold text-red-600 bg-red-50 px-2 py-1 rounded">
+                            <span className="text-[12px] uppercase tracking-wider font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded">
                               Only {workshop.available_slots} spots left
                             </span>
                           </div>
                         )}
 
-                        <button className="mt-auto w-full py-4 border border-offhanded-forest/20 text-offhanded-forest uppercase text-[10px] tracking-[0.4em] font-semibold hover:bg-offhanded-forest hover:text-white transition-all duration-500 rounded-lg">
+                        <button className="mt-auto w-full py-4 border border-offhanded-forest/20 text-offhanded-forest uppercase text-[12px] tracking-[0.4em] font-semibold hover:bg-offhanded-forest hover:text-white transition-all duration-500 rounded-lg">
                           Reserve Seat
                         </button>
                       </div>

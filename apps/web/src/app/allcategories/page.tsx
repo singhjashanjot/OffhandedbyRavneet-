@@ -282,7 +282,7 @@ export default function AllCategoriesPage() {
   };
 
   return (
-    <div className={`${newsreader.variable} font-display min-h-screen bg-[#fffff1] text-[#2D3E30] selection:bg-[#B2C0AD]/30 relative overflow-x-hidden`}>
+    <div className={`${newsreader.variable} font-display min-h-screen bg-transparent text-[#2D3E30] selection:bg-[#B2C0AD]/30 relative overflow-x-hidden`}>
       {/* Background Decorative Elements */}
       <div className="absolute top-20 left-10 w-64 h-64 rotate-12 pointer-events-none opacity-15 z-0">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">

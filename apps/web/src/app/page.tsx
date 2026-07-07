@@ -75,7 +75,7 @@ export default async function HomePage() {
         <CTASection />
       </main>
 
-      <Footer />
+      <Footer transparent={false} />
     </>
   );
 }

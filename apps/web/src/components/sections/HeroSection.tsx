@@ -34,12 +34,10 @@ Slow down, explore, and rediscover the joy of creating in a calm, supportive spa
                 Explore Workshops
               </ClickPowerUp>
               <ClickPowerUp 
-                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest"
+                onClick={() => router.push("/gallery")}
+                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest "
               >
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-xl">play_circle</span>
-                  Workshop Visuals
-                </div>
+                Workshop Visuals
               </ClickPowerUp>
             </div>
           </div>

@@ -82,7 +82,7 @@ export default function RegisterPage({
     return (
       <>
         <Header />
-        <main className="bg-[#fffff1] min-h-screen pt-24 pb-20 flex items-center justify-center">
+        <main className="bg-transparent min-h-screen pt-24 pb-20 flex items-center justify-center">
           <div className="animate-pulse text-neutral-400">Loading…</div>
         </main>
       </>
@@ -223,7 +223,7 @@ export default function RegisterPage({
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-[#fffff1] pt-32 pb-12 px-4 md:px-0 flex items-center justify-center">
+        <main className="min-h-screen bg-transparent pt-32 pb-12 px-4 md:px-0 flex items-center justify-center">
           <div className="bg-[#F9F9E8] p-10 md:p-12 rounded-2xl border border-[#2c3627]/10 text-center max-w-lg w-full mx-4">
             <div className="w-20 h-20 bg-[#B2C0AD]/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🎉</span>
@@ -284,7 +284,7 @@ export default function RegisterPage({
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-[#fffff1] pt-32 pb-12 px-4 md:px-0">
+        <main className="min-h-screen bg-transparent pt-32 pb-12 px-4 md:px-0">
           <div className="max-w-[900px] mx-auto">
             {/* Back to registration */}
             <button
@@ -452,7 +452,7 @@ export default function RegisterPage({
         }
       `}</style>
 
-      <main className="min-h-screen bg-[#fffff1] line-art-bg pt-32 pb-12 px-4 md:px-0">
+      <main className="min-h-screen bg-transparent line-art-bg pt-32 pb-12 px-4 md:px-0">
         <div className="max-w-[1100px] mx-auto flex flex-col flex-1">
           
           {/* Centered Title */}

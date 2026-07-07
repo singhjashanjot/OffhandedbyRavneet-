@@ -25,7 +25,7 @@ export default function ExperiencePage({
   return (
     <>
       <Header />
-      <main className="flex flex-col items-center w-full bg-[#fffff1] text-[#141514] overflow-x-hidden transition-colors duration-300">
+      <main className="flex flex-col items-center w-full bg-transparent text-[#141514] overflow-x-hidden transition-colors duration-300">
         
         {/* HERO SECTION */}
         <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center px-6 py-24 overflow-hidden">

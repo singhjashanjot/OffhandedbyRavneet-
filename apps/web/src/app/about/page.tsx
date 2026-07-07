@@ -23,43 +23,10 @@ const stats = [
 
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen bg-[#FFFFF0] overflow-hidden">
-      {/* Background Layers replicating offhandedbyravneet.com */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Canvas Texture Background */}
-        <div 
-          className="absolute inset-0 opacity-[0.72] bg-cover bg-center bg-no-repeat mix-blend-multiply"
-          style={{ backgroundImage: 'url("/about-bg.jpg")' }}
-        />
-        
-        {/* Vignette Overlay */}
-        <div 
-          className="absolute inset-0"
-          style={{ background: 'radial-gradient(80% 60%, transparent 40%, rgba(255, 255, 230, 0.55) 100%)' }}
-        />
+    <>
+      <Header />
 
-        {/* Breathing Sage Green Orbs */}
-        {/* Top-Left Orb */}
-        <div 
-          className="absolute top-[-12%] left-[-8%] w-[480px] h-[480px] rounded-full bg-[#B9C4B1] opacity-60 blur-[40px] animate-orb-breathe-1"
-        />
-        
-        {/* Bottom-Right Orb */}
-        <div 
-          className="absolute bottom-[-10%] right-[-6%] w-[520px] h-[520px] rounded-full bg-[#B9C4B1] opacity-60 blur-[48px] animate-orb-breathe-2"
-        />
-
-        {/* Middle-Right Orb */}
-        <div 
-          className="absolute top-[40%] right-[8%] w-[240px] h-[240px] rounded-full bg-[#B9C4B1] opacity-55 blur-[30px] animate-orb-breathe-3"
-        />
-      </div>
-
-      {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
-
-        <main className="flex-1 flex flex-col items-center pt-24">
+      <main className="flex-1 flex flex-col items-center pt-24">
         {/* Hero Section */}
         <section className="max-w-5xl w-full px-6 py-20 lg:py-32 flex flex-col items-center text-center">
           <span className="uppercase tracking-[0.3em] text-xs font-bold text-brand-300 mb-6">
@@ -76,7 +43,7 @@ export default function AboutPage() {
             {/* Who We Are */}
             <div className="flex flex-col md:flex-row items-start gap-8 md:gap-24">
               <div className="w-full md:w-1/3 pt-2">
-                <span className="text-brand-300 text-sm font-bold uppercase tracking-widest mb-4 block">
+                <span className="text-[#2D3E30] text-sm font-bold uppercase tracking-widest mb-4 block">
                   01 — Who We Are
                 </span>
                 <h3 className="font-display text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#2D3E30]">
@@ -94,7 +61,7 @@ export default function AboutPage() {
             {/* What We Do */}
             <div className="flex flex-col md:flex-row-reverse items-start gap-8 md:gap-24">
               <div className="w-full md:w-1/3 pt-2">
-                <span className="text-brand-300 text-sm font-bold uppercase tracking-widest mb-4 block text-left md:text-right">
+                <span className="text-[#2D3E30] text-sm font-bold uppercase tracking-widest mb-4 block text-left md:text-right">
                   02 — What We Do
                 </span>
                 <h3 className="font-display text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#2D3E30] text-left md:text-right">
@@ -115,7 +82,7 @@ export default function AboutPage() {
             {/* Philosophy */}
             <div className="flex flex-col md:flex-row items-start gap-8 md:gap-24">
               <div className="w-full md:w-1/3 pt-2">
-                <span className="text-brand-300 text-sm font-bold uppercase tracking-widest mb-4 block">
+                <span className="text-[#2D3E30] text-sm font-bold uppercase tracking-widest mb-4 block">
                   03 — Philosophy
                 </span>
                 <h3 className="font-display text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#2D3E30]">
@@ -213,8 +180,7 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <Footer transparent />
-      </div>
-    </div>
+      <Footer />
+    </>
   );
 }

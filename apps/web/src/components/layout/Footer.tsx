@@ -25,7 +25,7 @@ const socialLinks = [
   { label: "WhatsApp", href: "https://wa.me/919876543210", external: true },
 ];
 
-export function Footer({ transparent = false }: { transparent?: boolean } = {}) {
+export function Footer({ transparent = true }: { transparent?: boolean } = {}) {
   const [email, setEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
