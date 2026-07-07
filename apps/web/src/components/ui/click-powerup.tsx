@@ -78,7 +78,7 @@ export const ClickPowerUp = ({
       ))}
 
       <button
-        className={`relative overflow-hidden px-10 py-3 font-medium uppercase bg-[#2D3E30] ${className || ""}`}
+        className={`relative overflow-hidden px-6 py-2.5 sm:px-10 sm:py-3 font-medium uppercase bg-[#2D3E30] ${className || ""}`}
       >
         {/* Arm panel */}
         <motion.span

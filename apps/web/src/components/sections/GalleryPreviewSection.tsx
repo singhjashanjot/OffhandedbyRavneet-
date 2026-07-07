@@ -15,52 +15,52 @@ const galleryImages = [
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic",
     alt: "Art moment",
-    className: "h-64",
+    className: "h-40 sm:h-64",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_2774_zvfqy7.heic",
     alt: "Creative workshop",
-    className: "h-96",
+    className: "h-48 sm:h-96",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_0627_mqmp5e.heic",
     alt: "Making art",
-    className: "h-80",
+    className: "h-44 sm:h-80",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636490/IMG_6955_qypkz3.heic",
     alt: "Offhanded session",
-    className: "h-72",
+    className: "h-40 sm:h-72",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636489/IMG_5521_qdzurw.heic",
     alt: "Workshop creation",
-    className: "h-[26rem]",
+    className: "h-56 sm:h-[26rem]",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636488/IMG_5556_swiq5g.heic",
     alt: "Artistic moment",
-    className: "h-[18rem]",
+    className: "h-44 sm:h-[18rem]",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636486/IMG_1987_hb6ecj.heic",
     alt: "Creativity",
-    className: "h-[22rem]",
+    className: "h-48 sm:h-[22rem]",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636417/IMG_8310_yojqor.heic",
     alt: "Clay craft",
-    className: "h-72",
+    className: "h-40 sm:h-72",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636416/IMG_8301_b3dqiw.heic",
     alt: "Pottery moment",
-    className: "h-96",
+    className: "h-48 sm:h-96",
   },
   {
     src: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636390/IMG_8297_ivhitf.heic",
     alt: "Workshop memory",
-    className: "h-80",
+    className: "h-44 sm:h-80",
   },
 ];
 
@@ -74,7 +74,7 @@ export function GalleryPreviewSection() {
         />
 
         {/* Pinterest-style Masonry Grid */}
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
           {galleryImages.map((image, index) => (
             <motion.div
               key={index}

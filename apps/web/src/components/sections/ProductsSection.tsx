@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -76,6 +76,17 @@ function CustomOrderCard() {
 
 export function ProductsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [useParallax, setUseParallax] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setUseParallax(window.innerWidth >= 1024);
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -85,8 +96,46 @@ export function ProductsSection() {
   const y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], ["80vh", "0vh", "0vh", "-20vh"]);
   const opacity = useTransform(scrollYProgress, [0, 0.15, 0.3, 0.7, 1], [0, 1, 1, 0.8, 0]);
 
+  if (!useParallax) {
+    return (
+      <div ref={sectionRef} className="relative h-auto bg-[#2B3B2E]">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-8 md:pb-12">
+          {/* Decorative blur circles */}
+          <div className="absolute top-10 right-10 w-48 h-48 rounded-full bg-white/[0.04] blur-3xl pointer-events-none" />
+          <div className="absolute bottom-16 left-8 w-64 h-64 rounded-full bg-white/[0.03] blur-3xl pointer-events-none" />
+
+          {/* Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4">
+            <div className="max-w-lg">
+              <span className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] mb-2 block">Volume 01 — Permanent Collection</span>
+              <h2 className="text-3xl md:text-4xl font-display font-light tracking-tight text-white">Our Products</h2>
+              <p className="text-white/50 text-base font-light mt-1">Curated art supplies for your creative journey.</p>
+            </div>
+            <Link href="/products" className="inline-flex items-center gap-2 text-white/80 font-medium hover:text-white transition-all group text-sm">
+              <span className="uppercase tracking-widest">View all products</span>
+              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1 text-base">east</span>
+            </Link>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Custom Order Section */}
+          <CustomOrderCard />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={sectionRef} className="relative h-[100vh]">
+    <div 
+      ref={sectionRef} 
+      className="relative h-[100vh]"
+    >
       {/* Sticky green section */}
       <motion.div
         style={{ y }}

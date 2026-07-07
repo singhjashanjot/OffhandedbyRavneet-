@@ -29,7 +29,7 @@ function Card({ href, image, label, title, description, aspect }: CardProps) {
           : "aspect-[4/3]";
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark border border-stone-100 dark:border-stone-800 block ${aspectClass} mb-4`}
+      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark border border-stone-100 dark:border-stone-800 block ${aspectClass} mb-4 break-inside-avoid`}
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
@@ -40,8 +40,8 @@ function Card({ href, image, label, title, description, aspect }: CardProps) {
         <span className="text-white/60 text-[10px] uppercase tracking-[0.2em] mb-2 font-bold">
           {label}
         </span>
-        <h3 className="text-white text-2xl font-display font-light mb-2">{title}</h3>
-        <p className="text-white/50 text-sm font-light leading-relaxed max-w-xs transition-opacity group-hover:text-white/80">
+        <h3 className="text-white text-2xl font-display font-light mb-0 sm:mb-2">{title}</h3>
+        <p className="hidden sm:block text-white/50 text-sm font-light leading-relaxed max-w-xs transition-opacity group-hover:text-white/80">
           {description}
         </p>
       </div>
@@ -128,10 +128,6 @@ export function CategoriesSection() {
     },
   ];
 
-  const col1 = cards.slice(0, 3);
-  const col2 = cards.slice(3, 6);
-  const col3 = cards.slice(6, 9);
-
   return (
     <section className="px-4 py-10 md:py-14 lg:px-8 max-w-7xl mx-auto w-full" id="categories">
       <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
@@ -154,14 +150,10 @@ export function CategoriesSection() {
         </Link>
       </div>
 
-      {/* 3-column masonry grid with balanced columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[col1, col2, col3].map((column, colIndex) => (
-          <div key={colIndex} className="flex flex-col">
-            {column.map((card) => (
-              <Card key={card.title} {...card} />
-            ))}
-          </div>
+      {/* 2-column masonry grid on mobile, 3-column on desktop */}
+      <div className="columns-2 lg:columns-3 gap-4">
+        {cards.map((card) => (
+          <Card key={card.title} {...card} />
         ))}
       </div>
     </section>

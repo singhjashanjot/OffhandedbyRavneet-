@@ -209,19 +209,24 @@ export function Footer({ transparent = true }: { transparent?: boolean } = {}) {
 
         {/* ─── Bottom: Large Brand Name ─── */}
         <div className="mt-16 lg:mt-24 w-full overflow-hidden pt-4">
-          <h2
-            className="font-display font-light leading-none select-none text-center whitespace-nowrap"
-            style={{
-              fontSize: "clamp(4rem, 10.5vw, 16rem)",
-              letterSpacing: "-0.09em",
-              color: "#3D4E40",
-              opacity: 0.5,
-              transform: "scaleY(1.1)",
-              transformOrigin: "bottom",
-            }}
-          >
-            offhandedbyravneet
-          </h2>
+          <svg viewBox="0 0 1000 130" className="w-full h-auto select-none pointer-events-none" aria-label="offhandedbyravneet">
+            <text
+              x="50%"
+              y="75%"
+              textAnchor="middle"
+              className="font-display font-light"
+              style={{
+                fontSize: "100px",
+                letterSpacing: "-0.09em",
+                fill: "#3D4E40",
+                opacity: 0.5,
+                transform: "scaleY(1.1)",
+                transformOrigin: "center",
+              }}
+            >
+              offhandedbyravneet
+            </text>
+          </svg>
         </div>
       </div>
     </footer>

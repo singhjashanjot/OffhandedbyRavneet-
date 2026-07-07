@@ -26,16 +26,16 @@ export function HeroSection() {
             </h1>
             <p className="text-primary/80 text-base md:text-lg font-light max-w-lg mb-8 leading-relaxed">
 Slow down, explore, and rediscover the joy of creating in a calm, supportive space.            </p>
-            <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto mt-4">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center justify-center mt-4">
               <ClickPowerUp 
                 onClick={() => router.push("/workshops")}
-                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest "
+                className="w-48 sm:w-auto flex items-center justify-center text-xs sm:text-sm tracking-wider sm:tracking-widest"
               >
                 Explore Workshops
               </ClickPowerUp>
               <ClickPowerUp 
                 onClick={() => router.push("/gallery")}
-                className="w-full sm:w-auto flex items-center justify-center text-sm tracking-widest "
+                className="w-48 sm:w-auto flex items-center justify-center text-xs sm:text-sm tracking-wider sm:tracking-widest"
               >
                 Workshop Visuals
               </ClickPowerUp>
