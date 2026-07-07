@@ -100,7 +100,7 @@ export const viewport: Viewport = {
 
 import SmoothScrolling from "@/components/SmoothScrolling";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { GlobalBackground } from "@/components";
+import { GlobalBackground, PaintbrushCursor } from "@/components";
 
 /* ========================================
    ROOT LAYOUT
@@ -118,6 +118,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#FFFFF0] antialiased overflow-x-hidden relative">
         <GlobalBackground />
+        <PaintbrushCursor />
 
         {/* Content Wrapper */}
         <div className="relative z-10 flex flex-col min-h-screen">
