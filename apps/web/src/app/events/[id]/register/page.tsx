@@ -8,6 +8,7 @@ import { Header } from "@/components";
 import { formatPrice, formatDate } from "@/data/workshops";
 import { createBrowserClient } from "@supabase/ssr";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { createOfflineBooking } from "@/lib/actions/bookings";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -32,6 +33,7 @@ export default function RegisterPage({
   const [isProcessing, setIsProcessing] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingResult, setBookingResult] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "offline">("online");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -137,7 +139,11 @@ export default function RegisterPage({
       const orderRes = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workshopId: workshop.id, tickets }),
+        body: JSON.stringify({
+          workshopId: workshop.id,
+          tickets,
+          paymentOption: paymentMethod === "offline" ? "partial" : "full"
+        }),
       });
       const orderData = await orderRes.json();
       if (!orderRes.ok) throw new Error(orderData.error || "Failed to create order.");
@@ -204,6 +210,40 @@ export default function RegisterPage({
     }
   };
 
+  const handleOfflineBooking = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    setBookingError(null);
+
+    try {
+      const res = await createOfflineBooking({
+        workshopId: workshop.id,
+        tickets,
+        attendeeName: formData.name || user?.user_metadata?.full_name || "",
+        attendeeEmail: formData.email || user?.email || "",
+        attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
+        age: formData.age || undefined,
+        remarks: formData.remarks || undefined,
+      });
+
+      if (!res.success) {
+        throw new Error(res.error || "Failed to create offline booking.");
+      }
+
+      setBookingResult({
+        bookingId: res.bookingId,
+        totalAmount: res.grandTotal,
+        isOffline: true,
+      });
+      setIsProcessing(false);
+      setStep("success");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err: any) {
+      setBookingError(err.message || "Something went wrong. Please try again.");
+      setIsProcessing(false);
+    }
+  };
+
   const timeDisplay = workshop.start_time
     ? `${workshop.start_time}${workshop.end_time ? ` – ${workshop.end_time}` : ""}`
     : "";
@@ -215,8 +255,8 @@ export default function RegisterPage({
   const maxGuests = Math.min(workshop.available_slots || 10, 10);
 
   const totalAmount = workshop.price * tickets;
-  const taxAmount = Math.round(totalAmount * 0.18);
-  const grandTotal = totalAmount + taxAmount;
+  const taxAmount = 0;
+  const grandTotal = totalAmount;
 
   // Success / Booking Confirmed view
   if (step === "success") {
@@ -245,8 +285,18 @@ export default function RegisterPage({
                   </p>
                 )}
                 <p className="text-[#2c3627]">
-                  <strong>Amount:</strong> {formatPrice(grandTotal)}
+                  <strong>Total Amount:</strong> {formatPrice(grandTotal)}
                 </p>
+                {paymentMethod === "offline" ? (
+                  <>
+                    <p className="text-[#2c3627]">
+                      <strong>Paid Online (60%):</strong> {formatPrice(Math.round(grandTotal * 0.60))}
+                    </p>
+                    <p className="text-[#2c3627]">
+                      <strong>Remaining (40% - Pay at Workshop):</strong> {formatPrice(grandTotal - Math.round(grandTotal * 0.60))}
+                    </p>
+                  </>
+                ) : null}
                 <p className="text-[#2c3627]">
                   <strong>Tickets:</strong> {tickets}
                 </p>
@@ -357,7 +407,7 @@ export default function RegisterPage({
                   </div>
                 </div>
 
-                {/* Payment Summary — moved here with matching bg */}
+                {/* Payment Summary */}
                 <div className="rounded-xl p-6 border bg-[#F9F9E8] border-[#2c3627]/10">
                   <h3 className="text-[#2c3627] text-lg font-bold mb-6">Payment Summary</h3>
                   <div className="flex flex-col gap-4">
@@ -365,13 +415,23 @@ export default function RegisterPage({
                       <span className="text-[#2c3627]/60">{formatPrice(workshop.price)} × {tickets} {tickets === 1 ? "ticket" : "tickets"}</span>
                       <span className="font-medium text-[#2c3627]">{formatPrice(totalAmount)}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#2c3627]/60">GST (18%)</span>
-                      <span className="font-medium text-[#2c3627]">{formatPrice(taxAmount)}</span>
-                    </div>
+                    {paymentMethod === "offline" && (
+                      <div className="flex justify-between text-sm border-t border-[#2c3627]/5 pt-3">
+                        <span className="text-[#2c3627]/60">60% Partial Payment (Due Now)</span>
+                        <span className="font-medium text-[#2c3627]">{formatPrice(Math.round(grandTotal * 0.60))}</span>
+                      </div>
+                    )}
+                    {paymentMethod === "offline" && (
+                      <div className="flex justify-between text-xs text-[#2c3627]/60 italic">
+                        <span>40% Remaining (Pay at Workshop)</span>
+                        <span>{formatPrice(grandTotal - Math.round(grandTotal * 0.60))}</span>
+                      </div>
+                    )}
                     <div className="border-t border-[#2c3627]/10 pt-4 flex justify-between items-baseline">
-                      <span className="text-[#2c3627] text-lg font-bold">Total</span>
-                      <span className="text-[#2c3627] text-3xl font-black">{formatPrice(grandTotal)}</span>
+                      <span className="text-[#2c3627] text-lg font-bold">Total Due Now</span>
+                      <span className="text-[#2c3627] text-3xl font-black">
+                        {formatPrice(paymentMethod === "offline" ? Math.round(grandTotal * 0.60) : grandTotal)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -380,13 +440,64 @@ export default function RegisterPage({
               {/* Right: Payment */}
               <div className="lg:col-span-7">
                 <div className="bg-white/40 backdrop-blur-sm border border-[#2c3627]/10 rounded-xl p-8 shadow-sm">
-                  <h2 className="text-[#2c3627] text-xl font-bold mb-4">Payment</h2>
-                  <div className="mb-8 p-5 border border-[#2c3627]/10 rounded-xl bg-[#F9F9E8] text-center">
-                    <span className="material-symbols-outlined text-3xl text-[#2c3627]/30 mb-2 block">credit_card</span>
-                    <p className="text-[#2c3627]/70 text-sm leading-relaxed">
-                      All payment methods — Cards, UPI, NetBanking, Wallets — are handled securely by <strong>Razorpay</strong>.
-                    </p>
+                  <h2 className="text-[#2c3627] text-xl font-bold mb-6">Choose Payment Method</h2>
+
+                  {/* Payment Method Selector */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    {/* Pay Online Option */}
+                    <label className={`flex flex-col p-4 rounded-xl border cursor-pointer transition-all ${
+                      paymentMethod === "online"
+                        ? "bg-[#2c3627]/5 border-[#2c3627] ring-1 ring-[#2c3627]"
+                        : "bg-white/50 border-[#2c3627]/10 hover:bg-[#2c3627]/5"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          checked={paymentMethod === "online"}
+                          onChange={() => setPaymentMethod("online")}
+                          className="text-[#2c3627] focus:ring-[#2c3627] h-4 w-4"
+                        />
+                        <span className="text-sm font-bold text-[#2c3627]">Pay Online</span>
+                      </div>
+                      <span className="text-xs text-[#2c3627]/60 leading-relaxed">Pay securely via Cards, UPI, NetBanking, Wallets</span>
+                    </label>
+
+                    {/* Pay at Workshop Option */}
+                    <label className={`flex flex-col p-4 rounded-xl border cursor-pointer transition-all ${
+                      paymentMethod === "offline"
+                        ? "bg-[#2c3627]/5 border-[#2c3627] ring-1 ring-[#2c3627]"
+                        : "bg-white/50 border-[#2c3627]/10 hover:bg-[#2c3627]/5"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          checked={paymentMethod === "offline"}
+                          onChange={() => setPaymentMethod("offline")}
+                          className="text-[#2c3627] focus:ring-[#2c3627] h-4 w-4"
+                        />
+                        <span className="text-sm font-bold text-[#2c3627]">Pay at Workshop (60% Partial)</span>
+                      </div>
+                      <span className="text-xs text-[#2c3627]/60 leading-relaxed">Pay 60% online now to secure booking, and 40% on arrival</span>
+                    </label>
                   </div>
+
+                  {paymentMethod === "online" ? (
+                    <div className="mb-8 p-5 border border-[#2c3627]/10 rounded-xl bg-[#F9F9E8] text-center">
+                      <span className="material-symbols-outlined text-3xl text-[#2c3627]/30 mb-2 block">credit_card</span>
+                      <p className="text-[#2c3627]/70 text-sm leading-relaxed">
+                        All payment methods — Cards, UPI, NetBanking, Wallets — are handled securely by <strong>Razorpay</strong>.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mb-8 p-5 border border-[#2c3627]/10 rounded-xl bg-[#F9F9E8] text-center">
+                      <span className="material-symbols-outlined text-3xl text-[#2c3627]/30 mb-2 block">storefront</span>
+                      <p className="text-[#2c3627]/70 text-sm leading-relaxed">
+                        Secure your spot today by making a <strong>60% partial payment of {formatPrice(Math.round(grandTotal * 0.60))} now</strong>. The remaining <strong>40% ({formatPrice(grandTotal - Math.round(grandTotal * 0.60))})</strong> can be paid via UPI or Cash when you arrive at the workshop.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Error message */}
                   {bookingError && (
@@ -395,7 +506,7 @@ export default function RegisterPage({
                     </div>
                   )}
 
-                  {/* Pay Button */}
+                  {/* Action Button */}
                   <button
                     onClick={handlePayment}
                     disabled={isProcessing}
@@ -411,14 +522,17 @@ export default function RegisterPage({
                       </>
                     ) : (
                       <>
-                        Pay Total: {formatPrice(grandTotal)}
+                        {paymentMethod === "offline"
+                          ? `Pay 60% Now: ${formatPrice(Math.round(grandTotal * 0.60))}`
+                          : `Pay Online: ${formatPrice(grandTotal)}`}
                         <span className="material-symbols-outlined">arrow_forward</span>
                       </>
                     )}
                   </button>
+
                   <p className="text-center text-[#2c3627]/40 text-xs mt-6 flex items-center justify-center gap-1">
                     <span className="material-symbols-outlined text-sm">lock</span>
-                    Encrypted and secure transaction
+                    {paymentMethod === "online" ? "Encrypted and secure transaction" : "Secure reservation verification"}
                   </p>
                 </div>
 

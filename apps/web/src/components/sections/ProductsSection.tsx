@@ -1,74 +1,95 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 /* ========================================
-   PRODUCTS SECTION
-   Parallax slide-up reveal + custom order CTA.
-======================================== */
+   PRODUCTS SECTION — CURATION REVEAL
+   Parallax slide-up reveal + Curation state.
+ ======================================== */
 
-const featuredProducts = [
-  { id: 1, name: "Artisan Mug Set", category: "Handmade Ceramics", price: "1,299", image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80" },
-  { id: 2, name: "Premium Paint Kit", category: "Art Kits", price: "2,499", image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&q=80" },
-  { id: 3, name: "Gold Fine Liners", category: "Fine Liners", price: "899", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&q=80" },
-  { id: 4, name: "Linen Sketchbook", category: "Sketchbooks", price: "1,099", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" },
-  { id: 5, name: "Punch Needle Frame", category: "Art Kits", price: "1,899", image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&q=80" },
-  { id: 6, name: "Ceramic Vase Set", category: "Handmade Ceramics", price: "2,199", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" },
-];
-
-function ProductCard({ product }: { product: (typeof featuredProducts)[0] }) {
-  return (
-    <div className="group flex flex-col">
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-white/10">
-        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `url("${product.image}")` }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
-      <div className="mt-3 flex flex-col gap-0.5">
-        <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold">{product.category}</p>
-        <h3 className="font-display text-white text-sm font-medium leading-snug">{product.name}</h3>
-        <span className="font-sans text-white/80 text-sm font-semibold mt-0.5">₹{product.price}</span>
-      </div>
-    </div>
-  );
-}
-
-function CustomOrderCard() {
-  const [description, setDescription] = useState("");
+function CurationCard() {
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); if (description.trim()) { setSubmitted(true); setDescription(""); setTimeout(() => setSubmitted(false), 4000); } };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      setSubmitted(true);
+      setEmail("");
+    }
+  };
 
   return (
-    <div className="relative mt-10 md:mt-14">
-      <div className="relative max-w-xl mx-auto text-center">
-        <div className="flex justify-center mb-5">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-white/70 text-2xl">palette</span>
-            </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-[10px]">brush</span>
-            </div>
+    <div className="relative mt-8 md:mt-12 bg-white/[0.02] border border-white/10 rounded-3xl p-8 md:p-16 text-center max-w-4xl mx-auto overflow-hidden backdrop-blur-md shadow-2xl">
+      {/* Decorative background glow */}
+      <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-white/[0.02] blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-white/[0.02] blur-3xl pointer-events-none" />
+
+      {/* Floating Art Icons Animation */}
+      <div className="relative flex justify-center mb-8">
+        <div className="relative w-24 h-24 flex items-center justify-center">
+          {/* Animated pulsing outer ring */}
+          <div className="absolute inset-0 rounded-full border border-white/10 animate-pulse" style={{ animationDuration: "3s" }} />
+          <div className="absolute inset-2 rounded-full border border-white/5 animate-ping" style={{ animationDuration: "3s" }} />
+          
+          {/* Paintbrush Container */}
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center shadow-inner relative z-10 hover:rotate-12 transition-transform duration-500">
+            <span className="material-symbols-outlined text-white/70 text-3xl animate-bounce" style={{ animationDuration: "3s" }}>palette</span>
+          </div>
+          
+          {/* Floating paintbrush */}
+          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shadow-lg border border-white/20">
+            <span className="material-symbols-outlined text-white text-base">brush</span>
           </div>
         </div>
-        <h3 className="text-xl md:text-2xl font-display font-light text-white mb-2">Have Something Unique in Mind?</h3>
-        <p className="text-white/50 text-sm font-light max-w-md mx-auto leading-relaxed">Want a custom-made piece? Share your vision and our artists will bring it to life within 24 hours.</p>
-        <form onSubmit={handleSubmit} className="relative max-w-lg mx-auto mt-4">
-          <div className="relative bg-white/10 border border-white/20 rounded-2xl overflow-hidden focus-within:border-white/40 transition-all">
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your dream piece..." rows={2} className="w-full bg-transparent text-white placeholder-white/30 px-4 pt-3 pb-2 text-sm font-light leading-relaxed resize-none focus:outline-none" />
-            <div className="flex items-center justify-between px-3 pb-2">
-              <span className="text-white/30 text-[10px] flex items-center gap-1"><span className="material-symbols-outlined text-xs">schedule</span> 24hr response</span>
-              <button type="submit" disabled={!description.trim()} className="bg-white text-[#2B3B2E] px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/90 disabled:opacity-40 transition-all">Send</button>
-            </div>
+      </div>
+
+      <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] mb-3 block">Studio Curations</span>
+      <h3 className="text-2xl md:text-3xl font-display font-light text-white mb-4 leading-tight">
+        Handcrafted Ceramics & Fine Art Tools
+      </h3>
+      <p className="text-white/60 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed mb-8">
+        We are currently curating and handcrafting a select range of our finest art supplies, signature sketchbooks, and artisan ceramics directly in our studio. Keep an eye out — beautiful things are in the making!
+      </p>
+
+      {/* Form / Success state */}
+      <div className="max-w-md mx-auto relative z-10">
+        {!submitted ? (
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              required
+              placeholder="Enter your email for launch updates"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/15 rounded-xl px-5 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/35 transition-all"
+            />
+            <button
+              type="submit"
+              className="bg-white text-[#2B3B2E] px-6 py-3 rounded-xl text-sm font-semibold hover:bg-neutral-100 active:scale-95 transition-all shadow-md uppercase tracking-wider text-[11px]"
+            >
+              Notify Me
+            </button>
+          </form>
+        ) : (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <p className="text-green-400 text-sm font-semibold flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-lg">check_circle</span>
+              You are on the list!
+            </p>
+            <p className="text-white/50 text-xs mt-1.5 font-light">
+              We'll send you an exclusive invite the moment our studio curations launch.
+            </p>
           </div>
-          {submitted && <p className="mt-3 text-green-400 text-xs flex items-center justify-center gap-1"><span className="material-symbols-outlined text-sm">check_circle</span> We will reach out soon!</p>}
-        </form>
-        <div className="flex items-center justify-center gap-5 mt-6 text-white/30 text-[9px] uppercase tracking-widest">
-          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">verified</span> Expert Artists</span>
-          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">local_shipping</span> Pan-India</span>
-          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">handshake</span> With Love</span>
-        </div>
+        )}
+      </div>
+
+      {/* Footer Features */}
+      <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mt-12 pt-8 border-t border-white/5 text-white/40 text-[10px] uppercase tracking-widest font-semibold">
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm text-white/50">brush</span> Custom Orders</span>
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm text-white/50">verified</span> Ceramic Art</span>
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm text-white/50">schedule</span> Launching Soon</span>
       </div>
     </div>
   );
@@ -99,7 +120,7 @@ export function ProductsSection() {
   if (!useParallax) {
     return (
       <div ref={sectionRef} className="relative h-auto bg-[#2B3B2E]">
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-8 md:pb-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-16 md:pb-24">
           {/* Decorative blur circles */}
           <div className="absolute top-10 right-10 w-48 h-48 rounded-full bg-white/[0.04] blur-3xl pointer-events-none" />
           <div className="absolute bottom-16 left-8 w-64 h-64 rounded-full bg-white/[0.03] blur-3xl pointer-events-none" />
@@ -111,21 +132,10 @@ export function ProductsSection() {
               <h2 className="text-3xl md:text-4xl font-display font-light tracking-tight text-white">Our Products</h2>
               <p className="text-white/50 text-base font-light mt-1">Curated art supplies for your creative journey.</p>
             </div>
-            <Link href="/products" className="inline-flex items-center gap-2 text-white/80 font-medium hover:text-white transition-all group text-sm">
-              <span className="uppercase tracking-widest">View all products</span>
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1 text-base">east</span>
-            </Link>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          {/* Custom Order Section */}
-          <CustomOrderCard />
+          {/* Curation Card */}
+          <CurationCard />
         </div>
       </div>
     );
@@ -143,7 +153,7 @@ export function ProductsSection() {
       >
         <motion.div
           style={{ opacity }}
-          className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-8 md:pb-12"
+          className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-28 pb-16 md:pb-24"
         >
           {/* Decorative blur circles */}
           <div className="absolute top-10 right-10 w-48 h-48 rounded-full bg-white/[0.04] blur-3xl pointer-events-none" />
@@ -156,21 +166,10 @@ export function ProductsSection() {
               <h2 className="text-3xl md:text-4xl font-display font-light tracking-tight text-white">Our Products</h2>
               <p className="text-white/50 text-base font-light mt-1">Curated art supplies for your creative journey.</p>
             </div>
-            <Link href="/products" className="inline-flex items-center gap-2 text-white/80 font-medium hover:text-white transition-all group text-sm">
-              <span className="uppercase tracking-widest">View all products</span>
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1 text-base">east</span>
-            </Link>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          {/* Custom Order Section */}
-          <CustomOrderCard />
+          {/* Curation Card */}
+          <CurationCard />
         </motion.div>
       </motion.div>
     </div>

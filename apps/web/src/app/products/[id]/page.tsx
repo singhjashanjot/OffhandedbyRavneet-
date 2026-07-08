@@ -44,7 +44,7 @@ export default async function ProductDetailPage({
   const mainImage =
     product.product_images?.[0]?.url ||
     product.image ||
-    "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80";
+    "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic";
 
   return (
     <>
@@ -214,7 +214,7 @@ export default async function ProductDetailPage({
                 const relImage =
                   relProduct.product_images?.[0]?.url ||
                   relProduct.image ||
-                  "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80";
+                  "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic";
 
                 return (
                   <Link

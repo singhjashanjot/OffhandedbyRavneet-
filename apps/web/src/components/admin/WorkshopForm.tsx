@@ -1,3 +1,4 @@
+
 "use client";
 
 /* ========================================
@@ -9,6 +10,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { createWorkshop, updateWorkshop } from "@/lib/actions/admin-workshops";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { uploadWorkshopImage } from "@/lib/storage";
 
 interface WorkshopData {
   id: string;
@@ -111,6 +113,95 @@ function IsActiveToggle({ defaultChecked }: { defaultChecked: boolean }) {
   );
 }
 
+function TimeInput12h({
+  label,
+  name,
+  defaultValue,
+  required = false
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  required?: boolean;
+}) {
+  const initial = (() => {
+    if (!defaultValue) return { hour: "", minute: "", ampm: "PM" };
+    const parts = defaultValue.split(":");
+    const h = parseInt(parts[0] || "0", 10);
+    const m = parts[1] || "00";
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return { hour: String(displayH), minute: m.slice(0, 2), ampm };
+  })();
+
+  const [hour, setHour] = useState(initial.hour);
+  const [minute, setMinute] = useState(initial.minute);
+  const [ampm, setAmpm] = useState(initial.ampm);
+  const [value, setValue] = useState(defaultValue || "");
+
+  useEffect(() => {
+    if (!hour && !minute) {
+      setValue("");
+      return;
+    }
+    const h = hour || "12";
+    const m = minute || "00";
+    let hNum = parseInt(h, 10);
+    if (isNaN(hNum)) hNum = 12;
+    if (hNum < 1) hNum = 1;
+    if (hNum > 12) hNum = 12;
+
+    if (ampm === "PM" && hNum < 12) hNum += 12;
+    if (ampm === "AM" && hNum === 12) hNum = 0;
+
+    const hStr = String(hNum).padStart(2, "0");
+    const mStr = String(parseInt(m, 10) || 0).padStart(2, "0");
+    setValue(`${hStr}:${mStr}`);
+  }, [hour, minute, ampm]);
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-neutral-600 mb-1.5 uppercase tracking-wider">{label}</label>
+      <input type="hidden" name={name} value={value} />
+      <div className="flex gap-2 items-center">
+        <input
+          type="number"
+          min={1}
+          max={12}
+          placeholder="HH"
+          value={hour}
+          required={required}
+          onChange={(e) => setHour(e.target.value)}
+          className="w-16 px-3 py-2 border border-neutral-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] bg-white text-neutral-800"
+        />
+        <span className="text-neutral-400 font-bold">:</span>
+        <input
+          type="number"
+          min={0}
+          max={59}
+          placeholder="MM"
+          value={minute}
+          required={required}
+          onChange={(e) => {
+            let val = e.target.value;
+            if (val.length > 2) val = val.slice(0, 2);
+            setMinute(val);
+          }}
+          className="w-16 px-3 py-2 border border-neutral-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] bg-white text-neutral-800"
+        />
+        <select
+          value={ampm}
+          onChange={(e) => setAmpm(e.target.value)}
+          className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] bg-white text-neutral-800 cursor-pointer"
+        >
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
   // Build bound action for edit mode
   const boundUpdate = workshop
@@ -133,6 +224,28 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   const updateImageUrl = (index: number, value: string) =>
     setImageUrls((prev) => prev.map((url, i) => (i === index ? value : url)));
+
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
+  const handleFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingIndex(index);
+    try {
+      const folderId = workshop?.id || `new-workshop-${Date.now()}`;
+      const { url, error } = await uploadWorkshopImage(folderId, file);
+      if (error) {
+        alert("Upload failed: " + error);
+      } else if (url) {
+        updateImageUrl(index, url);
+      }
+    } catch (err: any) {
+      alert("Error uploading file: " + err.message);
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
 
   const inputClass =
     "w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] transition-all bg-white";
@@ -266,26 +379,18 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
             />
           </div>
 
-          <div>
-            <label className={labelClass}>Start Time *</label>
-            <input
-              name="start_time"
-              type="time"
-              required
-              defaultValue={workshop?.start_time}
-              className={inputClass}
-            />
-          </div>
+          <TimeInput12h
+            label="Start Time *"
+            name="start_time"
+            required
+            defaultValue={workshop?.start_time}
+          />
 
-          <div>
-            <label className={labelClass}>End Time</label>
-            <input
-              name="end_time"
-              type="time"
-              defaultValue={workshop?.end_time || ""}
-              className={inputClass}
-            />
-          </div>
+          <TimeInput12h
+            label="End Time"
+            name="end_time"
+            defaultValue={workshop?.end_time || ""}
+          />
 
           <div>
             <label className={labelClass}>Duration</label>
@@ -408,39 +513,62 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {imageUrls.map((url, index) => (
-            <div key={index} className="flex gap-3 items-start">
-              <div className="flex-1">
-                <input
-                  name={`image_url_${index}`}
-                  type="url"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className={inputClass}
-                />
+            <div key={index} className="flex flex-col md:flex-row gap-3 items-start p-4 border border-neutral-100 rounded-xl bg-neutral-50/50">
+              <div className="flex-1 w-full space-y-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Image URL</label>
+                  <input
+                    name={`image_url_${index}`}
+                    type="url"
+                    value={url}
+                    onChange={(e) => updateImageUrl(index, e.target.value)}
+                    placeholder="https://res.cloudinary.com/..."
+                    className={inputClass}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400 font-medium">Or</span>
+                  <label className="relative cursor-pointer px-3 py-1.5 bg-white border border-neutral-200 hover:border-neutral-300 rounded-lg text-xs font-semibold text-neutral-600 shadow-sm transition-all hover:bg-neutral-50 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {uploadingIndex === index ? "Uploading..." : "Upload from Device"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingIndex !== null}
+                      onChange={(e) => handleFileChange(index, e)}
+                    />
+                  </label>
+                </div>
               </div>
-              {url && (
-                <img
-                  src={url}
-                  alt={`Preview ${index + 1}`}
-                  className="w-12 h-12 rounded-lg object-cover border border-neutral-200"
-                  onError={(e) =>
-                    ((e.target as HTMLImageElement).style.display = "none")
-                  }
-                />
-              )}
-              {imageUrls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeImageField(index)}
-                  className="text-red-500 hover:text-red-700 text-lg mt-2"
-                  title="Remove"
-                >
-                  ✕
-                </button>
-              )}
+
+              <div className="flex items-center gap-3 shrink-0 self-end md:self-center">
+                {url && (
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-16 h-16 rounded-lg object-cover border border-neutral-200 bg-white"
+                    onError={(e) =>
+                      ((e.target as HTMLImageElement).style.display = "none")
+                    }
+                  />
+                )}
+                {imageUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeImageField(index)}
+                    className="text-red-500 hover:text-red-700 w-8 h-8 rounded-lg border border-red-100 bg-white hover:bg-red-50 flex items-center justify-center transition-colors text-sm shadow-sm"
+                    title="Remove"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

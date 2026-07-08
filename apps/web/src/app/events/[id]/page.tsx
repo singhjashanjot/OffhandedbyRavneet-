@@ -61,8 +61,17 @@ export default async function EventDetailsPage({
   const related = relatedWorkshops || [];
 
   // Format time display
+  const formatTimeStr = (timeStr: string) => {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(":");
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return `${displayH}:${minutes} ${ampm}`;
+  };
+
   const timeDisplay = workshop.start_time
-    ? `${workshop.start_time}${workshop.end_time ? ` – ${workshop.end_time}` : ""}`
+    ? `${formatTimeStr(workshop.start_time)}${workshop.end_time ? ` – ${formatTimeStr(workshop.end_time)}` : ""}`
     : "";
 
   return (
@@ -116,12 +125,14 @@ export default async function EventDetailsPage({
             {/* About */}
             <section>
               <h2 className="text-2xl font-display font-light text-neutral-900 mb-4">About the Session</h2>
-              <p className="text-neutral-600 text-lg font-light leading-relaxed mb-4">
+              <div className="text-neutral-600 text-base md:text-lg font-light leading-relaxed whitespace-pre-line">
                 {workshop.long_description || workshop.description}
-              </p>
-              <p className="text-neutral-600 text-lg font-light leading-relaxed">
-                Guided by our expert instructors, this session is designed to help you disconnect from the digital world and reconnect with your creativity. Whether you&apos;re a beginner or an experienced artist, you&apos;ll find joy in the process of making.
-              </p>
+              </div>
+              {!workshop.long_description?.includes("Guided by our expert instructors") && (
+                <p className="text-neutral-600 text-base md:text-lg font-light leading-relaxed mt-6">
+                  Guided by our expert instructors, this session is designed to help you disconnect from the digital world and reconnect with your creativity. Whether you&apos;re a beginner or an experienced artist, you&apos;ll find joy in the process of making.
+                </p>
+              )}
             </section>
 
             {/* What to Expect */}
@@ -180,7 +191,7 @@ export default async function EventDetailsPage({
                 <div className="shrink-0 relative">
                   <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm">
                     <Image
-                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80"
+                      src="https://res.cloudinary.com/daoho0jwj/image/upload/v1778867803/IMG_8389_zpdwk5.jpg"
                       alt={workshop.instructor}
                       fill
                       className="object-cover"

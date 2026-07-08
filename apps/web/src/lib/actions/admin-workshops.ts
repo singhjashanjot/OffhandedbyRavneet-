@@ -280,6 +280,17 @@ export async function deleteWorkshop(
   try {
     const { supabase } = await verifyAdmin();
 
+    // Get workshop date first
+    const { data: workshop, error: fetchErr } = await supabase
+      .from("workshops")
+      .select("date, title")
+      .eq("id", workshopId)
+      .single();
+
+    if (fetchErr) {
+      return { error: `Failed to fetch workshop details: ${fetchErr.message}` };
+    }
+
     // Check for ANY existing bookings (not just CONFIRMED) to avoid FK violations
     const { count, error: countError } = await supabase
       .from("bookings")
@@ -289,7 +300,20 @@ export async function deleteWorkshop(
     const hasBookings = !countError && count !== null && count > 0;
 
     if (hasBookings) {
-      // Soft-delete: deactivate workshop, preserve booking data
+      // Check if workshop is in the future
+      const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' } as const;
+      const formatter = new Intl.DateTimeFormat('en-CA', options);
+      const today = formatter.format(new Date());
+
+      const isUpcoming = workshop?.date ? workshop.date >= today : true;
+
+      if (isUpcoming) {
+        return { 
+          error: `Cannot delete or deactivate "${workshop?.title || "workshop"}": It is an upcoming event (scheduled for ${workshop?.date || "TBD"}) with existing bookings.`
+        };
+      }
+
+      // Soft-delete for past workshops: deactivate workshop, preserve booking data
       const { error } = await supabase
         .from("workshops")
         .update({ is_active: false })

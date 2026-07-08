@@ -1,6 +1,7 @@
 import { getAdminPurchases } from "@/lib/queries/admin";
 import { formatPrice } from "@/data/workshops";
 import type { Metadata } from "next";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 
 /* ========================================
    ADMIN — PURCHASES DASHBOARD
@@ -22,11 +23,14 @@ export default async function AdminPurchasesPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-900">Purchases</h1>
-        <p className="text-sm text-neutral-500 mt-1">
-          All payments, bookings, and product orders
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-serif text-neutral-900">Purchases</h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            All payments, bookings, and product orders
+          </p>
+        </div>
+        <RefreshButton />
       </div>
 
       {/* ── Summary Cards ────────────── */}

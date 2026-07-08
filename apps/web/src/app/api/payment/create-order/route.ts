@@ -46,11 +46,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
     }
 
-    const { workshopId, tickets, productId, quantity } = body as {
+    const { workshopId, tickets, productId, quantity, paymentOption } = body as {
       workshopId?: string;
       tickets?: number;
       productId?: string;
       quantity?: number;
+      paymentOption?: "full" | "partial";
     };
 
     const isWorkshop = !!workshopId;
@@ -116,10 +117,12 @@ export async function POST(request: NextRequest) {
       }
 
       const baseAmount = workshop.price * ticketCount;
-      amountInPaise = Math.round(baseAmount * 100); // Razorpay uses smallest currency unit
+      const isPartial = paymentOption === "partial";
+      const finalAmount = isPartial ? Math.round(baseAmount * 0.60) : baseAmount;
+      amountInPaise = Math.round(finalAmount * 100); // Razorpay uses smallest currency unit
       purpose = "WORKSHOP";
       referenceId = workshop.id;
-      description = `${workshop.title} — ${ticketCount} ticket(s)`;
+      description = `${workshop.title} — ${ticketCount} ticket(s)${isPartial ? " (60% Partial)" : ""}`;
     } else {
       // Product checkout
       const qty = Number(quantity) || 1;

@@ -15,6 +15,7 @@ export interface Workshop {
   instructor: string;
   availableSeats: number;
   duration: string;
+  endTime?: string;
 }
 
 export const upcomingWorkshops: Workshop[] = [
@@ -23,10 +24,11 @@ export const upcomingWorkshops: Workshop[] = [
     categoryId: "pottery",
     title: "Introduction to Pottery Texture Art",
     description: "Mold, shape, and create beautiful textured pottery pieces in a calming session.",
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80",
+    image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic",
     price: 1499,
     date: "2024-06-24",
     time: "11:00 AM",
+    endTime: "1:30 PM",
     location: "Sanskriti Kendra, Delhi",
     venue: "Studio 1, Main Building",
     instructor: "Aditi S.",
@@ -38,10 +40,11 @@ export const upcomingWorkshops: Workshop[] = [
     categoryId: "canvas",
     title: "Expressive Canvas Painting",
     description: "Express yourself on canvas with guided acrylic painting techniques.",
-    image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
+    image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631430/IMG_3254_vjcfvh.heic",
     price: 1299,
     date: "2024-06-25",
     time: "4:00 PM",
+    endTime: "6:00 PM",
     location: "Dhan Mill Compound, Delhi",
     venue: "Art Hub",
     instructor: "Rajesh K.",
@@ -53,10 +56,11 @@ export const upcomingWorkshops: Workshop[] = [
     categoryId: "clay-mirror",
     title: "Clay Mirror Art Workshop",
     description: "Create intricate cultural designs with clay and mirrors.",
-    image: "https://images.unsplash.com/photo-1522775559573-2f63d04af08f?w=800&q=80",
+    image: "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779631445/IMG_6955_dacuj6.heic",
     price: 1599,
     date: "2024-07-08",
     time: "2:00 PM",
+    endTime: "5:00 PM",
     location: "Sanskriti Kendra, Delhi",
     venue: "Workshop Area B",
     instructor: "Priya M.",

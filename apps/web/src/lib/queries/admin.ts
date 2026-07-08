@@ -5,6 +5,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { autoDeactivatePastWorkshops } from "./workshops";
 
 /** Verify current user is admin, redirect to home if not */
 export async function requireAdmin() {
@@ -57,6 +58,7 @@ export async function getAdminStats() {
 
 /** Get all workshops for admin management */
 export async function getAdminWorkshops() {
+  await autoDeactivatePastWorkshops();
   const supabase = createClient();
   const { data, error } = await supabase
     .from("workshops")
@@ -73,10 +75,10 @@ export async function getAdminWorkshops() {
 /** Get all bookings for admin management */
 export async function getAdminBookings() {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
-      "*, workshops(title, date, start_time, venue_name, image), payments(amount, status, currency)"
+      "*, workshops(title, date, start_time, venue_name, price, image), payments(id, amount, status, currency, provider_payment_id, provider_order_id)"
     )
     .order("created_at", { ascending: false })
     .limit(100);
@@ -85,7 +87,44 @@ export async function getAdminBookings() {
     console.error("Error fetching admin bookings:", error);
     return [];
   }
-  return data;
+
+  if (bookings && bookings.length > 0) {
+    // Fetch all workshop payments for the users in these bookings
+    const userIds = bookings.map((b: any) => b.user_id);
+    const workshopIds = bookings.map((b: any) => b.workshop_id);
+
+    const { data: relatedPayments } = await supabase
+      .from("payments")
+      .select("id, user_id, reference_id, amount, status")
+      .in("user_id", userIds)
+      .in("reference_id", workshopIds)
+      .eq("purpose", "WORKSHOP")
+      .eq("status", "SUCCESS");
+
+    const successPaymentMap = new Map<string, number>();
+    if (relatedPayments) {
+      relatedPayments.forEach((p: any) => {
+        const key = `${p.user_id}_${p.reference_id}`;
+        successPaymentMap.set(key, (successPaymentMap.get(key) || 0) + (p.amount || 0));
+      });
+    }
+
+    bookings.forEach((booking: any) => {
+      const key = `${booking.user_id}_${booking.workshop_id}`;
+      const successSum = successPaymentMap.get(key) || 0;
+      
+      // If the main payment linked to the booking is not SUCCESS (e.g. PENDING or CREATED),
+      // we should still count its amount as part of the total paid amount (online partial payment)
+      let totalPaid = successSum;
+      if (booking.payments && booking.payments.status !== "SUCCESS") {
+        totalPaid += booking.payments.amount || 0;
+      }
+      
+      booking.total_paid_amount = totalPaid;
+    });
+  }
+
+  return bookings;
 }
 
 /** Get all reviews for admin moderation */

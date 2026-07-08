@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     -------------------------------------------------- */
     const { data: payment, error: paymentFetchError } = await supabase
       .from("payments")
-      .select("id, user_id, status, provider_order_id, purpose, reference_id, amount")
+      .select("id, user_id, status, provider_order_id, purpose, reference_id, amount, provider_payment_id")
       .eq("id", paymentId)
       .single();
 
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
        5. Idempotency check — prevent replay attacks
          If already verified, return the existing result safely.
     -------------------------------------------------- */
-    if (payment.status === "SUCCESS") {
+    if (payment.status === "SUCCESS" || (payment.status === "PENDING" && payment.provider_payment_id)) {
       // Already confirmed — return existing booking if available
       if (payment.purpose === "WORKSHOP") {
         const { data: existingBooking } = await supabase
@@ -179,12 +179,26 @@ export async function POST(request: NextRequest) {
     }
 
     /* --------------------------------------------------
-       6. Mark payment as SUCCESS with provider IDs
+       6. Mark payment with provider IDs (PENDING if partial, SUCCESS if full)
     -------------------------------------------------- */
+    let isPartial = false;
+    if (payment.purpose === "WORKSHOP") {
+      const { data: workshop } = await supabase
+        .from("workshops")
+        .select("price")
+        .eq("id", payment.reference_id)
+        .single();
+      if (workshop) {
+        const ticketCount = Number(tickets) || 1;
+        const totalExpected = workshop.price * ticketCount;
+        isPartial = payment.amount < totalExpected;
+      }
+    }
+
     const { error: updateError } = await supabase
       .from("payments")
       .update({
-        status: "SUCCESS",
+        status: isPartial ? "PENDING" : "SUCCESS",
         provider_payment_id: razorpay_payment_id,
         provider_signature: razorpay_signature,
       })
