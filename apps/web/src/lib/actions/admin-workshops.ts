@@ -119,7 +119,7 @@ function parseFormData(formData: FormData): WorkshopInput {
     image_urls: imageUrls,
     coupon_code: (formData.get("coupon_code") as string) || "",
     coupon_discount_percent: formData.get("coupon_discount_percent")
-      ? parseInt(formData.get("coupon_discount_percent") as string, 10)
+      ? parseFloat(formData.get("coupon_discount_percent") as string)
       : undefined,
   };
 }

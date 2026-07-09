@@ -445,8 +445,9 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
               type="number"
               min={0}
               max={100}
+              step="0.01"
               defaultValue={workshop?.coupon_discount_percent ?? ""}
-              placeholder="e.g. 20"
+              placeholder="e.g. 20 or 99.99"
               className={inputClass}
             />
           </div>
