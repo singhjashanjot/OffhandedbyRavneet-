@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       attendeeName,
       attendeeEmail,
       attendeePhone,
+      couponCode,
       // Product-specific
       productId,
       quantity,
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
       attendeeName?: string;
       attendeeEmail?: string;
       attendeePhone?: string;
+      couponCode?: string;
       productId?: string;
       quantity?: number;
     };
@@ -182,15 +184,27 @@ export async function POST(request: NextRequest) {
        6. Mark payment with provider IDs (PENDING if partial, SUCCESS if full)
     -------------------------------------------------- */
     let isPartial = false;
+    let appliedCouponCode = null;
+    let appliedDiscountPercent = null;
+    let discountAmount = null;
+
     if (payment.purpose === "WORKSHOP") {
       const { data: workshop } = await supabase
         .from("workshops")
-        .select("price")
+        .select("price, coupon_code, coupon_discount_percent")
         .eq("id", payment.reference_id)
         .single();
       if (workshop) {
         const ticketCount = Number(tickets) || 1;
-        const totalExpected = workshop.price * ticketCount;
+        let totalExpected = workshop.price * ticketCount;
+
+        if (couponCode && workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {
+          appliedCouponCode = workshop.coupon_code;
+          appliedDiscountPercent = workshop.coupon_discount_percent || 0;
+          discountAmount = Math.round(totalExpected * (appliedDiscountPercent / 100));
+          totalExpected = Math.max(0, totalExpected - discountAmount);
+        }
+
         isPartial = payment.amount < totalExpected;
       }
     }
@@ -254,6 +268,9 @@ export async function POST(request: NextRequest) {
           attendee_email: attendeeEmail || user.email || "",
           attendee_phone: attendeePhone || null,
           status: "CONFIRMED",
+          coupon_code: appliedCouponCode,
+          coupon_discount_percent: appliedDiscountPercent,
+          discount_amount: discountAmount,
         })
         .select("id")
         .single();

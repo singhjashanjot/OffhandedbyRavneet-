@@ -34,6 +34,11 @@ export default function RegisterPage({
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [paymentMethod, setPaymentMethod] = useState<"online" | "offline">("online");
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [appliedCouponCode, setAppliedCouponCode] = useState("");
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [couponError, setCouponError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -142,7 +147,8 @@ export default function RegisterPage({
         body: JSON.stringify({
           workshopId: workshop.id,
           tickets,
-          paymentOption: paymentMethod === "offline" ? "partial" : "full"
+          paymentOption: paymentMethod === "offline" ? "partial" : "full",
+          couponCode: couponApplied ? appliedCouponCode : undefined
         }),
       });
       const orderData = await orderRes.json();
@@ -176,6 +182,7 @@ export default function RegisterPage({
                 attendeeName: formData.name || user?.user_metadata?.full_name || "",
                 attendeeEmail: formData.email || user?.email || "",
                 attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
+                couponCode: couponApplied ? appliedCouponCode : undefined,
               }),
             });
             const verifyData = await verifyRes.json();
@@ -224,6 +231,7 @@ export default function RegisterPage({
         attendeePhone: formData.phone ? `${countryCode}${formData.phone}` : undefined,
         age: formData.age || undefined,
         remarks: formData.remarks || undefined,
+        couponCode: couponApplied ? appliedCouponCode : undefined,
       });
 
       if (!res.success) {
@@ -254,9 +262,31 @@ export default function RegisterPage({
   // Calculate max guests based on available slots
   const maxGuests = Math.min(workshop.available_slots || 10, 10);
 
+  const handleApplyCoupon = () => {
+    setCouponError(null);
+    if (!couponInput.trim()) return;
+
+    if (workshop?.coupon_code && couponInput.trim().toUpperCase() === workshop.coupon_code.toUpperCase()) {
+      setDiscountPercent(workshop.coupon_discount_percent || 0);
+      setAppliedCouponCode(workshop.coupon_code);
+      setCouponApplied(true);
+    } else {
+      setCouponError("Invalid coupon code.");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponApplied(false);
+    setAppliedCouponCode("");
+    setDiscountPercent(0);
+    setCouponInput("");
+    setCouponError(null);
+  };
+
   const totalAmount = workshop.price * tickets;
+  const discountAmount = couponApplied ? Math.round(totalAmount * (discountPercent / 100)) : 0;
   const taxAmount = 0;
-  const grandTotal = totalAmount;
+  const grandTotal = totalAmount - discountAmount;
 
   // Success / Booking Confirmed view
   if (step === "success") {
@@ -415,6 +445,12 @@ export default function RegisterPage({
                       <span className="text-[#2c3627]/60">{formatPrice(workshop.price)} × {tickets} {tickets === 1 ? "ticket" : "tickets"}</span>
                       <span className="font-medium text-[#2c3627]">{formatPrice(totalAmount)}</span>
                     </div>
+                    {couponApplied && (
+                      <div className="flex justify-between text-sm text-green-700 font-semibold">
+                        <span>Discount ({discountPercent}%)</span>
+                        <span>-{formatPrice(discountAmount)}</span>
+                      </div>
+                    )}
                     {paymentMethod === "offline" && (
                       <div className="flex justify-between text-sm border-t border-[#2c3627]/5 pt-3">
                         <span className="text-[#2c3627]/60">60% Partial Payment (Due Now)</span>
@@ -432,6 +468,47 @@ export default function RegisterPage({
                       <span className="text-[#2c3627] text-3xl font-black">
                         {formatPrice(paymentMethod === "offline" ? Math.round(grandTotal * 0.60) : grandTotal)}
                       </span>
+                    </div>
+
+                    {/* Coupon Code Input */}
+                    <div className="border-t border-[#2c3627]/5 pt-4">
+                      <label className="block text-xs font-semibold text-[#2c3627]/60 uppercase tracking-wider mb-2">
+                        Have a Coupon?
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Enter coupon code"
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value.toUpperCase());
+                            setCouponError(null);
+                          }}
+                          disabled={couponApplied}
+                          className="flex-1 px-3 py-2 border border-[#2c3627]/20 rounded-lg text-sm bg-white text-[#2c3627] focus:outline-none focus:ring-1 focus:ring-[#2c3627] uppercase disabled:opacity-60"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={couponApplied || !couponInput.trim()}
+                          className="px-4 py-2 bg-[#2c3627] text-white rounded-lg text-sm font-semibold hover:bg-[#2c3627]/90 disabled:opacity-50 transition-all"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponError && <p className="text-red-600 text-xs mt-1">{couponError}</p>}
+                      {couponApplied && (
+                        <div className="flex items-center justify-between mt-2 text-xs text-green-700 bg-green-50 border border-green-200/50 p-2 rounded-lg">
+                          <span>Coupon <strong>{appliedCouponCode}</strong> applied!</span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className="text-red-500 hover:text-red-700 font-semibold"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

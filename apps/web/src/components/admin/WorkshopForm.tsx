@@ -34,6 +34,8 @@ interface WorkshopData {
   is_active: boolean;
   image?: string;
   workshop_images?: { image_url: string; sort_order: number }[];
+  coupon_code?: string;
+  coupon_discount_percent?: number;
 }
 
 interface WorkshopFormProps {
@@ -412,6 +414,39 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
               min={1}
               defaultValue={workshop?.price}
               placeholder="1499"
+              className={inputClass}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Promotions & Coupons ─────────── */}
+      <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
+        <h2 className="text-lg font-serif text-neutral-900 border-b border-neutral-100 pb-3">
+          Promotions & Coupons
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className={labelClass}>Coupon Code</label>
+            <input
+              name="coupon_code"
+              type="text"
+              defaultValue={workshop?.coupon_code || ""}
+              placeholder="e.g. ARTSTART20"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Discount Percent (%)</label>
+            <input
+              name="coupon_discount_percent"
+              type="number"
+              min={0}
+              max={100}
+              defaultValue={workshop?.coupon_discount_percent ?? ""}
+              placeholder="e.g. 20"
               className={inputClass}
             />
           </div>

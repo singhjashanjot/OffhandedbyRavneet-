@@ -41,6 +41,7 @@ export async function createOfflineBooking(params: {
   attendeePhone?: string;
   age?: string;
   remarks?: string;
+  couponCode?: string;
 }) {
   try {
     const supabase = createClient();
@@ -51,12 +52,12 @@ export async function createOfflineBooking(params: {
       return { success: false, error: "Authentication required." };
     }
 
-    const { workshopId, tickets, attendeeName, attendeeEmail, attendeePhone, age, remarks } = params;
+    const { workshopId, tickets, attendeeName, attendeeEmail, attendeePhone, age, remarks, couponCode } = params;
 
     // 2. Fetch workshop price and details from DB
     const { data: workshop, error: workshopError } = await supabase
       .from("workshops")
-      .select("id, title, price, available_slots, is_active, date, start_time, end_time, venue_name")
+      .select("id, title, price, available_slots, is_active, date, start_time, end_time, venue_name, coupon_code, coupon_discount_percent")
       .eq("id", workshopId)
       .single();
 
@@ -96,8 +97,22 @@ export async function createOfflineBooking(params: {
     }
 
     // Calculate total amount in rupees
-    const baseAmount = workshop.price * tickets;
-    const taxAmount = 0;
+    let baseAmount = workshop.price * tickets;
+    let appliedCouponCode = null;
+    let appliedDiscountPercent = null;
+    let discountAmount = 0;
+
+    if (couponCode) {
+      if (workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {
+        appliedCouponCode = workshop.coupon_code;
+        appliedDiscountPercent = workshop.coupon_discount_percent || 0;
+        discountAmount = Math.round(baseAmount * (appliedDiscountPercent / 100));
+        baseAmount = Math.max(0, baseAmount - discountAmount);
+      } else {
+        return { success: false, error: "Invalid coupon code." };
+      }
+    }
+
     const grandTotal = baseAmount;
 
     // 5. Create payment record with PENDING status
@@ -145,6 +160,9 @@ export async function createOfflineBooking(params: {
         age: age || null,
         remarks: remarks || null,
         status: "CONFIRMED",
+        coupon_code: appliedCouponCode,
+        coupon_discount_percent: appliedDiscountPercent,
+        discount_amount: discountAmount,
       })
       .select("id")
       .single();

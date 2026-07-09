@@ -46,12 +46,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
     }
 
-    const { workshopId, tickets, productId, quantity, paymentOption } = body as {
+    const { workshopId, tickets, productId, quantity, paymentOption, couponCode } = body as {
       workshopId?: string;
       tickets?: number;
       productId?: string;
       quantity?: number;
       paymentOption?: "full" | "partial";
+      couponCode?: string;
     };
 
     const isWorkshop = !!workshopId;
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
 
       const { data: workshop, error: workshopError } = await supabase
         .from("workshops")
-        .select("id, title, price, available_slots, is_active")
+        .select("id, title, price, available_slots, is_active, coupon_code, coupon_discount_percent")
         .eq("id", workshopId)
         .single();
 
@@ -116,13 +117,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const baseAmount = workshop.price * ticketCount;
+      let baseAmount = workshop.price * ticketCount;
+
+      if (couponCode) {
+        if (workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {
+          const discountPercent = workshop.coupon_discount_percent || 0;
+          const discountAmount = Math.round(baseAmount * (discountPercent / 100));
+          baseAmount = Math.max(0, baseAmount - discountAmount);
+        } else {
+          return NextResponse.json({ error: "Invalid coupon code." }, { status: 400 });
+        }
+      }
+
       const isPartial = paymentOption === "partial";
       const finalAmount = isPartial ? Math.round(baseAmount * 0.60) : baseAmount;
       amountInPaise = Math.round(finalAmount * 100); // Razorpay uses smallest currency unit
       purpose = "WORKSHOP";
       referenceId = workshop.id;
-      description = `${workshop.title} — ${ticketCount} ticket(s)${isPartial ? " (60% Partial)" : ""}`;
+      description = `${workshop.title} — ${ticketCount} ticket(s)${isPartial ? " (60% Partial)" : ""}${couponCode ? ` (Coupon: ${couponCode})` : ""}`;
     } else {
       // Product checkout
       const qty = Number(quantity) || 1;

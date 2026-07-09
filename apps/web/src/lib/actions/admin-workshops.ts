@@ -59,6 +59,8 @@ interface WorkshopInput {
   instructor?: string;
   level?: string;
   location?: string;
+  coupon_code?: string;
+  coupon_discount_percent?: number;
 }
 
 function validateWorkshop(input: WorkshopInput): string[] {
@@ -115,6 +117,10 @@ function parseFormData(formData: FormData): WorkshopInput {
     level: (formData.get("level") as string) || "Beginner Friendly",
     location: (formData.get("location") as string) || "",
     image_urls: imageUrls,
+    coupon_code: (formData.get("coupon_code") as string) || "",
+    coupon_discount_percent: formData.get("coupon_discount_percent")
+      ? parseInt(formData.get("coupon_discount_percent") as string, 10)
+      : undefined,
   };
 }
 
@@ -158,6 +164,8 @@ export async function createWorkshop(
         available_slots: input.available_slots,
         is_active: input.is_active,
         image: input.image_urls[0] || null,
+        coupon_code: input.coupon_code?.trim() || null,
+        coupon_discount_percent: input.coupon_discount_percent || null,
       })
       .select("id")
       .single();
@@ -232,6 +240,8 @@ export async function updateWorkshop(
         available_slots: input.available_slots,
         is_active: input.is_active,
         image: input.image_urls[0] || null,
+        coupon_code: input.coupon_code?.trim() || null,
+        coupon_discount_percent: input.coupon_discount_percent || null,
       })
       .eq("id", workshopId);
 

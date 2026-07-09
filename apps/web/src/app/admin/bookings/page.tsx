@@ -62,7 +62,9 @@ export default async function AdminBookingsPage() {
       ) : (
         <div className="space-y-4">
           {bookings.map((booking: any) => {
-            const totalExpected = (booking.workshops?.price || 0) * (booking.tickets || 1);
+            const baseTotal = (booking.workshops?.price || 0) * (booking.tickets || 1);
+            const discountAmount = booking.discount_amount || 0;
+            const totalExpected = baseTotal - discountAmount;
             const originalPaid = booking.payments?.amount || 0;
             const isPartialPayment = originalPaid > 0 && originalPaid < totalExpected;
             const amountPaid = booking.total_paid_amount !== undefined ? booking.total_paid_amount : originalPaid;
@@ -121,6 +123,16 @@ export default async function AdminBookingsPage() {
                           label="Tickets"
                           value={`${booking.tickets} ticket${booking.tickets > 1 ? "s" : ""}`}
                         />
+                        {booking.coupon_code && (
+                          <DetailRow
+                            label="Coupon Applied"
+                            value={
+                              <span className="text-green-700 font-semibold bg-green-50 px-2 py-0.5 rounded border border-green-200 text-xs inline-block">
+                                {booking.coupon_code} ({booking.coupon_discount_percent}% off, saved {formatPrice(discountAmount)})
+                              </span>
+                            }
+                          />
+                        )}
                         <DetailRow
                           label="Amount Paid"
                           value={
