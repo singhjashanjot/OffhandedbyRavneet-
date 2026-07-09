@@ -39,7 +39,7 @@ const bebasNeue = Bebas_Neue({
 ======================================== */
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://offhanded.in"),
+  metadataBase: new URL("https://www.offhandedbyravneet.com"),
   title: {
     default: "Offhanded | Immersive Art Experiences & Workshops",
     template: "%s | Offhanded",
@@ -62,14 +62,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://offhanded.in",
+    url: "https://www.offhandedbyravneet.com",
     siteName: "Offhanded",
     title: "Offhanded | Immersive Art Experiences & Workshops",
     description:
       "Discover immersive, meditative art workshops by Offhanded. Join pottery, canvas art, rope painting, and more.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Offhanded - Immersive Art Experiences",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Offhanded | Immersive Art Experiences",
     description: "Discover immersive, meditative art workshops by Offhanded.",
-    images: ["/og-image.jpg"],
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
