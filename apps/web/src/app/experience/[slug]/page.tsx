@@ -3,6 +3,39 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Header, Footer, CTASection } from "@/components";
 import { workshopCategories } from "@/data/categories";
+import type { Metadata } from "next";
+
+// Dynamic metadata generation for category pages
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const category = workshopCategories.find((c) => c.slug === params.slug);
+  if (!category) {
+    return {
+      title: "Art Experience | Offhanded",
+    };
+  }
+
+  const categoryName = category.name;
+  return {
+    title: `${categoryName} Workshop | Jalandhar, Punjab & India`,
+    description: `Join the immersive ${categoryName} workshop by Offhanded by Ravneet in Jalandhar, Punjab, and across India. ${category.description} Book your creative escape today starting at ${category.price}.`,
+    keywords: [
+      categoryName,
+      `${categoryName} workshop`,
+      `${categoryName} class`,
+      `${categoryName} jalandhar`,
+      `${categoryName} punjab`,
+      `${categoryName} india`,
+      "art workshops in jalandhar",
+      "art workshops in punjab",
+      "offhandedbyravneet",
+      "offhanded",
+    ],
+  };
+}
 
 // Generate static params for all categories
 export function generateStaticParams() {

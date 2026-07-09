@@ -6,8 +6,8 @@ import { formatPrice, formatDate } from "@/data";
 import type { DbWorkshop } from "@/lib/adapters";
 
 export const metadata: Metadata = {
-  title: "Offhanded | Upcoming Workshops",
-  description: "Browse our upcoming art workshops. Pottery, canvas, rope painting, and more.",
+  title: "Latest & Upcoming Art Workshops | Jalandhar, Punjab & India",
+  description: "Book the latest art workshops, pottery classes, and premium textured painting experiences by Offhanded by Ravneet in Jalandhar, Punjab, and across India.",
 };
 
 // Always fetch fresh data so newly-created workshops show immediately

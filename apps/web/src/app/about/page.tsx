@@ -9,9 +9,9 @@ import type { Metadata } from "next";
 ======================================== */
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About Offhanded by Ravneet | Premium Art Studio Jalandhar, Punjab",
   description:
-    "Learn about Offhanded's mission, our founder Ravneet's story, and why we're passionate about bringing art to everyone.",
+    "Learn about Offhanded's mission, our founder Ravneet's story, and why we are passionate about bringing world-class pottery and art workshops to Jalandhar, Punjab, and all of India.",
 };
 
 const stats = [
