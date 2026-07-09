@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function getUserProfileData() {
   const supabase = createClient();
@@ -96,16 +97,25 @@ export async function triggerWelcomeEmailAction() {
   }
 
   try {
-    const { sendWelcomeEmail } = await import("@/lib/email");
-    // Send the welcome email
-    await sendWelcomeEmail(email, fullName);
+    // Send the welcome email and check for Resend API errors
+    const { error: sendError } = await sendWelcomeEmail(email, fullName);
+    
+    if (sendError) {
+      console.error("Resend API error sending welcome email:", sendError);
+      return { success: false, error: sendError.message || "Failed to send email via Resend" };
+    }
 
     // Update user metadata in Supabase Auth to set welcome_sent: true
-    await supabase.auth.updateUser({
+    const { error: updateError } = await supabase.auth.updateUser({
       data: {
         welcome_sent: true
       }
     });
+
+    if (updateError) {
+      console.error("Failed to update user metadata in Supabase Auth:", updateError);
+      return { success: false, error: updateError.message };
+    }
 
     return { success: true, message: "Welcome email sent successfully" };
   } catch (error: any) {

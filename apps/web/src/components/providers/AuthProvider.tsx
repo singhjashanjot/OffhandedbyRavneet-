@@ -9,6 +9,7 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import { triggerWelcomeEmailAction } from "@/lib/actions/user";
 
 interface AuthContextType {
   user: User | null;
@@ -52,12 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Welcome email trigger effect
   useEffect(() => {
     if (user && !user.user_metadata?.welcome_sent) {
-      import("@/lib/actions/user").then(({ triggerWelcomeEmailAction }) => {
-        triggerWelcomeEmailAction().then((res) => {
-          if (res.success && res.message === "Welcome email sent successfully") {
-            supabase.auth.refreshSession();
-          }
-        });
+      triggerWelcomeEmailAction().then((res) => {
+        if (res.success && res.message === "Welcome email sent successfully") {
+          supabase.auth.refreshSession();
+        }
       });
     }
   }, [user, supabase]);
