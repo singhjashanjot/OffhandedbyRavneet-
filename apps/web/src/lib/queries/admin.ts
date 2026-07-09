@@ -26,7 +26,7 @@ export async function requireAdmin() {
     .single();
 
   if (!profile || profile.role !== "admin") {
-    redirect("/");
+    redirect("/unauthorized");
   }
 
   return user;
