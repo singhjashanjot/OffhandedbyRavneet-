@@ -235,12 +235,34 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
 </body>
 </html>`;
 
+  const text = `Hi ${firstName}!
+
+Your spot is officially reserved for "${workshopTitle}". We can't wait to have you join us.
+
+Booking Reference: #${shortBookingId}
+Date: ${workshopDate}
+Time: ${workshopTime}
+Venue: ${workshopVenue}
+Tickets: ${tickets} ${tickets === 1 ? "person" : "people"}
+Amount Paid: ${formattedAmount}
+
+What to Expect:
+- All materials and tools are provided — just bring yourself
+- Refreshments will be served during the session
+- Please arrive 10 minutes before the session starts
+- Wear comfortable clothes you don't mind getting a little messy
+
+Questions? We're here to help. You can reach us at ${OWNER_EMAIL}.
+
+Offhanded by Ravneet`;
+
   return resend.emails.send({
     from: FROM,
     to: customerEmail,
     replyTo: REPLY_TO,
     subject: `✅ Booking Confirmed — ${workshopTitle}`,
     html,
+    text,
   });
 }
 
@@ -385,12 +407,31 @@ export async function sendNewBookingAlertToOwner(data: OwnerAlertData) {
 </body>
 </html>`;
 
+  const text = `New Booking Received!
+
+Amount Paid: ${formattedAmount}
+Date/Time: ${now} IST
+
+Customer Details:
+- Name: ${customerName}
+- Email: ${customerEmail}
+${customerPhone ? `- Phone: ${customerPhone}\n` : ""}
+Workshop Details:
+- Workshop: ${workshopTitle}
+- Date: ${workshopDate}
+- Time: ${workshopTime}
+- Tickets: ${tickets} ${tickets === 1 ? "person" : "people"}
+- Booking ID: #${shortBookingId}
+
+Automated alert from your Offhanded booking system.`;
+
   return resend.emails.send({
     from: FROM,
     to: OWNER_EMAIL,
     replyTo: REPLY_TO,
     subject: `💰 New Booking: ${workshopTitle} — ${formattedAmount} from ${customerName}`,
     html,
+    text,
   });
 }
 
@@ -466,12 +507,27 @@ export async function sendProductConfirmationToCustomer(data: ProductCustomerEma
 </td></tr></table>
 </body></html>`;
 
+  const text = `Hi ${firstName}!
+
+Your order has been confirmed and is being prepared.
+
+Order Details:
+- Product: ${productName}
+- Quantity: ${quantity}
+- Amount Paid: ${formattedAmount}
+- Order Reference: #${shortOrderId}
+
+Questions about your order? Contact us at ${OWNER_EMAIL}.
+
+Offhanded by Ravneet`;
+
   return resend.emails.send({
     from: FROM,
     to: customerEmail,
     replyTo: REPLY_TO,
     subject: `✅ Order Confirmed — ${productName}`,
     html,
+    text,
   });
 }
 
@@ -533,12 +589,29 @@ export async function sendProductAlertToOwner(data: ProductOwnerAlertData) {
 </td></tr></table>
 </body></html>`;
 
+  const text = `New Product Order Received!
+
+Amount Paid: ${formattedAmount}
+Date/Time: ${now} IST
+
+Customer Details:
+- Name: ${customerName}
+- Email: ${customerEmail}
+${customerPhone ? `- Phone: ${customerPhone}\n` : ""}
+Order Details:
+- Product: ${productName}
+- Quantity: ${quantity}
+- Order ID: #${shortOrderId}
+
+Automated alert from your Offhanded order system.`;
+
   return resend.emails.send({
     from: FROM,
     to: OWNER_EMAIL,
     replyTo: REPLY_TO,
     subject: `🛍️ New Order: ${productName} — ${formattedAmount} from ${customerName}`,
     html,
+    text,
   });
 }
 
@@ -674,11 +747,32 @@ export async function sendWelcomeEmail(customerEmail: string, customerName: stri
 </html>
   `;
 
+  const text = `Hi ${firstName},
+
+We are absolutely thrilled to welcome you to the Offhanded creative community. 
+
+Offhanded is a sanctuary for slow, tactile, and immersive craft experiences. Whether you're getting your hands dirty on a pottery wheel, blending textures on a raw canvas, or learning bento cake decoration, our studio is a place to step away from the digital noise, clear your mind, and make something beautiful.
+
+Creative Pillars:
+1. Immersive Workshops: Guided pottery classes, canvas texturing, gold foil painting, punch needle workshops, and bento cake decoration.
+2. Handcrafted Products: Premium, hand-built studio ceramic items, creative art kits, and tools.
+
+Ready to find your creative flow? Explore upcoming workshops: https://www.offhandedbyravneet.com/workshops
+
+"Art is not a luxury, it is a way of seeing. It is an act of stepping back and finding peace in creation."
+
+Best regards,
+Offhanded by Ravneet
+Jalandhar, Punjab, India
+Instagram: https://instagram.com/offhandedbyravneet
+Website: https://www.offhandedbyravneet.com`;
+
   return resend.emails.send({
     from: FROM,
     to: customerEmail,
     replyTo: REPLY_TO,
     subject: "Welcome to the Offhanded Creative Family! 🎨✨",
     html,
+    text,
   });
 }

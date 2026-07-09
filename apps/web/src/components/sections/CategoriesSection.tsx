@@ -29,7 +29,7 @@ function Card({ href, image, label, title, description, aspect }: CardProps) {
           : "aspect-[4/3]";
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark border border-stone-100 dark:border-stone-800 block ${aspectClass} mb-4 break-inside-avoid`}
+      className={`group relative overflow-hidden rounded-2xl bg-[#FFFFF5] dark:bg-surface-dark block ${aspectClass} mb-4 break-inside-avoid`}
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
