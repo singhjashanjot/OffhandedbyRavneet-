@@ -541,3 +541,144 @@ export async function sendProductAlertToOwner(data: ProductOwnerAlertData) {
     html,
   });
 }
+
+/* ================================================================
+   5. CUSTOMER WELCOME EMAIL
+   Triggered on successful user signup / account creation
+================================================================ */
+
+export async function sendWelcomeEmail(customerEmail: string, customerName: string) {
+  const firstName = customerName ? customerName.split(" ")[0] : "there";
+  
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to the Offhanded Family 🎨</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4e8;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4e8;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- Top Decorative Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:24px;">
+              <img src="https://res.cloudinary.com/daoho0jwj/image/upload/v1771541977/android-chrome-512x512_jskgfx.png" alt="Offhanded Logo" style="width:72px;height:72px;border-radius:50%;display:block;" />
+              <p style="margin:8px 0 0 0;color:${BRAND.dark};font-size:12px;letter-spacing:4px;text-transform:uppercase;font-weight:600;">Offhanded by Ravneet</p>
+            </td>
+          </tr>
+
+          <!-- Main Email Container -->
+          <tr>
+            <td style="background-color:${BRAND.cream};padding:40px;border-radius:16px;border:1px solid #e0e0d0;box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+              
+              <!-- Title -->
+              <h1 style="margin:0 0 16px 0;color:${BRAND.dark};font-size:26px;font-weight:350;line-height:1.3;letter-spacing:-0.5px;text-align:center;">
+                Welcome to our creative escape ✨
+              </h1>
+
+              <!-- Greeting -->
+              <p style="margin:0 0 16px 0;color:${BRAND.dark};font-size:16px;font-weight:600;">Hi ${firstName},</p>
+              
+              <!-- Introduction -->
+              <p style="margin:0 0 24px 0;color:${BRAND.mutedText};font-size:15px;line-height:1.7;">
+                We are absolutely thrilled to welcome you to the Offhanded creative community. 
+                Offhanded is a sanctuary for slow, tactile, and immersive craft experiences. 
+                Whether you're getting your hands dirty on a pottery wheel, blending textures on a raw canvas, or learning bento cake decoration, 
+                our studio is a place to step away from the digital noise, clear your mind, and make something beautiful.
+              </p>
+
+              <!-- Creative Core Pillar Highlights (Cards Grid) -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="padding:15px;background-color:${BRAND.lightCream};border-radius:8px;border-left:4px solid ${BRAND.dark};">
+                    <h3 style="margin:0 0 4px 0;color:${BRAND.dark};font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">🏺 Immersive Workshops</h3>
+                    <p style="margin:0;color:${BRAND.mutedText};font-size:13.5px;line-height:1.5;">
+                      Join us for guided pottery classes, canvas texturing, gold foil painting, punch needle workshops, and bento cake decoration. 
+                      No art experience is ever required—just bring your curiosity!
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height:12px;"></td>
+                </tr>
+                <tr>
+                  <td style="padding:15px;background-color:${BRAND.lightCream};border-radius:8px;border-left:4px solid ${BRAND.sage};">
+                    <h3 style="margin:0 0 4px 0;color:${BRAND.dark};font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">🎨 Handcrafted Products</h3>
+                    <p style="margin:0;color:${BRAND.mutedText};font-size:13.5px;line-height:1.5;">
+                      We are curating a selection of premium, hand-built studio ceramic items, creative art kits, and tools designed to keep your creative flame alive at home.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Call to Action -->
+              <div style="text-align:center;padding:12px 0 24px 0;">
+                <p style="margin:0 0 16px 0;color:${BRAND.mutedText};font-size:14px;">Ready to find your creative flow?</p>
+                <a href="https://www.offhandedbyravneet.com/workshops" style="display:inline-block;background-color:${BRAND.dark};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 4px 10px rgba(44,54,39,0.15);">
+                  Explore Upcoming Workshops
+                </a>
+              </div>
+
+              <!-- Quote divider -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e8e8d8;padding-top:24px;margin-top:12px;">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0;color:${BRAND.mutedText};font-style:italic;font-size:14px;line-height:1.6;max-width:420px;text-align:center;">
+                      "Art is not a luxury, it is a way of seeing. It is an act of stepping back and finding peace in creation."
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:32px 40px;text-align:center;">
+              <p style="margin:0 0 6px 0;color:${BRAND.dark};font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">Offhanded by Ravneet</p>
+              <p style="margin:0 0 16px 0;color:${BRAND.mutedText};font-size:11px;">Jalandhar, Punjab, India</p>
+              
+              <!-- Social Links -->
+              <table align="center" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+                <tr>
+                  <td style="padding:0 8px;">
+                    <a href="https://instagram.com/offhandedbyravneet" style="color:${BRAND.dark};font-size:12px;text-decoration:none;font-weight:500;">Instagram</a>
+                  </td>
+                  <td style="color:${BRAND.mutedText};font-size:12px;">•</td>
+                  <td style="padding:0 8px;">
+                    <a href="https://www.offhandedbyravneet.com" style="color:${BRAND.dark};font-size:12px;text-decoration:none;font-weight:500;">Website</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;color:#b0b0a0;font-size:11px;line-height:1.6;">
+                You are receiving this email because you signed up to join the Offhanded community.<br/>
+                If you did not make this request, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `;
+
+  return resend.emails.send({
+    from: FROM,
+    to: customerEmail,
+    replyTo: REPLY_TO,
+    subject: "Welcome to the Offhanded Creative Family! 🎨✨",
+    html,
+  });
+}

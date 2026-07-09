@@ -73,3 +73,43 @@ export async function getUserProfileData() {
     orders: orders || [],
   };
 }
+
+export async function triggerWelcomeEmailAction() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Not logged in" };
+  }
+
+  // Check if welcome email was already sent
+  const isWelcomeSent = user.user_metadata?.welcome_sent;
+  if (isWelcomeSent) {
+    return { success: true, message: "Welcome email already sent previously" };
+  }
+
+  const email = user.email;
+  const fullName = user.user_metadata?.full_name || user.email?.split("@")[0] || "Creative Friend";
+
+  if (!email) {
+    return { success: false, error: "No email address found for user" };
+  }
+
+  try {
+    const { sendWelcomeEmail } = await import("@/lib/email");
+    // Send the welcome email
+    await sendWelcomeEmail(email, fullName);
+
+    // Update user metadata in Supabase Auth to set welcome_sent: true
+    await supabase.auth.updateUser({
+      data: {
+        welcome_sent: true
+      }
+    });
+
+    return { success: true, message: "Welcome email sent successfully" };
+  } catch (error: any) {
+    console.error("Failed to send welcome email:", error);
+    return { success: false, error: error.message };
+  }
+}

@@ -49,6 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
+  // Welcome email trigger effect
+  useEffect(() => {
+    if (user && !user.user_metadata?.welcome_sent) {
+      import("@/lib/actions/user").then(({ triggerWelcomeEmailAction }) => {
+        triggerWelcomeEmailAction().then((res) => {
+          if (res.success && res.message === "Welcome email sent successfully") {
+            supabase.auth.refreshSession();
+          }
+        });
+      });
+    }
+  }, [user, supabase]);
+
   const signInWithEmail = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error ? new Error(error.message) : null };
