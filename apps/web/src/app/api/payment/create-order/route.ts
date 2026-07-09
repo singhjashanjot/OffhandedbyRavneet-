@@ -209,11 +209,23 @@ export async function POST(request: NextRequest) {
         contact: user.user_metadata?.phone_number || "",
       },
     });
-  } catch (err) {
-    // Never expose internal error details
+  } catch (err: any) {
+    // Never expose internal error details, but temporarily do so to debug
     console.error("[create-order] Unexpected error:", err);
     return NextResponse.json(
-      { error: "An unexpected error occurred. Please try again." },
+      {
+        error: "An unexpected error occurred. Please try again.",
+        details: err?.message || String(err),
+        stack: err?.stack,
+        envStatus: {
+          hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+          hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
+          keyIdValue: process.env.RAZORPAY_KEY_ID 
+            ? `${process.env.RAZORPAY_KEY_ID.substring(0, 8)}... (${process.env.RAZORPAY_KEY_ID.length} chars)` 
+            : "undefined/empty",
+          keySecretLength: process.env.RAZORPAY_KEY_SECRET ? process.env.RAZORPAY_KEY_SECRET.length : 0,
+        }
+      },
       { status: 500 }
     );
   }
