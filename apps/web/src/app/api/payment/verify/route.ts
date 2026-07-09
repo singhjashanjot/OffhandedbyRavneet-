@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
           console.log(`[email] Workshop fetched: "${workshopTitle}", sending to customer: ${finalEmail}`);
 
           // Customer confirmation
-          sendBookingConfirmationToCustomer({
+          const customerRes = await sendBookingConfirmationToCustomer({
             customerName: finalName,
             customerEmail: finalEmail,
             workshopTitle,
@@ -334,12 +334,19 @@ export async function POST(request: NextRequest) {
             tickets: ticketCount,
             amountPaid: payment.amount,
             bookingId: booking.id,
-          })
-            .then((r) => console.log("[email] ✅ Customer confirmation sent:", r))
-            .catch((e) => console.error("[email] ❌ Customer confirmation FAILED:", e));
+          });
+
+          if (customerRes?.error) {
+            console.error("[email] ❌ Customer confirmation FAILED:", customerRes.error);
+          } else {
+            console.log("[email] ✅ Customer confirmation sent:", customerRes?.data);
+          }
+
+          // Introduce a 500ms delay to respect Resend 2 requests/sec limit
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           // Owner alert
-          sendNewBookingAlertToOwner({
+          const ownerRes = await sendNewBookingAlertToOwner({
             customerName: finalName,
             customerEmail: finalEmail,
             customerPhone: attendeePhone,
@@ -349,15 +356,19 @@ export async function POST(request: NextRequest) {
             tickets: ticketCount,
             amountPaid: payment.amount,
             bookingId: booking.id,
-          })
-            .then((r) => console.log("[email] ✅ Owner alert sent:", r))
-            .catch((e) => console.error("[email] ❌ Owner alert FAILED:", e));
+          });
+
+          if (ownerRes?.error) {
+            console.error("[email] ❌ Owner alert FAILED:", ownerRes.error);
+          } else {
+            console.log("[email] ✅ Owner alert sent:", ownerRes?.data);
+          }
         } catch (e) {
-          console.error("[email] Workshop fetch failed:", e);
+          console.error("[email] Workshop fetch or send failed:", e);
         }
       };
 
-      sendEmails();
+      await sendEmails();
 
     } else if (payment.purpose === "PRODUCT") {
       const qty = Number(quantity) || 1;
@@ -399,27 +410,38 @@ export async function POST(request: NextRequest) {
           const finalEmail = user.email || "";
           console.log(`[email] Sending product emails for order ${order.id} to ${finalEmail}`);
 
-          sendProductConfirmationToCustomer({
+          const customerRes = await sendProductConfirmationToCustomer({
             customerName: finalName,
             customerEmail: finalEmail,
             productName: product.name,
             quantity: qty,
             amountPaid: payment.amount,
             orderId: order.id,
-          })
-            .then((r) => console.log("[email] ✅ Product customer email sent:", r))
-            .catch((e) => console.error("[email] ❌ Product customer email FAILED:", e));
+          });
 
-          sendProductAlertToOwner({
+          if (customerRes?.error) {
+            console.error("[email] ❌ Product customer email FAILED:", customerRes.error);
+          } else {
+            console.log("[email] ✅ Product customer email sent:", customerRes?.data);
+          }
+
+          // Introduce a 500ms delay to respect Resend 2 requests/sec limit
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          const ownerRes = await sendProductAlertToOwner({
             customerName: finalName,
             customerEmail: finalEmail,
             productName: product.name,
             quantity: qty,
             amountPaid: payment.amount,
             orderId: order.id,
-          })
-            .then((r) => console.log("[email] ✅ Product owner alert sent:", r))
-            .catch((e) => console.error("[email] ❌ Product owner alert FAILED:", e));
+          });
+
+          if (ownerRes?.error) {
+            console.error("[email] ❌ Product owner alert FAILED:", ownerRes.error);
+          } else {
+            console.log("[email] ✅ Product owner alert sent:", ownerRes?.data);
+          }
         }
         bookingId = order.id;
       }

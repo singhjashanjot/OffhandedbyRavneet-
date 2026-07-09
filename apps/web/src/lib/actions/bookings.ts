@@ -206,7 +206,7 @@ export async function createOfflineBooking(params: {
     // Send emails using async execution
     const sendEmails = async () => {
       try {
-        await sendBookingConfirmationToCustomer({
+        const customerRes = await sendBookingConfirmationToCustomer({
           customerName: finalName,
           customerEmail: finalEmail,
           workshopTitle: workshopTitleFormatted,
@@ -218,7 +218,16 @@ export async function createOfflineBooking(params: {
           bookingId: booking.id,
         });
 
-        await sendNewBookingAlertToOwner({
+        if (customerRes?.error) {
+          console.error("Resend error sending offline customer email:", customerRes.error);
+        } else {
+          console.log("Offline customer email sent successfully:", customerRes?.data);
+        }
+
+        // Introduce a 500ms delay to respect Resend 2 requests/sec limit
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const ownerRes = await sendNewBookingAlertToOwner({
           customerName: finalName,
           customerEmail: finalEmail,
           customerPhone: attendeePhone,
@@ -229,11 +238,17 @@ export async function createOfflineBooking(params: {
           amountPaid: grandTotal,
           bookingId: booking.id,
         });
+
+        if (ownerRes?.error) {
+          console.error("Resend error sending offline owner alert:", ownerRes.error);
+        } else {
+          console.log("Offline owner alert sent successfully:", ownerRes?.data);
+        }
       } catch (err) {
         console.error("Error sending offline booking emails:", err);
       }
     };
-    sendEmails();
+    await sendEmails();
 
     revalidatePath("/");
     revalidatePath("/bookings");
