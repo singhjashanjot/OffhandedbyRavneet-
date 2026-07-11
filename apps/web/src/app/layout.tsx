@@ -106,14 +106,14 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        width: 512,
+        height: 512,
         alt: "Offhanded by Ravneet - Immersive Art Experiences",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Offhanded | Immersive Art Workshops in Punjab & India",
     description: "Discover immersive, meditative art workshops and pottery classes by Offhanded by Ravneet.",
     images: ["/og-image.png"],
