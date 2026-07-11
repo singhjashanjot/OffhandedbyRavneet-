@@ -22,7 +22,7 @@ const navigationLinks = [
 const socialLinks = [
   { label: "Instagram", href: "https://instagram.com/offhandedbyravneet", external: true },
   { label: "Facebook", href: "https://facebook.com/offhanded", external: true },
-  { label: "WhatsApp", href: "https://wa.me/919876543210", external: true },
+  { label: "WhatsApp", href: "https://wa.me/919855801521", external: true },
 ];
 
 export function Footer({ transparent = true }: { transparent?: boolean } = {}) {
@@ -124,10 +124,10 @@ export function Footer({ transparent = true }: { transparent?: boolean } = {}) {
             <div>
               <p className="text-sm text-neutral-500 mb-1.5">Get Support :</p>
               <a
-                href="mailto:hello@offhanded.in"
+                href="mailto:offhandedbyravneet@gmail.com"
                 className="text-sm text-neutral-900 hover:text-neutral-600 transition-colors duration-200 underline underline-offset-4 decoration-neutral-300"
               >
-                hello@offhanded.in
+                offhandedbyravneet@gmail.com
               </a>
             </div>
 

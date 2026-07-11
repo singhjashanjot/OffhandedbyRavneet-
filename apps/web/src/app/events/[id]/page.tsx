@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Header, Footer } from "@/components";
+import { Header, Footer, ShareButton } from "@/components";
 import { formatPrice, formatDate } from "@/data/workshops";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,6 +20,10 @@ export default async function EventDetailsPage({
   params: { id: string };
 }) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const bookingUrl = user
+    ? `/events/${params.id}/register`
+    : `/login?redirectTo=${encodeURIComponent(`/events/${params.id}/register`)}`;
 
   // Try to fetch by slug first, then by ID (for backward compatibility)
   let workshop = null;
@@ -269,7 +273,7 @@ export default async function EventDetailsPage({
                     )}
                   </div>
 
-                  <Link href={`/events/${workshop.id}/register`} className="w-full bg-brand-400 hover:bg-brand-500 active:scale-[0.98] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center gap-2">
+                  <Link href={bookingUrl} className="w-full bg-brand-400 hover:bg-brand-500 active:scale-[0.98] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center gap-2">
                     <span>Reserve My Seat</span>
                     <ArrowRightIcon />
                   </Link>
@@ -282,7 +286,7 @@ export default async function EventDetailsPage({
                 <div className="bg-neutral-50 px-8 py-4 border-t border-neutral-100 flex justify-between items-center">
                   <span className="text-xs font-medium text-neutral-500">Share this workshop</span>
                   <div className="flex gap-3 text-neutral-400">
-                    <button className="hover:text-neutral-900 transition-colors"><ShareIcon /></button>
+                    <ShareButton title={workshop.title} description={workshop.description} />
                     <button className="hover:text-neutral-900 transition-colors"><HeartIcon /></button>
                   </div>
                 </div>
@@ -353,7 +357,7 @@ export default async function EventDetailsPage({
             <p className="text-xs text-neutral-500">Total</p>
             <p className="text-xl font-bold text-neutral-900">{formatPrice(workshop.price)}</p>
           </div>
-          <Link href={`/events/${workshop.id}/register`} className="bg-brand-400 hover:bg-brand-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm">
+          <Link href={bookingUrl} className="bg-brand-400 hover:bg-brand-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm">
             Reserve Seat
           </Link>
         </div>
@@ -446,13 +450,7 @@ function ArrowRightIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function ShareIcon({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" x2="12" y1="2" y2="15" />
-    </svg>
-  );
-}
+
 
 function HeartIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (

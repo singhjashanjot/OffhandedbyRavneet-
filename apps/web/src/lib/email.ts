@@ -776,3 +776,102 @@ Website: https://www.offhandedbyravneet.com`;
     text,
   });
 }
+
+/* ================================================================
+   6. CONTACT ENQUIRY EMAIL
+   Triggered when someone submits the contact form
+================================================================ */
+
+interface ContactEnquiryData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+export async function sendContactEnquiryEmail(data: ContactEnquiryData) {
+  const { name, email, phone, subject, message } = data;
+  const now = new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>New Contact Enquiry</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4e8;font-family:sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4e8;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e0e0d0;border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="background-color:#2c3627;padding:24px 30px;color:#ffffff;">
+              <h2 style="margin:0;font-size:20px;font-weight:400;">New Contact Enquiry 📧</h2>
+              <p style="margin:4px 0 0 0;font-size:12px;opacity:0.8;">Received at ${now} IST</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:30px;">
+              <table width="100%" cellpadding="0" cellspacing="8" style="font-size:14px;color:#2c3627;">
+                <tr>
+                  <td style="width:30%;font-weight:bold;color:#6b7a65;">Name:</td>
+                  <td>${name}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:bold;color:#6b7a65;">Email:</td>
+                  <td><a href="mailto:${email}" style="color:#2c3627;text-decoration:none;">${email}</a></td>
+                </tr>
+                ${phone ? `
+                <tr>
+                  <td style="font-weight:bold;color:#6b7a65;">Phone:</td>
+                  <td><a href="tel:${phone}" style="color:#2c3627;text-decoration:none;">${phone}</a></td>
+                </tr>` : ""}
+                <tr>
+                  <td style="font-weight:bold;color:#6b7a65;">Subject:</td>
+                  <td>${subject}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:bold;color:#6b7a65;vertical-align:top;">Message:</td>
+                  <td style="white-space:pre-wrap;line-height:1.6;">${message}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  const text = `New Contact Enquiry Received!
+  
+Name: ${name}
+Email: ${email}
+${phone ? `Phone: ${phone}\n` : ""}
+Subject: ${subject}
+Message:
+${message}
+`;
+
+  // Always send enquiries to offhandedbyravneet@gmail.com
+  return resend.emails.send({
+    from: FROM,
+    to: "offhandedbyravneet@gmail.com",
+    replyTo: email,
+    subject: `📧 Contact Enquiry: ${subject} from ${name}`,
+    html,
+    text,
+  });
+}
+

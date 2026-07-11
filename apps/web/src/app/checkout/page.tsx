@@ -172,9 +172,18 @@ function CheckoutContent() {
               </div>
             )}
             <p className="font-sans text-sm text-neutral-400 mb-6">A confirmation email will be sent shortly.</p>
-            <Link href={isProductCheckout ? "/products" : "/"} className="btn btn-primary w-full block text-center">
-              {isProductCheckout ? "Back to Shop" : "Back to Home"}
-            </Link>
+            <div className="flex flex-col gap-3">
+              <Link href={isProductCheckout ? "/products" : "/"} className="btn btn-primary w-full block text-center">
+                {isProductCheckout ? "Back to Shop" : "Back to Home"}
+              </Link>
+              <button
+                type="button"
+                onClick={() => alert("Please contact at offhandedbyravneet@gmail.com or +91 9855801521")}
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-red-200/60 text-red-700 h-14 rounded-full font-bold text-base tracking-tight transition-all hover:bg-red-50"
+              >
+                Request Cancellation
+              </button>
+            </div>
           </div>
         </main>
         <Footer />

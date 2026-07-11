@@ -188,7 +188,7 @@ function LoginForm() {
           <p className="text-center mt-8 text-slate-500 text-sm">
             New to Offhanded?{" "}
             <Link
-              href="/signup"
+              href={`/signup${redirectTo !== "/" ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`}
               className="text-[#92a08a] font-semibold hover:underline decoration-2 underline-offset-4 ml-1"
             >
               Create an account

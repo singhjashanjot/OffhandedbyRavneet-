@@ -123,9 +123,14 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" }
+    ],
     shortcut: "/favicon.ico",
-    apple: "/icon.svg",
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" }
+    ],
   },
 };
 

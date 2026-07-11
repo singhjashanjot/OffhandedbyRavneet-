@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Header, Footer } from "@/components";
 import { PhoneInput } from "@/components/ui";
 import { motion } from "framer-motion";
+import { submitEnquiryAction } from "@/lib/actions/enquiry";
 
 /* ========================================
    CONTACT PAGE
@@ -15,22 +16,26 @@ const contactMethods = [
     icon: "📧",
     title: "Email Us",
     description: "We'll respond within 24 hours",
-    value: "hello@offhanded.in",
-    href: "mailto:hello@offhanded.in",
+    links: [
+      { text: "offhandedbyravneet@gmail.com", url: "mailto:offhandedbyravneet@gmail.com" }
+    ],
   },
   {
     icon: "📱",
-    title: "WhatsApp",
-    description: "Quick responses for urgent queries",
-    value: "+91 98765 43210",
-    href: "https://wa.me/919876543210",
+    title: "WhatsApp & Call",
+    description: "Quick responses for queries",
+    links: [
+      { text: "+91 9855801521", url: "https://wa.me/919855801521" },
+      { text: "+91 9855642084", url: "https://wa.me/919855642084" }
+    ],
   },
   {
     icon: "📍",
     title: "Location",
-    description: "Workshops across Delhi NCR",
-    value: "Delhi, Gurugram, Noida",
-    href: null,
+    description: "Based in Jalandhar",
+    links: [
+      { text: "Punjab, India", url: "" }
+    ],
   },
 ];
 
@@ -43,21 +48,46 @@ export default function ContactPage() {
     message: "",
   });
   const [countryCode, setCountryCode] = useState("+91");
+  const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement form submission
-    console.log("Form data:", { ...formData, phone: formData.phone ? `${countryCode}${formData.phone}` : "" });
-    alert("Thank you for contacting us! We'll get back to you soon.");
+    setLoading(true);
+    try {
+      const res = await submitEnquiryAction({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone ? `${countryCode}${formData.phone}` : "",
+        subject: formData.subject,
+        message: formData.message,
+      });
+      if (res.success) {
+        setIsSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "General Inquiry",
+          message: "",
+        });
+      } else {
+        alert(res.error || "Failed to send message. Please try again.");
+      }
+    } catch (error: any) {
+      alert("Failed to submit enquiry. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <Header />
       
-      <main className="pt-24">
+      <main className="pt-24 min-h-screen text-offhanded-deep selection:bg-offhanded-forest selection:text-white overflow-x-hidden font-display relative">
         {/* Header Section */}
-        <section className="py-24 bg-brand-50 max-w-screen-2xl mx-auto">
+        <section className="py-24 bg-transparent max-w-screen-2xl mx-auto relative z-10">
           <div className="container-custom text-center">
             <span className="badge-accent mb-4 inline-block">Get in Touch</span>
             <h1 className="font-display font-light text-display-md text-neutral-900 mb-6">
@@ -71,7 +101,7 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Content */}
-        <section className="py-24 bg-white max-w-screen-2xl mx-auto">
+        <section className="py-24 bg-transparent max-w-screen-2xl mx-auto relative z-10">
           <div className="container-custom">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
               {/* Contact Methods */}
@@ -88,29 +118,34 @@ export default function ContactPage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex gap-4 p-6 rounded-2xl bg-neutral-50 hover:bg-brand-50 transition-colors"
+                      className="flex gap-4 p-6 rounded-2xl bg-[#FFFFF5]/60 backdrop-blur-sm border border-neutral-100 hover:bg-[#FFFFF5] transition-colors"
                     >
                       <div className="text-3xl">{method.icon}</div>
                       <div>
                         <h3 className="font-display font-light text-neutral-900">{method.title}</h3>
                         <p className="text-body-sm text-neutral-500 mb-1">{method.description}</p>
-                        {method.href ? (
-                          <a
-                            href={method.href}
-                            className="text-brand-600 hover:text-brand-700 font-medium"
-                          >
-                            {method.value}
-                          </a>
-                        ) : (
-                          <span className="text-neutral-700">{method.value}</span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {method.links.map((link) => (
+                            link.url ? (
+                              <a
+                                key={link.text}
+                                href={link.url}
+                                className="text-brand-600 hover:text-brand-700 font-medium"
+                              >
+                                {link.text}
+                              </a>
+                            ) : (
+                              <span key={link.text} className="text-neutral-700 font-medium">{link.text}</span>
+                            )
+                          ))}
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
 
                 {/* Private Events */}
-                <div className="mt-8 p-6 rounded-2xl bg-neutral-900 text-white">
+                <div className="mt-8 p-6 rounded-2xl bg-[#2c3627] text-white">
                   <h3 className="font-display font-light text-heading-md mb-2">
                     Planning a Private Event?
                   </h3>
@@ -118,7 +153,7 @@ export default function ContactPage() {
                     We organize corporate events, kitty parties, birthday celebrations, 
                     and baby showers. Let's make it special.
                   </p>
-                  <a href="mailto:events@offhanded.in" className="btn-accent">
+                  <a href="mailto:offhandedbyravneet@gmail.com" className="btn-accent">
                     Inquire Now →
                   </a>
                 </div>
@@ -129,92 +164,115 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                className="w-full"
               >
-                <h2 className="font-display font-light text-heading-lg text-neutral-900 mb-8">
-                  Send Us a Message
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-body-sm font-medium text-neutral-700 mb-2">
-                        Your Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        className="input"
-                        value={formData.name}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                        required
-                      />
+                {isSubmitted ? (
+                  <div className="bg-[#FFFFF5]/60 backdrop-blur-sm p-10 md:p-12 rounded-3xl border border-neutral-200 text-center w-full">
+                    <div className="w-20 h-20 bg-[#B2C0AD]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-4xl">✨</span>
                     </div>
-                    <div>
-                      <label className="block text-body-sm font-medium text-neutral-700 mb-2">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="john@example.com"
-                        className="input"
-                        value={formData.email}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-body-sm font-medium text-neutral-700 mb-2">
-                      Phone Number <span className="text-neutral-400 font-normal">(Optional)</span>
-                    </label>
-                    <PhoneInput
-                      value={formData.phone}
-                      onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))}
-                      countryCode={countryCode}
-                      onCountryCodeChange={setCountryCode}
-                      placeholder="98765 43210"
-                      required={false}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-body-sm font-medium text-neutral-700 mb-2">
-                      Subject
-                    </label>
-                    <select 
-                      className="input"
-                      value={formData.subject}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
-                      required
+                    <h2 className="font-display font-light text-[#2c3627] text-2xl md:text-3xl mb-4">
+                      Thank You!
+                    </h2>
+                    <p className="text-[#2c3627]/80 text-base leading-relaxed mb-6 font-light">
+                      Thanks for your enquiry! Our team will contact you asap.
+                    </p>
+                    <button
+                      onClick={() => setIsSubmitted(false)}
+                      className="btn-primary w-full"
                     >
-                      <option>General Inquiry</option>
-                      <option>Workshop Question</option>
-                      <option>Private Event Booking</option>
-                      <option>Corporate Event</option>
-                      <option>Partnership</option>
-                      <option>Other</option>
-                    </select>
+                      Send Another Message
+                    </button>
                   </div>
+                ) : (
+                  <>
+                    <h2 className="font-display font-light text-heading-lg text-neutral-900 mb-8">
+                      Send Us a Message
+                    </h2>
 
-                  <div>
-                    <label className="block text-body-sm font-medium text-neutral-700 mb-2">
-                      Message
-                    </label>
-                    <textarea
-                      rows={5}
-                      placeholder="Tell us how we can help..."
-                      className="input resize-none"
-                      value={formData.message}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-                      required
-                    />
-                  </div>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                            Your Name
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="John Doe"
+                            className="input"
+                            value={formData.name}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="john@example.com"
+                            className="input"
+                            value={formData.email}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  <button type="submit" className="btn-primary w-full">
-                    Send Message →
-                  </button>
-                </form>
+                      <div>
+                        <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                          Phone Number <span className="text-neutral-400 font-normal">(Optional)</span>
+                        </label>
+                        <PhoneInput
+                          value={formData.phone}
+                          onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))}
+                          countryCode={countryCode}
+                          onCountryCodeChange={setCountryCode}
+                          placeholder="98765 43210"
+                          required={false}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                          Subject
+                        </label>
+                        <select 
+                          className="input"
+                          value={formData.subject}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
+                          required
+                        >
+                          <option>General Inquiry</option>
+                          <option>Workshop Question</option>
+                          <option>Private Event Booking</option>
+                          <option>Corporate Event</option>
+                          <option>Partnership</option>
+                          <option>Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-body-sm font-medium text-neutral-700 mb-2">
+                          Message
+                        </label>
+                        <textarea
+                          rows={5}
+                          placeholder="Tell us how we can help..."
+                          className="input resize-none"
+                          value={formData.message}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                          required
+                        />
+                      </div>
+
+                      <button type="submit" className="btn-primary w-full" disabled={loading}>
+                        {loading ? "Sending..." : "Send Message →"}
+                      </button>
+                    </form>
+                  </>
+                )}
               </motion.div>
             </div>
           </div>

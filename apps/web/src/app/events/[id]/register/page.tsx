@@ -24,9 +24,15 @@ export default function RegisterPage({
   params: { id: string };
 }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [workshop, setWorkshop] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?redirectTo=${encodeURIComponent(`/events/${params.id}/register`)}`);
+    }
+  }, [user, authLoading, params.id, router]);
   const [tickets, setTickets] = useState(1);
   const [countryCode, setCountryCode] = useState("+91");
   const [step, setStep] = useState<"register" | "payment" | "success">("register");
@@ -85,7 +91,7 @@ export default function RegisterPage({
     fetchWorkshop();
   }, [params.id, router]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <>
         <Header />
@@ -352,6 +358,13 @@ export default function RegisterPage({
               >
                 Browse More Workshops
               </Link>
+              <button
+                type="button"
+                onClick={() => alert("Please contact at offhandedbyravneet@gmail.com or +91 9855801521")}
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-red-200/60 text-red-700 h-14 rounded-full font-bold text-base tracking-tight transition-all hover:bg-red-50"
+              >
+                Request Cancellation
+              </button>
             </div>
           </div>
         </main>
