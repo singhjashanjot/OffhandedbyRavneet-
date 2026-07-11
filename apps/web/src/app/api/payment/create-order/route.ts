@@ -168,14 +168,21 @@ export async function POST(request: NextRequest) {
     /* --------------------------------------------------
        4. Create Razorpay order (server-side call)
     -------------------------------------------------- */
+    const orderNotes: Record<string, string> = {
+      user_id: user.id,
+      purpose,
+      reference_id: referenceId,
+    };
+    if (isWorkshop) {
+      orderNotes.ticket_count = String(Number(tickets) || 1);
+    } else if (isProduct) {
+      orderNotes.quantity = String(Number(quantity) || 1);
+    }
+
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
-      notes: {
-        user_id: user.id,
-        purpose,
-        reference_id: referenceId,
-      },
+      notes: orderNotes,
     });
 
     /* --------------------------------------------------

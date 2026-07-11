@@ -25,6 +25,23 @@ const BRAND = {
   mutedText: "#6b7a65",
 };
 
+/* ── HTML escaping to prevent injection in email bodies ──────── */
+function escapeHtml(str: string): string {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/** Strip CRLF characters from email header values to prevent header injection */
+function sanitizeHeaderValue(str: string): string {
+  if (!str) return "";
+  return String(str).replace(/[\r\n]/g, "");
+}
+
 /* ================================================================
    1. CUSTOMER BOOKING CONFIRMATION EMAIL
 ================================================================ */
@@ -57,6 +74,10 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
   const shortBookingId = bookingId.slice(0, 8).toUpperCase();
   const formattedAmount = `₹${amountPaid.toLocaleString("en-IN")}`;
   const firstName = customerName.split(" ")[0];
+  const safeWorkshopTitle = escapeHtml(workshopTitle);
+  const safeWorkshopDate = escapeHtml(workshopDate);
+  const safeWorkshopTime = escapeHtml(workshopTime);
+  const safeWorkshopVenue = escapeHtml(workshopVenue);
 
   const html = `
 <!DOCTYPE html>
@@ -64,7 +85,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking Confirmed — ${workshopTitle}</title>
+  <title>Booking Confirmed — ${safeWorkshopTitle}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f4e8;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 
@@ -84,7 +105,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
           <!-- Greeting -->
           <tr>
             <td style="background-color:${BRAND.cream};padding:40px 40px 0 40px;">
-              <p style="margin:0 0 8px 0;color:${BRAND.dark};font-size:18px;font-weight:600;">Hi ${firstName}!</p>
+              <p style="margin:0 0 8px 0;color:${BRAND.dark};font-size:18px;font-weight:600;">Hi ${escapeHtml(firstName)}!</p>
               <p style="margin:0;color:${BRAND.mutedText};font-size:15px;line-height:1.7;">
                 Your spot is officially reserved. We can't wait to have you join us. Here are your complete booking details:
               </p>
@@ -102,7 +123,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
                 </tr>
                 <tr>
                   <td style="padding:24px;">
-                    <h2 style="margin:0 0 20px 0;color:${BRAND.dark};font-size:22px;font-weight:400;line-height:1.3;">${workshopTitle}</h2>
+                    <h2 style="margin:0 0 20px 0;color:${BRAND.dark};font-size:22px;font-weight:400;line-height:1.3;">${safeWorkshopTitle}</h2>
                     <table width="100%" cellpadding="0" cellspacing="0">
                       ${workshopDate ? `
                       <tr>
@@ -110,7 +131,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:${BRAND.mutedText};font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;width:40%;">📅 Date</td>
-                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${workshopDate}</td>
+                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${safeWorkshopDate}</td>
                             </tr>
                           </table>
                         </td>
@@ -121,7 +142,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:${BRAND.mutedText};font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;width:40%;">⏰ Time</td>
-                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${workshopTime}</td>
+                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${safeWorkshopTime}</td>
                             </tr>
                           </table>
                         </td>
@@ -132,7 +153,7 @@ export async function sendBookingConfirmationToCustomer(data: CustomerEmailData)
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:${BRAND.mutedText};font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;width:40%;">📍 Venue</td>
-                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${workshopVenue}</td>
+                              <td style="color:${BRAND.dark};font-size:14px;font-weight:500;">${safeWorkshopVenue}</td>
                             </tr>
                           </table>
                         </td>
@@ -260,7 +281,7 @@ Offhanded by Ravneet`;
     from: FROM,
     to: customerEmail,
     replyTo: REPLY_TO,
-    subject: `✅ Booking Confirmed — ${workshopTitle}`,
+    subject: sanitizeHeaderValue(`✅ Booking Confirmed — ${workshopTitle}`),
     html,
     text,
   });
@@ -307,6 +328,12 @@ export async function sendNewBookingAlertToOwner(data: OwnerAlertData) {
     hour: "2-digit",
     minute: "2-digit",
   });
+  const safeCustName = escapeHtml(customerName);
+  const safeCustEmail = escapeHtml(customerEmail);
+  const safeCustPhone = customerPhone ? escapeHtml(customerPhone) : "";
+  const safeWsTitle = escapeHtml(workshopTitle);
+  const safeWsDate = escapeHtml(workshopDate);
+  const safeWsTime = escapeHtml(workshopTime);
 
   const html = `
 <!DOCTYPE html>
@@ -314,7 +341,7 @@ export async function sendNewBookingAlertToOwner(data: OwnerAlertData) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Booking — ${workshopTitle}</title>
+  <title>New Booking — ${safeWsTitle}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f0f0e0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 
@@ -349,16 +376,16 @@ export async function sendNewBookingAlertToOwner(data: OwnerAlertData) {
               <table width="100%" cellpadding="0" cellspacing="8">
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Name</td>
-                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${customerName}</td>
+                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${safeCustName}</td>
                 </tr>
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Email</td>
-                  <td style="padding:6px 0;"><a href="mailto:${customerEmail}" style="color:${BRAND.dark};font-size:14px;font-weight:600;">${customerEmail}</a></td>
+                  <td style="padding:6px 0;"><a href="mailto:${safeCustEmail}" style="color:${BRAND.dark};font-size:14px;font-weight:600;">${safeCustEmail}</a></td>
                 </tr>
                 ${customerPhone ? `
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Phone</td>
-                  <td style="padding:6px 0;"><a href="tel:${customerPhone}" style="color:${BRAND.dark};font-size:14px;font-weight:600;">${customerPhone}</a></td>
+                  <td style="padding:6px 0;"><a href="tel:${safeCustPhone}" style="color:${BRAND.dark};font-size:14px;font-weight:600;">${safeCustPhone}</a></td>
                 </tr>` : ""}
               </table>
 
@@ -367,17 +394,17 @@ export async function sendNewBookingAlertToOwner(data: OwnerAlertData) {
               <table width="100%" cellpadding="0" cellspacing="8">
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Workshop</td>
-                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${workshopTitle}</td>
+                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${safeWsTitle}</td>
                 </tr>
                 ${workshopDate ? `
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Date</td>
-                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${workshopDate}</td>
+                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${safeWsDate}</td>
                 </tr>` : ""}
                 ${workshopTime ? `
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Time</td>
-                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${workshopTime}</td>
+                  <td style="color:${BRAND.dark};font-size:14px;font-weight:600;padding:6px 0;">${safeWsTime}</td>
                 </tr>` : ""}
                 <tr>
                   <td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Tickets</td>
@@ -429,7 +456,7 @@ Automated alert from your Offhanded booking system.`;
     from: FROM,
     to: OWNER_EMAIL,
     replyTo: REPLY_TO,
-    subject: `💰 New Booking: ${workshopTitle} — ${formattedAmount} from ${customerName}`,
+    subject: sanitizeHeaderValue(`💰 New Booking: ${workshopTitle} — ${formattedAmount} from ${customerName}`),
     html,
     text,
   });
@@ -453,6 +480,7 @@ export async function sendProductConfirmationToCustomer(data: ProductCustomerEma
   const shortOrderId = orderId.slice(0, 8).toUpperCase();
   const formattedAmount = `₹${amountPaid.toLocaleString("en-IN")}`;
   const firstName = customerName.split(" ")[0];
+  const safeProductName = escapeHtml(productName);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -466,14 +494,14 @@ export async function sendProductConfirmationToCustomer(data: ProductCustomerEma
     <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:300;">Order Confirmed 🎉</h1>
   </td></tr>
   <tr><td style="background-color:#fffff1;padding:40px;">
-    <p style="margin:0 0 8px 0;color:#2c3627;font-size:18px;font-weight:600;">Hi ${firstName}!</p>
+    <p style="margin:0 0 8px 0;color:#2c3627;font-size:18px;font-weight:600;">Hi ${escapeHtml(firstName)}!</p>
     <p style="margin:0 0 24px 0;color:#6b7a65;font-size:15px;line-height:1.7;">Your order has been confirmed and is being prepared. Here are your details:</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F9F9E8;border:1px solid #e0e0d0;border-radius:12px;overflow:hidden;">
       <tr><td style="background-color:#2c3627;padding:14px 24px;">
         <p style="margin:0;color:#B2C0AD;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;">Order Details</p>
       </td></tr>
       <tr><td style="padding:24px;">
-        <h2 style="margin:0 0 20px 0;color:#2c3627;font-size:20px;font-weight:400;">${productName}</h2>
+        <h2 style="margin:0 0 20px 0;color:#2c3627;font-size:20px;font-weight:400;">${safeProductName}</h2>
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:8px 0;border-bottom:1px solid #e8e8d8;">
             <table width="100%"><tr>
@@ -525,7 +553,7 @@ Offhanded by Ravneet`;
     from: FROM,
     to: customerEmail,
     replyTo: REPLY_TO,
-    subject: `✅ Order Confirmed — ${productName}`,
+    subject: sanitizeHeaderValue(`✅ Order Confirmed — ${productName}`),
     html,
     text,
   });
@@ -551,6 +579,10 @@ export async function sendProductAlertToOwner(data: ProductOwnerAlertData) {
   const shortOrderId = orderId.slice(0, 8).toUpperCase();
   const formattedAmount = `₹${amountPaid.toLocaleString("en-IN")}`;
   const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const safeProdCustName = escapeHtml(customerName);
+  const safeProdCustEmail = escapeHtml(customerEmail);
+  const safeProdCustPhone = customerPhone ? escapeHtml(customerPhone) : "";
+  const safeProdName = escapeHtml(productName);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -571,13 +603,13 @@ export async function sendProductAlertToOwner(data: ProductOwnerAlertData) {
   <tr><td style="background-color:#ffffff;padding:36px 40px;">
     <h3 style="margin:0 0 16px 0;color:#2c3627;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;border-bottom:2px solid #B2C0AD;padding-bottom:8px;">Customer Details</h3>
     <table width="100%" cellpadding="0" cellspacing="8">
-      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Name</td><td style="color:#2c3627;font-size:14px;font-weight:600;padding:6px 0;">${customerName}</td></tr>
-      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Email</td><td style="padding:6px 0;"><a href="mailto:${customerEmail}" style="color:#2c3627;font-size:14px;font-weight:600;">${customerEmail}</a></td></tr>
-      ${customerPhone ? `<tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Phone</td><td style="padding:6px 0;"><a href="tel:${customerPhone}" style="color:#2c3627;font-size:14px;font-weight:600;">${customerPhone}</a></td></tr>` : ""}
+      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Name</td><td style="color:#2c3627;font-size:14px;font-weight:600;padding:6px 0;">${safeProdCustName}</td></tr>
+      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Email</td><td style="padding:6px 0;"><a href="mailto:${safeProdCustEmail}" style="color:#2c3627;font-size:14px;font-weight:600;">${safeProdCustEmail}</a></td></tr>
+      ${customerPhone ? `<tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Phone</td><td style="padding:6px 0;"><a href="tel:${safeProdCustPhone}" style="color:#2c3627;font-size:14px;font-weight:600;">${safeProdCustPhone}</a></td></tr>` : ""}
     </table>
     <h3 style="margin:28px 0 16px 0;color:#2c3627;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;border-bottom:2px solid #B2C0AD;padding-bottom:8px;">Order Details</h3>
     <table width="100%" cellpadding="0" cellspacing="8">
-      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Product</td><td style="color:#2c3627;font-size:14px;font-weight:600;padding:6px 0;">${productName}</td></tr>
+      <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:35%;padding:6px 0;">Product</td><td style="color:#2c3627;font-size:14px;font-weight:600;padding:6px 0;">${safeProdName}</td></tr>
       <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Quantity</td><td style="color:#2c3627;font-size:14px;font-weight:600;padding:6px 0;">${quantity}</td></tr>
       <tr><td style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Order ID</td><td style="color:#2c3627;font-size:14px;font-weight:700;padding:6px 0;letter-spacing:2px;">#${shortOrderId}</td></tr>
     </table>
@@ -609,7 +641,7 @@ Automated alert from your Offhanded order system.`;
     from: FROM,
     to: OWNER_EMAIL,
     replyTo: REPLY_TO,
-    subject: `🛍️ New Order: ${productName} — ${formattedAmount} from ${customerName}`,
+    subject: sanitizeHeaderValue(`🛍️ New Order: ${productName} — ${formattedAmount} from ${customerName}`),
     html,
     text,
   });
@@ -656,7 +688,7 @@ export async function sendWelcomeEmail(customerEmail: string, customerName: stri
               </h1>
 
               <!-- Greeting -->
-              <p style="margin:0 0 16px 0;color:${BRAND.dark};font-size:16px;font-weight:600;">Hi ${firstName},</p>
+              <p style="margin:0 0 16px 0;color:${BRAND.dark};font-size:16px;font-weight:600;">Hi ${escapeHtml(firstName)},</p>
               
               <!-- Introduction -->
               <p style="margin:0 0 24px 0;color:${BRAND.mutedText};font-size:15px;line-height:1.7;">
@@ -792,6 +824,11 @@ interface ContactEnquiryData {
 
 export async function sendContactEnquiryEmail(data: ContactEnquiryData) {
   const { name, email, phone, subject, message } = data;
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safePhone = phone ? escapeHtml(phone) : "";
+  const safeSubject = escapeHtml(subject);
+  const safeMessage = escapeHtml(message);
   const now = new Date().toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
     day: "numeric",
@@ -824,24 +861,24 @@ export async function sendContactEnquiryEmail(data: ContactEnquiryData) {
               <table width="100%" cellpadding="0" cellspacing="8" style="font-size:14px;color:#2c3627;">
                 <tr>
                   <td style="width:30%;font-weight:bold;color:#6b7a65;">Name:</td>
-                  <td>${name}</td>
+                  <td>${safeName}</td>
                 </tr>
                 <tr>
                   <td style="font-weight:bold;color:#6b7a65;">Email:</td>
-                  <td><a href="mailto:${email}" style="color:#2c3627;text-decoration:none;">${email}</a></td>
+                  <td><a href="mailto:${safeEmail}" style="color:#2c3627;text-decoration:none;">${safeEmail}</a></td>
                 </tr>
                 ${phone ? `
                 <tr>
                   <td style="font-weight:bold;color:#6b7a65;">Phone:</td>
-                  <td><a href="tel:${phone}" style="color:#2c3627;text-decoration:none;">${phone}</a></td>
+                  <td><a href="tel:${safePhone}" style="color:#2c3627;text-decoration:none;">${safePhone}</a></td>
                 </tr>` : ""}
                 <tr>
                   <td style="font-weight:bold;color:#6b7a65;">Subject:</td>
-                  <td>${subject}</td>
+                  <td>${safeSubject}</td>
                 </tr>
                 <tr>
                   <td style="font-weight:bold;color:#6b7a65;vertical-align:top;">Message:</td>
-                  <td style="white-space:pre-wrap;line-height:1.6;">${message}</td>
+                  <td style="white-space:pre-wrap;line-height:1.6;">${safeMessage}</td>
                 </tr>
               </table>
             </td>
@@ -869,7 +906,7 @@ ${message}
     from: FROM,
     to: "offhandedbyravneet@gmail.com",
     replyTo: email,
-    subject: `📧 Contact Enquiry: ${subject} from ${name}`,
+    subject: sanitizeHeaderValue(`📧 Contact Enquiry: ${subject} from ${name}`),
     html,
     text,
   });

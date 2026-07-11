@@ -14,12 +14,18 @@ export async function GET(request: Request) {
   // Support both 'next' (from Supabase) and 'redirectTo' (our custom param)
   const redirectTo = searchParams.get("redirectTo") || searchParams.get("next") || "/";
 
+  // Validate redirectTo is a safe, same-origin relative path
+  const safeRedirect =
+    redirectTo.startsWith("/") && !redirectTo.startsWith("//") && !redirectTo.includes("@")
+      ? redirectTo
+      : "/";
+
   if (code) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${redirectTo}`);
+      return NextResponse.redirect(`${origin}${safeRedirect}`);
     }
   }
 

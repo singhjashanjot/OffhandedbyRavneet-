@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import Razorpay from "razorpay";
 import { createClient } from "@/lib/supabase/server";
 import {
   sendBookingConfirmationToCustomer,
@@ -21,6 +22,11 @@ import {
   sendProductConfirmationToCustomer,
   sendProductAlertToOwner,
 } from "@/lib/email";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy_key_for_build",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret_for_build",
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,6 +93,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate optional attendee fields to prevent email header/HTML injection
+    if (attendeeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(attendeeEmail)) {
+      return NextResponse.json({ error: "Invalid attendee email." }, { status: 400 });
+    }
+    if (attendeePhone && attendeePhone.length > 20) {
+      return NextResponse.json({ error: "Phone number is too long." }, { status: 400 });
+    }
+
     /* --------------------------------------------------
        3. Verify HMAC SHA256 signature
          This is the critical security step.
@@ -107,7 +121,9 @@ export async function POST(request: NextRequest) {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    if (expectedSignature !== razorpay_signature) {
+    const sigBuf = Buffer.from(expectedSignature, "hex");
+    const recvBuf = Buffer.from(razorpay_signature, "hex");
+    if (sigBuf.length !== recvBuf.length || !crypto.timingSafeEqual(sigBuf, recvBuf)) {
       // Signature mismatch — potential tampered request
       console.warn(
         `[verify] Signature mismatch for user ${user.id}, order ${razorpay_order_id}`
@@ -181,6 +197,42 @@ export async function POST(request: NextRequest) {
     }
 
     /* --------------------------------------------------
+       5b. Fetch authoritative ticket count from Razorpay order notes
+         NEVER trust client-supplied ticket/quantity counts —
+         use the value stored during create-order instead.
+    -------------------------------------------------- */
+    let serverTicketCount = 1;
+    let serverQuantity = 1;
+
+    try {
+      const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
+      const notes = razorpayOrder.notes || {};
+      if (payment.purpose === "WORKSHOP") {
+        serverTicketCount = parseInt(String(notes.ticket_count), 10) || 1;
+        if (!Number.isInteger(serverTicketCount) || serverTicketCount < 1 || serverTicketCount > 10) {
+          return NextResponse.json(
+            { error: "Invalid ticket count in order." },
+            { status: 400 }
+          );
+        }
+      } else if (payment.purpose === "PRODUCT") {
+        serverQuantity = parseInt(String(notes.quantity), 10) || 1;
+        if (!Number.isInteger(serverQuantity) || serverQuantity < 1 || serverQuantity > 100) {
+          return NextResponse.json(
+            { error: "Invalid quantity in order." },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (orderErr) {
+      console.error("[verify] Failed to fetch Razorpay order for ticket validation:", orderErr);
+      return NextResponse.json(
+        { error: "Could not verify order details. Please contact support." },
+        { status: 500 }
+      );
+    }
+
+    /* --------------------------------------------------
        6. Mark payment with provider IDs (PENDING if partial, SUCCESS if full)
     -------------------------------------------------- */
     let isPartial = false;
@@ -195,7 +247,7 @@ export async function POST(request: NextRequest) {
         .eq("id", payment.reference_id)
         .single();
       if (workshop) {
-        const ticketCount = Number(tickets) || 1;
+        const ticketCount = serverTicketCount;
         let totalExpected = workshop.price * ticketCount;
 
         if (couponCode && workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {
@@ -233,7 +285,7 @@ export async function POST(request: NextRequest) {
     let bookingId: string | undefined;
 
     if (payment.purpose === "WORKSHOP") {
-      const ticketCount = Number(tickets) || 1;
+      const ticketCount = serverTicketCount;
 
       // Atomically deduct slots
       const { data: slotResult } = await supabase.rpc("decrement_workshop_slots", {
@@ -371,7 +423,7 @@ export async function POST(request: NextRequest) {
       await sendEmails();
 
     } else if (payment.purpose === "PRODUCT") {
-      const qty = Number(quantity) || 1;
+      const qty = serverQuantity;
 
       // Create order record
       const { data: order, error: orderError } = await supabase
