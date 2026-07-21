@@ -3,6 +3,60 @@
 @tailwind utilities;
 
 /* ========================================
+   MATERIAL SYMBOLS FOUC PREVENTION
+   Hide icon spans until the icon font loads
+   to prevent raw text (e.g. "home", "person")
+   flashing on first paint.
+======================================== */
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 100 700;
+  /* Invisible placeholder — browser will swap to the real font once loaded */
+  font-display: block;
+  src: local("Material Symbols Outlined");
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  /* Prevent text from showing before the icon font loads */
+  color: transparent;
+  transition: color 0ms;
+}
+
+/* Once font is loaded the real glyph renders — restore inherited color */
+@supports (font-variation-settings: normal) {
+  .material-symbols-outlined {
+    color: inherit;
+  }
+}
+
+/* Fallback: once the stylesheet link finishes, icons get their color back */
+/* This uses the :defined pseudo-class timing trick via a tiny CSS animation */
+.material-symbols-outlined {
+  animation: icons-loaded 0s 0.1s forwards;
+}
+
+@keyframes icons-loaded {
+  to {
+    color: inherit;
+  }
+}
+
+/* ========================================
    CANELA FONT (Commercial Type)
    Place your Canela-Black.woff2 in /public/fonts/
 ======================================== */

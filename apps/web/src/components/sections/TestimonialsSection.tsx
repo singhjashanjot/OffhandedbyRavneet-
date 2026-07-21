@@ -313,16 +313,6 @@ function VideoCardInner({
           pointerEvents: "none",
         }}
       >
-        <h3
-          className="font-condensed uppercase tracking-wide"
-          style={{
-            fontSize: config.isMobile ? "0.9rem" : "1.15rem",
-            lineHeight: 1.1,
-            color: "#e8d5b5",
-          }}
-        >
-          {review.name}
-        </h3>
         <p
           className="font-sans"
           style={{
