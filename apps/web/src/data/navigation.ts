@@ -57,7 +57,6 @@ export const footerNavigation = {
   ],
   social: [
     { label: "Instagram", href: "https://instagram.com/offhandedbyravneet", icon: "instagram" },
-    { label: "Facebook", href: "https://facebook.com/offhanded", icon: "facebook" },
     { label: "WhatsApp", href: "https://wa.me/919876543210", icon: "whatsapp" },
   ],
 };

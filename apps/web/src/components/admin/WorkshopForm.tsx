@@ -12,6 +12,12 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { uploadWorkshopImage } from "@/lib/storage";
 
+interface WhatToExpectItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
 interface WorkshopData {
   id: string;
   title: string;
@@ -20,6 +26,7 @@ interface WorkshopData {
   category: string;
   workshop_type: string;
   price: number;
+  price_for_two?: number;
   date: string;
   start_time: string;
   end_time?: string;
@@ -33,9 +40,10 @@ interface WorkshopData {
   available_slots: number;
   is_active: boolean;
   image?: string;
-  workshop_images?: { image_url: string; sort_order: number }[];
+  card_image?: string;
   coupon_code?: string;
   coupon_discount_percent?: number;
+  what_to_expect?: WhatToExpectItem[];
 }
 
 interface WorkshopFormProps {
@@ -204,6 +212,30 @@ function TimeInput12h({
   );
 }
 
+const ICON_OPTIONS = [
+  { value: "leaf",       label: "🌿 Mindfulness / Nature" },
+  { value: "scissors",   label: "✂️ Materials / Craft" },
+  { value: "coffee",     label: "☕ Refreshments" },
+  { value: "group",      label: "👥 Small Group" },
+  { value: "star",       label: "⭐ Highlight" },
+  { value: "palette",    label: "🎨 Art / Painting" },
+  { value: "camera",     label: "📸 Photography" },
+  { value: "music",      label: "🎵 Music" },
+  { value: "book",       label: "📚 Learning" },
+  { value: "heart",      label: "❤️ Wellness" },
+  { value: "gift",       label: "🎁 Takeaway / Gift" },
+  { value: "award",      label: "🏆 Certificate" },
+  { value: "clock",      label: "🕐 Time" },
+  { value: "map",        label: "📍 Location" },
+];
+
+const DEFAULT_EXPECT_ITEMS: WhatToExpectItem[] = [
+  { icon: "leaf",      title: "Mindfulness Focus",  description: "Guided breathing & centering techniques." },
+  { icon: "scissors",  title: "All Materials",      description: "Tools, materials, and supplies included." },
+  { icon: "coffee",    title: "Refreshments",       description: "Herbal tea and light organic snacks." },
+  { icon: "group",     title: "Small Group",        description: "Limited seats for personal attention." },
+];
+
 export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
   // Build bound action for edit mode
   const boundUpdate = workshop
@@ -213,39 +245,42 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
   const action = mode === "edit" ? boundUpdate : createWorkshop;
   const [state, formAction] = useFormState(action, null);
 
-  // Image URL management
-  const initialImages =
-    workshop?.workshop_images?.map((img) => img.image_url) ||
-    (workshop?.image ? [workshop.image] : []);
-  const [imageUrls, setImageUrls] = useState<string[]>(
-    initialImages.length > 0 ? initialImages : [""]
+  const [imageUrl, setImageUrl] = useState<string>(workshop?.image || "");
+  const [cardImageUrl, setCardImageUrl] = useState<string>(workshop?.card_image || "");
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [uploadingCardImage, setUploadingCardImage] = useState<boolean>(false);
+
+  const [expectItems, setExpectItems] = useState<WhatToExpectItem[]>(
+    workshop?.what_to_expect && workshop.what_to_expect.length === 4
+      ? workshop.what_to_expect
+      : DEFAULT_EXPECT_ITEMS
   );
 
-  const addImageField = () => setImageUrls((prev) => [...prev, ""]);
-  const removeImageField = (index: number) =>
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
-  const updateImageUrl = (index: number, value: string) =>
-    setImageUrls((prev) => prev.map((url, i) => (i === index ? value : url)));
+  const updateExpectItem = (index: number, field: keyof WhatToExpectItem, value: string) => {
+    setExpectItems((prev) => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
+  };
 
-  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
-
-  const handleFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, isCard: boolean) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingIndex(index);
+    if (isCard) setUploadingCardImage(true);
+    else setUploadingImage(true);
+    
     try {
       const folderId = workshop?.id || `new-workshop-${Date.now()}`;
       const { url, error } = await uploadWorkshopImage(folderId, file);
       if (error) {
         alert("Upload failed: " + error);
       } else if (url) {
-        updateImageUrl(index, url);
+        if (isCard) setCardImageUrl(url);
+        else setImageUrl(url);
       }
     } catch (err: any) {
       alert("Error uploading file: " + err.message);
     } finally {
-      setUploadingIndex(null);
+      if (isCard) setUploadingCardImage(false);
+      else setUploadingImage(false);
     }
   };
 
@@ -406,7 +441,7 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
           </div>
 
           <div>
-            <label className={labelClass}>Price (₹) *</label>
+            <label className={labelClass}>Price for 1 (₹) *</label>
             <input
               name="price"
               type="number"
@@ -414,6 +449,18 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
               min={1}
               defaultValue={workshop?.price}
               placeholder="1499"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Price for 2 (₹)</label>
+            <input
+              name="price_for_two"
+              type="number"
+              min={1}
+              defaultValue={workshop?.price_for_two}
+              placeholder="2799 (Discounted)"
               className={inputClass}
             />
           </div>
@@ -538,79 +585,152 @@ export default function WorkshopForm({ mode, workshop }: WorkshopFormProps) {
 
       {/* ── Images ─────────────────────── */}
       <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-          <h2 className="text-lg font-serif text-neutral-900">Images</h2>
-          <button
-            type="button"
-            onClick={addImageField}
-            className="text-xs px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-neutral-700 transition-colors font-medium"
-          >
-            + Add Image
-          </button>
+        <h2 className="text-lg font-serif text-neutral-900 border-b border-neutral-100 pb-3">Images</h2>
+
+        <div className="space-y-6">
+          {/* Main Cover Image */}
+          <div className="flex flex-col md:flex-row gap-4 items-start p-4 border border-neutral-100 rounded-xl bg-neutral-50/50">
+            <div className="flex-1 w-full space-y-2">
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-1">
+                  Picture for Home Page & Workshop Detail Page
+                </label>
+                <input
+                  name="image"
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://res.cloudinary.com/..."
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-400 font-medium">Or</span>
+                <label className="relative cursor-pointer px-3 py-1.5 bg-white border border-neutral-200 hover:border-neutral-300 rounded-lg text-xs font-semibold text-neutral-600 shadow-sm transition-all hover:bg-neutral-50 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {uploadingImage ? "Uploading..." : "Upload from Device"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingImage}
+                    onChange={(e) => handleImageChange(e, false)}
+                  />
+                </label>
+              </div>
+            </div>
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="Main Preview"
+                className="w-24 h-24 rounded-lg object-cover border border-neutral-200 bg-white"
+              />
+            )}
+          </div>
+
+          {/* Card Image */}
+          <div className="flex flex-col md:flex-row gap-4 items-start p-4 border border-neutral-100 rounded-xl bg-neutral-50/50">
+            <div className="flex-1 w-full space-y-2">
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-1">
+                  Picture for Workshop Page (Cards)
+                </label>
+                <input
+                  name="card_image"
+                  type="url"
+                  value={cardImageUrl}
+                  onChange={(e) => setCardImageUrl(e.target.value)}
+                  placeholder="https://res.cloudinary.com/..."
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-400 font-medium">Or</span>
+                <label className="relative cursor-pointer px-3 py-1.5 bg-white border border-neutral-200 hover:border-neutral-300 rounded-lg text-xs font-semibold text-neutral-600 shadow-sm transition-all hover:bg-neutral-50 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {uploadingCardImage ? "Uploading..." : "Upload from Device"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingCardImage}
+                    onChange={(e) => handleImageChange(e, true)}
+                  />
+                </label>
+              </div>
+            </div>
+            {cardImageUrl && (
+              <img
+                src={cardImageUrl}
+                alt="Card Preview"
+                className="w-24 h-24 rounded-lg object-cover border border-neutral-200 bg-white"
+              />
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── What to Expect ─────────────── */}
+      <section className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
+        <div className="border-b border-neutral-100 pb-3">
+          <h2 className="text-lg font-serif text-neutral-900">What to Expect</h2>
+          <p className="text-xs text-neutral-500 mt-1">These 4 highlights are shown on the workshop detail page. Customise each item's icon, title, and description.</p>
         </div>
 
-        <div className="space-y-4">
-          {imageUrls.map((url, index) => (
-            <div key={index} className="flex flex-col md:flex-row gap-3 items-start p-4 border border-neutral-100 rounded-xl bg-neutral-50/50">
-              <div className="flex-1 w-full space-y-2">
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Image URL</label>
-                  <input
-                    name={`image_url_${index}`}
-                    type="url"
-                    value={url}
-                    onChange={(e) => updateImageUrl(index, e.target.value)}
-                    placeholder="https://res.cloudinary.com/..."
-                    className={inputClass}
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-400 font-medium">Or</span>
-                  <label className="relative cursor-pointer px-3 py-1.5 bg-white border border-neutral-200 hover:border-neutral-300 rounded-lg text-xs font-semibold text-neutral-600 shadow-sm transition-all hover:bg-neutral-50 flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    {uploadingIndex === index ? "Uploading..." : "Upload from Device"}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingIndex !== null}
-                      onChange={(e) => handleFileChange(index, e)}
-                    />
-                  </label>
-                </div>
+        {/* Hidden JSON field */}
+        <input type="hidden" name="what_to_expect" value={JSON.stringify(expectItems)} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {expectItems.map((item, idx) => (
+            <div key={idx} className="border border-neutral-100 rounded-xl p-4 bg-neutral-50/40 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Item {idx + 1}</span>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0 self-end md:self-center">
-                {url && (
-                  <img
-                    src={url}
-                    alt={`Preview ${index + 1}`}
-                    className="w-16 h-16 rounded-lg object-cover border border-neutral-200 bg-white"
-                    onError={(e) =>
-                      ((e.target as HTMLImageElement).style.display = "none")
-                    }
-                  />
-                )}
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageField(index)}
-                    className="text-red-500 hover:text-red-700 w-8 h-8 rounded-lg border border-red-100 bg-white hover:bg-red-50 flex items-center justify-center transition-colors text-sm shadow-sm"
-                    title="Remove"
-                  >
-                    ✕
-                  </button>
-                )}
+              {/* Icon picker */}
+              <div>
+                <label className={labelClass}>Icon</label>
+                <select
+                  value={item.icon}
+                  onChange={(e) => updateExpectItem(idx, "icon", e.target.value)}
+                  className={inputClass}
+                >
+                  {ICON_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className={labelClass}>Title</label>
+                <input
+                  type="text"
+                  value={item.title}
+                  onChange={(e) => updateExpectItem(idx, "title", e.target.value)}
+                  placeholder="e.g. All Materials Included"
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className={labelClass}>Description</label>
+                <input
+                  type="text"
+                  value={item.description}
+                  onChange={(e) => updateExpectItem(idx, "description", e.target.value)}
+                  placeholder="e.g. Tools, materials, and supplies included."
+                  className={inputClass}
+                />
               </div>
             </div>
           ))}
         </div>
-        <p className="text-xs text-neutral-400">
-          The first image will be used as the main workshop image.
-        </p>
       </section>
 
       {/* ── Actions ────────────────────── */}

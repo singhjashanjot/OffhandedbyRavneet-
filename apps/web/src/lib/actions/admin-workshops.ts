@@ -53,7 +53,10 @@ interface WorkshopInput {
   total_slots: number;
   available_slots: number;
   is_active: boolean;
-  image_urls: string[];
+  image?: string;
+  card_image?: string;
+  price_for_two?: number;
+  what_to_expect?: Array<{ icon: string; title: string; description: string }>;
   long_description?: string;
   duration?: string;
   instructor?: string;
@@ -85,15 +88,6 @@ function validateWorkshop(input: WorkshopInput): string[] {
 }
 
 function parseFormData(formData: FormData): WorkshopInput {
-  const imageUrls: string[] = [];
-  const entries = Array.from(formData.entries());
-  for (let i = 0; i < entries.length; i++) {
-    const [key, value] = entries[i];
-    if (key.startsWith("image_url_") && typeof value === "string" && value.trim()) {
-      imageUrls.push(value.trim());
-    }
-  }
-
   return {
     title: (formData.get("title") as string) || "",
     description: (formData.get("description") as string) || "",
@@ -101,6 +95,9 @@ function parseFormData(formData: FormData): WorkshopInput {
     category: (formData.get("category") as string) || "",
     workshop_type: (formData.get("workshop_type") as string) || "public",
     price: parseInt((formData.get("price") as string) || "0", 10),
+    price_for_two: formData.get("price_for_two") 
+      ? parseInt((formData.get("price_for_two") as string), 10) 
+      : undefined,
     date: (formData.get("date") as string) || "",
     start_time: (formData.get("start_time") as string) || "",
     end_time: (formData.get("end_time") as string) || "",
@@ -116,7 +113,13 @@ function parseFormData(formData: FormData): WorkshopInput {
     instructor: (formData.get("instructor") as string) || "",
     level: (formData.get("level") as string) || "Beginner Friendly",
     location: (formData.get("location") as string) || "",
-    image_urls: imageUrls,
+    image: (formData.get("image") as string) || undefined,
+    card_image: (formData.get("card_image") as string) || undefined,
+    what_to_expect: (() => {
+      const raw = formData.get("what_to_expect") as string;
+      if (!raw) return undefined;
+      try { return JSON.parse(raw); } catch { return undefined; }
+    })(),
     coupon_code: (formData.get("coupon_code") as string) || "",
     coupon_discount_percent: formData.get("coupon_discount_percent")
       ? parseFloat(formData.get("coupon_discount_percent") as string)
@@ -151,6 +154,7 @@ export async function createWorkshop(
         slug,
         workshop_type: input.workshop_type,
         price: input.price,
+        price_for_two: input.price_for_two || null,
         date: input.date,
         start_time: input.start_time,
         end_time: input.end_time || null,
@@ -163,7 +167,9 @@ export async function createWorkshop(
         total_slots: input.total_slots,
         available_slots: input.available_slots,
         is_active: input.is_active,
-        image: input.image_urls[0] || null,
+        image: input.image || null,
+        card_image: input.card_image || null,
+        what_to_expect: input.what_to_expect || null,
         coupon_code: input.coupon_code?.trim() || null,
         coupon_discount_percent: input.coupon_discount_percent || null,
       })
@@ -175,22 +181,7 @@ export async function createWorkshop(
       return { error: `Failed to create workshop: ${insertError.message}` };
     }
 
-    // Insert workshop images
-    if (input.image_urls.length > 0 && workshop) {
-      const imageRows = input.image_urls.map((url, i) => ({
-        workshop_id: workshop.id,
-        image_url: url,
-        sort_order: i,
-      }));
-
-      const { error: imgError } = await supabase
-        .from("workshop_images")
-        .insert(imageRows);
-
-      if (imgError) {
-        console.error("Workshop images insert error:", imgError);
-      }
-    }
+    // We removed workshop_images relation in favor of explicit image and card_image columns
 
     revalidatePath("/workshops");
     revalidatePath("/admin/workshops");
@@ -227,6 +218,7 @@ export async function updateWorkshop(
         category: input.category,
         workshop_type: input.workshop_type,
         price: input.price,
+        price_for_two: input.price_for_two || null,
         date: input.date,
         start_time: input.start_time,
         end_time: input.end_time || null,
@@ -239,7 +231,9 @@ export async function updateWorkshop(
         total_slots: input.total_slots,
         available_slots: input.available_slots,
         is_active: input.is_active,
-        image: input.image_urls[0] || null,
+        image: input.image || null,
+        card_image: input.card_image || null,
+        what_to_expect: input.what_to_expect || null,
         coupon_code: input.coupon_code?.trim() || null,
         coupon_discount_percent: input.coupon_discount_percent || null,
       })
@@ -250,27 +244,7 @@ export async function updateWorkshop(
       return { error: `Failed to update workshop: ${updateError.message}` };
     }
 
-    // Replace all images: delete old, insert new
-    await supabase
-      .from("workshop_images")
-      .delete()
-      .eq("workshop_id", workshopId);
-
-    if (input.image_urls.length > 0) {
-      const imageRows = input.image_urls.map((url, i) => ({
-        workshop_id: workshopId,
-        image_url: url,
-        sort_order: i,
-      }));
-
-      const { error: imgError } = await supabase
-        .from("workshop_images")
-        .insert(imageRows);
-
-      if (imgError) {
-        console.error("Workshop images update error:", imgError);
-      }
-    }
+    // We removed workshop_images relation update logic in favor of the single explicit image columns
 
     revalidatePath("/workshops");
     revalidatePath("/admin/workshops");

@@ -7,6 +7,7 @@ export interface Workshop {
   title: string;
   description: string;
   image: string;
+  card_image?: string;
   price: number;
   date: string;
   time: string;

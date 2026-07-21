@@ -142,51 +142,52 @@ export default async function EventDetailsPage({
             {/* What to Expect */}
             <section className="bg-[#FFFFF5] border border-neutral-200 rounded-2xl p-6 md:p-8">
               <h3 className="text-xl font-display font-light text-neutral-900 mb-6">What to Expect</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
-                {workshop.what_we_do && workshop.what_we_do.length > 0 ? (
-                  workshop.what_we_do.map((item: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="text-brand-600">
-                        <CheckIcon />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-neutral-900 text-sm">{item}</h4>
-                      </div>
-                    </li>
-                  ))
-                ) : (
-                  <>
-                    <li className="flex items-start gap-3">
-                      <span className="text-brand-500"><LeafIcon /></span>
-                      <div>
-                        <h4 className="font-semibold text-neutral-900">Mindfulness Focus</h4>
-                        <p className="text-sm text-neutral-500 mt-1">Guided breathing & centering techniques.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-brand-500"><MaterialsIcon /></span>
-                      <div>
-                        <h4 className="font-semibold text-neutral-900">All Materials</h4>
-                        <p className="text-sm text-neutral-500 mt-1">Tools, materials, and supplies included.</p>
-                      </div>
-                    </li>
-                  </>
-                )}
-                <li className="flex items-start gap-3">
-                  <span className="text-brand-500"><CoffeeIcon /></span>
-                  <div>
-                    <h4 className="font-semibold text-neutral-900">Refreshments</h4>
-                    <p className="text-sm text-neutral-500 mt-1">Herbal tea and light organic snacks.</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-brand-500"><GroupIcon /></span>
-                  <div>
-                    <h4 className="font-semibold text-neutral-900">Small Group</h4>
-                    <p className="text-sm text-neutral-500 mt-1">Limited seats for personal attention.</p>
-                  </div>
-                </li>
-              </ul>
+              {(() => {
+                // Use custom items from DB if available, else use hardcoded defaults
+                const items: { icon: string; title: string; description: string }[] =
+                  workshop.what_to_expect && workshop.what_to_expect.length > 0
+                    ? workshop.what_to_expect
+                    : [
+                        { icon: "leaf",     title: "Mindfulness Focus", description: "Guided breathing & centering techniques." },
+                        { icon: "scissors", title: "All Materials",     description: "Tools, materials, and supplies included." },
+                        { icon: "coffee",   title: "Refreshments",      description: "Herbal tea and light organic snacks." },
+                        { icon: "group",    title: "Small Group",       description: "Limited seats for personal attention." },
+                      ];
+
+                const IconFor = ({ name }: { name: string }) => {
+                  switch (name) {
+                    case "leaf":     return <LeafIcon />;
+                    case "scissors": return <MaterialsIcon />;
+                    case "coffee":   return <CoffeeIcon />;
+                    case "group":    return <GroupIcon />;
+                    case "star":     return <StarIcon />;
+                    case "palette":  return <PaletteIcon />;
+                    case "camera":   return <CameraIcon />;
+                    case "music":    return <MusicIcon />;
+                    case "book":     return <BookIcon />;
+                    case "heart":    return <HeartIcon />;
+                    case "gift":     return <GiftIcon />;
+                    case "award":    return <AwardIcon />;
+                    case "clock":    return <ClockIcon />;
+                    case "map":      return <LocationIcon />;
+                    default:         return <LeafIcon />;
+                  }
+                };
+
+                return (
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+                    {items.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <span className="text-brand-500 mt-0.5"><IconFor name={item.icon} /></span>
+                        <div>
+                          <h4 className="font-semibold text-neutral-900">{item.title}</h4>
+                          <p className="text-sm text-neutral-500 mt-1">{item.description}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
             </section>
 
             {/* Instructor Bio */}
@@ -452,10 +453,66 @@ function ArrowRightIcon({ className = "w-5 h-5" }: { className?: string }) {
 
 
 
-function HeartIcon({ className = "w-5 h-5" }: { className?: string }) {
+function HeartIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
+  );
+}
+
+function StarIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+}
+
+function PaletteIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+    </svg>
+  );
+}
+
+function CameraIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" />
+    </svg>
+  );
+}
+
+function MusicIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+function BookIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+    </svg>
+  );
+}
+
+function GiftIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polyline points="20 12 20 22 4 22 4 12" /><rect width="20" height="5" x="2" y="7" /><line x1="12" x2="12" y1="22" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </svg>
+  );
+}
+
+function AwardIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
     </svg>
   );
 }

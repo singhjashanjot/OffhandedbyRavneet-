@@ -166,28 +166,36 @@ export default async function AdminBookingsPage() {
                           label="Payment Status"
                           value={
                             <div className="flex items-center gap-2">
-                              <span
-                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                  booking.payments?.status === "SUCCESS"
-                                    ? "bg-green-100 text-green-700 border border-green-200"
-                                    : isPartialPayment && booking.payments?.status !== "SUCCESS"
-                                    ? "bg-amber-100 text-amber-800 border border-amber-200"
-                                    : booking.payments?.status === "PENDING"
-                                    ? "bg-amber-100 text-amber-700 border border-amber-200"
-                                    : "bg-neutral-100 text-neutral-500 border border-neutral-200"
-                                }`}
-                              >
-                                {booking.payments?.status === "SUCCESS"
-                                  ? "Fully Paid"
-                                  : isPartialPayment && booking.payments?.status !== "SUCCESS"
-                                  ? "Partial Paid"
-                                  : booking.payments?.status === "PENDING"
-                                  ? "Payment Pending"
-                                  : booking.payments?.status || "—"}
-                              </span>
-                              {booking.payments?.status !== "SUCCESS" && booking.payments?.id && (
-                                <MarkPaymentDoneButton paymentId={booking.payments.id} />
-                              )}
+                            {(() => {
+                              const isFullyPaid = amountPaid >= totalExpected;
+                              const isPartialPayment = amountPaid > 0 && amountPaid < totalExpected;
+                              return (
+                                <>
+                                  <span
+                                    className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                      isFullyPaid
+                                        ? "bg-green-100 text-green-700 border border-green-200"
+                                        : isPartialPayment
+                                        ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                        : booking.payments?.status === "PENDING"
+                                        ? "bg-amber-100 text-amber-700 border border-amber-200"
+                                        : "bg-neutral-100 text-neutral-500 border border-neutral-200"
+                                    }`}
+                                  >
+                                    {isFullyPaid
+                                      ? "Fully Paid"
+                                      : isPartialPayment
+                                      ? "Partial Paid"
+                                      : booking.payments?.status === "PENDING"
+                                      ? "Payment Pending"
+                                      : booking.payments?.status || "—"}
+                                  </span>
+                                  {isPartialPayment && booking.payments?.status !== "SUCCESS" && booking.payments?.id && (
+                                    <MarkPaymentDoneButton paymentId={booking.payments.id} />
+                                  )}
+                                </>
+                              );
+                            })()}
                             </div>
                           }
                         />
@@ -202,12 +210,14 @@ export default async function AdminBookingsPage() {
                                 : "Razorpay (Online)"
                               : booking.payments?.provider_order_id === "OFFLINE_PAYMENT"
                               ? "Offline (Pay at Workshop)"
+                              : booking.payments?.provider_order_id
+                              ? "Razorpay (Online)"
                               : "—"
                           }
                         />
                         <DetailRow
                           label="Payment ID"
-                          value={booking.payments?.provider_payment_id || "—"}
+                          value={booking.payments?.provider_payment_id || booking.payments?.provider_order_id || "—"}
                         />
                         <DetailRow
                           label="Remarks / Info"

@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
       const { data: workshop, error: workshopError } = await supabase
         .from("workshops")
-        .select("id, title, price, available_slots, is_active, coupon_code, coupon_discount_percent")
+        .select("id, title, price, price_for_two, available_slots, is_active, coupon_code, coupon_discount_percent")
         .eq("id", workshopId)
         .single();
 
@@ -117,7 +117,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      let baseAmount = workshop.price * ticketCount;
+      let baseAmount = 0;
+      if (workshop.price_for_two && ticketCount >= 2) {
+        const pairs = Math.floor(ticketCount / 2);
+        const remainder = ticketCount % 2;
+        baseAmount = (pairs * workshop.price_for_two) + (remainder * workshop.price);
+      } else {
+        baseAmount = workshop.price * ticketCount;
+      }
 
       if (couponCode) {
         if (workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {

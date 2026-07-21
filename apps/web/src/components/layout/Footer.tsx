@@ -21,7 +21,6 @@ const navigationLinks = [
 
 const socialLinks = [
   { label: "Instagram", href: "https://instagram.com/offhandedbyravneet", external: true },
-  { label: "Facebook", href: "https://facebook.com/offhanded", external: true },
   { label: "WhatsApp", href: "https://wa.me/919855801521", external: true },
 ];
 

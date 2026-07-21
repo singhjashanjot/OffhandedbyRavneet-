@@ -51,7 +51,7 @@ export function WorkshopCard({
           >
             <div className="absolute inset-0 bg-brand-900/10 z-10 group-hover:bg-transparent transition-colors duration-500" />
             <Image
-              src={workshop.image}
+              src={workshop.card_image || workshop.image}
               alt={workshop.title}
               fill
               sizes={isFeatured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, 33vw"}

@@ -30,6 +30,7 @@ interface DbWorkshop {
   is_active: boolean;
   what_we_do: string[] | null;
   image: string | null;
+  card_image?: string | null;
   color: string | null;
   created_at: string;
   updated_at: string;
@@ -101,6 +102,7 @@ export function dbToWorkshop(db: DbWorkshop): Workshop {
     title: db.title,
     description: db.description,
     image: db.image || "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic",
+    card_image: db.card_image || undefined,
     price: db.price,
     date: db.date,
     time: formatTime(db.start_time),

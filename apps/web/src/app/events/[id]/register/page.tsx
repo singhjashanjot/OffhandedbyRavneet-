@@ -115,7 +115,7 @@ export default function RegisterPage({
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.name.trim() || !formData.email.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
       const form = document.querySelector("form");
       if (form && !form.checkValidity()) {
         form.reportValidity();
@@ -289,7 +289,17 @@ export default function RegisterPage({
     setCouponError(null);
   };
 
-  const totalAmount = workshop.price * tickets;
+  let totalAmount = 0;
+  let isPairDiscountApplied = false;
+  const baseTotal = workshop.price * tickets;
+  if (workshop.price_for_two && tickets >= 2) {
+    const pairs = Math.floor(tickets / 2);
+    const remainder = tickets % 2;
+    totalAmount = (pairs * workshop.price_for_two) + (remainder * workshop.price);
+    isPairDiscountApplied = true;
+  } else {
+    totalAmount = baseTotal;
+  }
   const discountAmount = couponApplied ? Math.round(totalAmount * (discountPercent / 100)) : 0;
   const taxAmount = 0;
   const grandTotal = totalAmount - discountAmount;
@@ -456,8 +466,14 @@ export default function RegisterPage({
                   <div className="flex flex-col gap-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-[#2c3627]/60">{formatPrice(workshop.price)} × {tickets} {tickets === 1 ? "ticket" : "tickets"}</span>
-                      <span className="font-medium text-[#2c3627]">{formatPrice(totalAmount)}</span>
+                      <span className="font-medium text-[#2c3627]">{formatPrice(baseTotal)}</span>
                     </div>
+                    {isPairDiscountApplied && (
+                      <div className="flex justify-between text-sm text-green-700 font-semibold mt-1">
+                        <span>Couple Discount Applied ✨</span>
+                        <span>-{formatPrice(baseTotal - totalAmount)}</span>
+                      </div>
+                    )}
                     {couponApplied && (
                       <div className="flex justify-between text-sm text-green-700 font-semibold">
                         <span>Discount ({discountPercent}%)</span>
@@ -715,7 +731,6 @@ export default function RegisterPage({
                         <label htmlFor="phone" className="text-[#2c3627] text-sm font-bold tracking-wide uppercase">
                           Contact Number
                         </label>
-                        <span className="text-[#B2C0AD] text-[10px] font-bold uppercase">Optional</span>
                       </div>
                       <div className="flex gap-2">
                         <select
@@ -738,6 +753,7 @@ export default function RegisterPage({
                         <input
                           type="tel"
                           name="phone"
+                          required
                           placeholder="98765 43210"
                           className="flex-1 min-w-0 rounded-lg focus:border-[#2c3627] focus:ring-1 focus:ring-[#2c3627] h-14 px-4 text-base transition-all bg-[#F9F9E8] border border-[#2c3627]/20 shadow-inner"
                           value={formData.phone}
@@ -748,9 +764,12 @@ export default function RegisterPage({
 
                     {/* Age */}
                     <div className="flex flex-col gap-2 w-full md:w-28 flex-shrink-0">
-                      <label htmlFor="age" className="text-[#2c3627] text-sm font-bold tracking-wide uppercase">
-                        Age
-                      </label>
+                      <div className="flex justify-between items-center">
+                        <label htmlFor="age" className="text-[#2c3627] text-sm font-bold tracking-wide uppercase">
+                          Age
+                        </label>
+                        <span className="text-[#B2C0AD] text-[10px] font-bold uppercase">Optional</span>
+                      </div>
                       <input
                         type="number"
                         id="age"

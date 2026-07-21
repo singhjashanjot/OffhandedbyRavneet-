@@ -155,7 +155,7 @@ export default async function WorkshopsPage() {
                           <img
                             alt={workshop.title}
                             className="w-full h-full object-cover transition-all duration-1000 scale-100 group-hover:scale-105"
-                            src={workshop.image || "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic"}
+                            src={workshop.card_image || workshop.image || "https://res.cloudinary.com/daoho0jwj/image/upload/c_scale,w_800,f_auto,q_auto/v1779636491/IMG_5555_aevxtd.heic"}
                           />
                         </div>
                         <div className="flex flex-col flex-grow px-2">
