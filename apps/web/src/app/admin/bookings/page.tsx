@@ -67,7 +67,11 @@ export default async function AdminBookingsPage() {
             const totalExpected = baseTotal - discountAmount;
             const originalPaid = booking.payments?.amount || 0;
             const isPartialPayment = originalPaid > 0 && originalPaid < totalExpected;
-            const amountPaid = booking.total_paid_amount !== undefined ? booking.total_paid_amount : originalPaid;
+            let amountPaid = booking.total_paid_amount !== undefined ? booking.total_paid_amount : originalPaid;
+            if (amountPaid > totalExpected) {
+              amountPaid = originalPaid;
+              if (amountPaid > totalExpected) amountPaid = totalExpected;
+            }
             const remainingAmount = totalExpected - amountPaid;
 
             return (
@@ -138,7 +142,7 @@ export default async function AdminBookingsPage() {
                           value={
                             amountPaid ? (
                               <span className="font-semibold text-neutral-900">
-                                {formatPrice(amountPaid)}
+                                {formatPrice(totalExpected)}
                                 {isPartialPayment && (
                                   <span className="text-xs text-neutral-500 font-normal ml-1.5">
                                     {booking.payments?.status === "SUCCESS"
