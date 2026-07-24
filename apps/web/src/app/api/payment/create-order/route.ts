@@ -81,11 +81,17 @@ export async function POST(request: NextRequest) {
 
       const { data: workshop, error: workshopError } = await supabase
         .from("workshops")
-        .select("id, title, price, price_for_two, available_slots, is_active, coupon_code, coupon_discount_percent")
+        .select("*")
         .eq("id", workshopId)
         .single();
 
-      if (workshopError || !workshop) {
+      if (workshopError) {
+        console.error("[create-order] Supabase error fetching workshop:", workshopError);
+        // Fallback to select(*) if column is missing, or just return 500
+        // For now, let's just log it and return 500 so it doesn't manifest as 404
+        return NextResponse.json({ error: "Internal Server Error fetching workshop." }, { status: 500 });
+      }
+      if (!workshop) {
         return NextResponse.json({ error: "Workshop not found." }, { status: 404 });
       }
       if (!workshop.is_active) {
