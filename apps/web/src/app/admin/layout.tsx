@@ -25,7 +25,7 @@ export default async function AdminLayout({
   await requireAdmin();
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex">
+    <div className="min-h-screen bg-transparent flex">
       {/* Sidebar */}
       <aside className="w-64 bg-[#1B3022] text-white flex flex-col fixed h-full z-40">
         <div className="p-6 border-b border-white/10">

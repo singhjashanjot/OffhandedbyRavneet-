@@ -18,68 +18,62 @@ export default async function AdminDashboard() {
       label: "Total Workshops",
       value: stats.totalWorkshops,
       icon: "🎨",
-      color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      color: "bg-white text-primary border-brand-200 shadow-soft",
     },
     {
       label: "Confirmed Bookings",
       value: stats.totalBookings,
       icon: "📋",
-      color: "bg-blue-50 text-blue-700 border-blue-200",
+      color: "bg-white text-primary border-brand-200 shadow-soft",
     },
     {
       label: "Registered Users",
       value: stats.totalUsers,
       icon: "👥",
-      color: "bg-purple-50 text-purple-700 border-purple-200",
-    },
-    {
-      label: "Total Revenue",
-      value: `₹${stats.totalRevenue.toLocaleString("en-IN")}`,
-      icon: "💰",
-      color: "bg-amber-50 text-amber-700 border-amber-200",
+      color: "bg-white text-primary border-brand-200 shadow-soft",
     },
   ];
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-500 mt-1">Overview of your platform activity</p>
+      <div className="mb-10">
+        <h1 className="text-4xl font-serif text-primary tracking-tight">Dashboard</h1>
+        <p className="text-base text-brand-600 mt-2">Overview of your platform activity</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`rounded-2xl border p-6 ${card.color}`}
+            className={`rounded-2xl border p-6 transition-all duration-300 hover:shadow-soft-lg ${card.color}`}
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl">{card.icon}</span>
+              <span className="text-3xl">{card.icon}</span>
             </div>
-            <p className="text-3xl font-bold">{card.value}</p>
-            <p className="text-sm mt-1 opacity-70">{card.label}</p>
+            <p className="text-4xl font-display font-medium">{card.value}</p>
+            <p className="text-sm font-medium mt-2 text-brand-600 uppercase tracking-wider">{card.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-200 p-8">
-        <h2 className="text-lg font-medium text-neutral-800 mb-4">Quick Actions</h2>
+      <div className="bg-white rounded-3xl border border-brand-200 p-8 shadow-soft">
+        <h2 className="text-xl font-serif text-primary mb-6">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href="/admin/workshops" className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition text-center">
-            <span className="text-2xl block mb-2">🎨</span>
-            <span className="text-sm font-medium text-neutral-700">Manage Workshops</span>
+          <a href="/admin/workshops" className="p-6 rounded-2xl bg-brand-50 hover:bg-brand-100 transition-colors text-center border border-transparent hover:border-brand-200">
+            <span className="text-3xl block mb-3">🎨</span>
+            <span className="text-sm font-medium text-primary">Manage Workshops</span>
           </a>
-          <a href="/admin/bookings" className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition text-center">
-            <span className="text-2xl block mb-2">📋</span>
-            <span className="text-sm font-medium text-neutral-700">View Bookings</span>
+          <a href="/admin/bookings" className="p-6 rounded-2xl bg-brand-50 hover:bg-brand-100 transition-colors text-center border border-transparent hover:border-brand-200">
+            <span className="text-3xl block mb-3">📋</span>
+            <span className="text-sm font-medium text-primary">View Bookings</span>
           </a>
-          <a href="/admin/reviews" className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition text-center">
-            <span className="text-2xl block mb-2">⭐</span>
-            <span className="text-sm font-medium text-neutral-700">Moderate Reviews</span>
+          <a href="/admin/reviews" className="p-6 rounded-2xl bg-brand-50 hover:bg-brand-100 transition-colors text-center border border-transparent hover:border-brand-200">
+            <span className="text-3xl block mb-3">⭐</span>
+            <span className="text-sm font-medium text-primary">Moderate Reviews</span>
           </a>
-          <a href="/admin/users" className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition text-center">
-            <span className="text-2xl block mb-2">👥</span>
-            <span className="text-sm font-medium text-neutral-700">View Users</span>
+          <a href="/admin/users" className="p-6 rounded-2xl bg-brand-50 hover:bg-brand-100 transition-colors text-center border border-transparent hover:border-brand-200">
+            <span className="text-3xl block mb-3">👥</span>
+            <span className="text-sm font-medium text-primary">View Users</span>
           </a>
         </div>
       </div>
