@@ -41,17 +41,23 @@ const bebasNeue = Bebas_Neue({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.offhandedbyravneet.com"),
   title: {
-    default: "Offhanded | Immersive Art Workshops in Jalandhar, Punjab & India",
+    default: "Upcoming Art Workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab & India | Offhanded",
     template: "%s | Offhanded by Ravneet",
   },
   description:
-    "Join immersive, meditative art workshops by Offhanded by Ravneet. Based in Jalandhar, Punjab, offering pottery texture art, Lippan art, canvas painting, and 20+ creative workshops across India.",
+    "Book the best upcoming art workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab, and across India. Join Offhanded for pottery, texture art, and immersive painting classes.",
   keywords: [
     "art workshops",
     "art workshops in punjab",
     "art workshops in jalandhar",
     "art workshops in chandigarh",
+    "art workshops in mohali",
     "art workshops in ludhiana",
+    "upcoming art workshops in jalandhar",
+    "upcoming art workshops in chandigarh",
+    "upcoming art workshops in ludhiana",
+    "upcoming art workshops in mohali",
+    "upcoming art workshops in punjab",
     "art workshops in amritsar",
     "art workshops in bathinda",
     "art workshops in hoshiarpur",
@@ -100,9 +106,9 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://www.offhandedbyravneet.com",
     siteName: "Offhanded",
-    title: "Offhanded | Immersive Art Workshops in Jalandhar, Punjab & India",
+    title: "Upcoming Art Workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab & India | Offhanded",
     description:
-      "Discover immersive, meditative art workshops, pottery classes, and premium creative experiences by Offhanded by Ravneet in Punjab and India.",
+      "Discover the best upcoming art workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab & India. Join Offhanded for immersive pottery and painting classes.",
     images: [
       {
         url: "/og-image.png",
@@ -114,8 +120,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Offhanded | Immersive Art Workshops in Punjab & India",
-    description: "Discover immersive, meditative art workshops and pottery classes by Offhanded by Ravneet.",
+    title: "Upcoming Art Workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab & India",
+    description: "Discover the best upcoming art workshops in Jalandhar, Chandigarh, Mohali, Ludhiana, Punjab & India by Offhanded.",
     images: ["/og-image.png"],
   },
   robots: {

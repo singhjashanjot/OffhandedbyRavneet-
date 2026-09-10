@@ -157,8 +157,6 @@ export async function createOfflineBooking(params: {
         attendee_name: attendeeName || user.user_metadata?.full_name || "Guest",
         attendee_email: attendeeEmail || user.email || "",
         attendee_phone: attendeePhone || null,
-        age: age || null,
-        remarks: remarks || null,
         status: "CONFIRMED",
         coupon_code: appliedCouponCode,
         coupon_discount_percent: appliedDiscountPercent,
@@ -276,7 +274,7 @@ export async function markPaymentAsDone(paymentId: string) {
     // 2. Fetch the payment record to check if it's PENDING
     const { data: payment, error: fetchError } = await supabase
       .from("payments")
-      .select("id, status, purpose, reference_id, amount, user_id, bookings(tickets, workshops(price))")
+      .select("id, status, purpose, reference_id, amount, user_id, bookings(tickets, discount_amount, workshops(price))")
       .eq("id", paymentId)
       .single();
 
@@ -295,7 +293,9 @@ export async function markPaymentAsDone(paymentId: string) {
     if (payment.purpose === "WORKSHOP" && payment.bookings && Array.isArray(payment.bookings) && payment.bookings.length > 0) {
       const b = payment.bookings[0] as any;
       if (b.workshops?.price) {
-        const totalExpected = b.workshops.price * b.tickets;
+        const baseTotal = b.workshops.price * b.tickets;
+        const discount = b.discount_amount || 0;
+        const totalExpected = baseTotal - discount;
         targetAmount = totalExpected;
         if (payment.amount < totalExpected) {
           isPartial = true;
@@ -360,6 +360,100 @@ export async function markPaymentAsDone(paymentId: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Unexpected error in markPaymentAsDone:", error);
+    return { success: false, error: error.message || "An unexpected error occurred." };
+  }
+}
+
+/** Re-send customer confirmation + owner alert for an existing confirmed booking.
+ *  Used for bookings repaired directly in the DB (SQL script / webhook), where
+ *  the verify-route email step never ran. */
+export async function resendBookingEmails(bookingId: string) {
+  try {
+    await requireAdmin();
+
+    const supabase = createClient();
+
+    const { data: booking, error: bookingError } = await supabase
+      .from("bookings")
+      .select("id, tickets, attendee_name, attendee_email, attendee_phone, payment_id, discount_amount, workshops(title, date, start_time, end_time, venue_name)")
+      .eq("id", bookingId)
+      .single();
+
+    if (bookingError || !booking) {
+      return { success: false, error: "Booking not found." };
+    }
+
+    const ws = Array.isArray(booking.workshops) ? booking.workshops[0] : booking.workshops;
+
+    let amountPaid = 0;
+    if (booking.payment_id) {
+      const { data: payment } = await supabase
+        .from("payments")
+        .select("amount")
+        .eq("id", booking.payment_id)
+        .maybeSingle();
+      amountPaid = payment?.amount || 0;
+    }
+
+    const workshopDate = ws?.date
+      ? new Date(ws.date).toLocaleDateString("en-IN", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Asia/Kolkata",
+        })
+      : "";
+    const workshopTime = ws?.start_time
+      ? `${ws.start_time}${ws.end_time ? ` – ${ws.end_time}` : ""}`
+      : "";
+
+    const emailData = {
+      customerName: booking.attendee_name || "Guest",
+      customerEmail: booking.attendee_email || "",
+      workshopTitle: ws?.title || "Workshop",
+      workshopDate,
+      workshopTime,
+      tickets: booking.tickets || 1,
+      amountPaid,
+      bookingId: booking.id,
+    };
+
+    if (!emailData.customerEmail) {
+      return { success: false, error: "Booking has no attendee email." };
+    }
+
+    const customerRes = await sendBookingConfirmationToCustomer({
+      ...emailData,
+      workshopVenue: ws?.venue_name || "",
+    });
+    if (customerRes?.error) {
+      console.error("[resend] Customer email failed:", customerRes.error);
+      return { success: false, error: "Customer email failed: " + String(customerRes.error) };
+    }
+
+    // Respect Resend 2 req/sec limit
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const ownerRes = await sendNewBookingAlertToOwner({
+      customerName: emailData.customerName,
+      customerEmail: emailData.customerEmail,
+      customerPhone: booking.attendee_phone || undefined,
+      workshopTitle: emailData.workshopTitle,
+      workshopDate,
+      workshopTime,
+      tickets: emailData.tickets,
+      amountPaid,
+      bookingId: booking.id,
+    });
+    if (ownerRes?.error) {
+      console.error("[resend] Owner alert failed:", ownerRes.error);
+      return { success: true, message: "Customer email sent, owner alert failed." };
+    }
+
+    return { success: true, message: "Confirmation + owner alert sent." };
+  } catch (error: any) {
+    console.error("Unexpected error in resendBookingEmails:", error);
     return { success: false, error: error.message || "An unexpected error occurred." };
   }
 }

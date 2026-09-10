@@ -3,6 +3,7 @@ import { formatPrice, formatDate } from "@/data/workshops";
 import type { Metadata } from "next";
 import { MarkPaymentDoneButton } from "@/components/admin/MarkPaymentDoneButton";
 import { RefreshButton } from "@/components/admin/RefreshButton";
+import { ResendEmailButton } from "@/components/admin/ResendEmailButton";
 
 /* ========================================
    ADMIN — BOOKINGS MANAGEMENT
@@ -69,8 +70,7 @@ export default async function AdminBookingsPage() {
             const isPartialPayment = originalPaid > 0 && originalPaid < totalExpected;
             let amountPaid = booking.total_paid_amount !== undefined ? booking.total_paid_amount : originalPaid;
             if (amountPaid > totalExpected) {
-              amountPaid = originalPaid;
-              if (amountPaid > totalExpected) amountPaid = totalExpected;
+              amountPaid = totalExpected;
             }
             const remainingAmount = totalExpected - amountPaid;
 
@@ -223,6 +223,12 @@ export default async function AdminBookingsPage() {
                           label="Payment ID"
                           value={booking.payments?.provider_payment_id || booking.payments?.provider_order_id || "—"}
                         />
+                        {booking.status === "CONFIRMED" && (
+                          <DetailRow
+                            label="Notifications"
+                            value={<ResendEmailButton bookingId={booking.id} />}
+                          />
+                        )}
                         <DetailRow
                           label="Remarks / Info"
                           value={booking.remarks || booking.special_requests || booking.notes || booking.attendee_notes}

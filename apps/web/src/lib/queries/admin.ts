@@ -113,10 +113,10 @@ export async function getAdminBookings() {
       const key = `${booking.user_id}_${booking.workshop_id}`;
       const successSum = successPaymentMap.get(key) || 0;
       
-      // If the main payment linked to the booking is not SUCCESS (e.g. PENDING or CREATED),
-      // we should still count its amount as part of the total paid amount (online partial payment)
+      // Partial (balance-due) payments are PENDING with a provider_payment_id;
+      // count them toward total paid. CREATED rows carry no captured money.
       let totalPaid = successSum;
-      if (booking.payments && booking.payments.status !== "SUCCESS") {
+      if (booking.payments && booking.payments.status === "PENDING") {
         totalPaid += booking.payments.amount || 0;
       }
       

@@ -172,7 +172,6 @@ export async function POST(request: NextRequest) {
          If already verified, return the existing result safely.
     -------------------------------------------------- */
     if (payment.status === "SUCCESS" || (payment.status === "PENDING" && payment.provider_payment_id)) {
-      // Already confirmed — return existing booking if available
       if (payment.purpose === "WORKSHOP") {
         const { data: existingBooking } = await supabase
           .from("bookings")
@@ -180,13 +179,18 @@ export async function POST(request: NextRequest) {
           .eq("payment_id", paymentId)
           .maybeSingle();
 
-        return NextResponse.json({
-          success: true,
-          alreadyVerified: true,
-          bookingId: existingBooking?.id,
-        });
+        if (existingBooking?.id) {
+          return NextResponse.json({
+            success: true,
+            alreadyVerified: true,
+            bookingId: existingBooking.id,
+          });
+        }
+        // Verified payment WITHOUT a booking (lost confirmation) — fall
+        // through to the atomic RPC, which creates the missing booking.
+      } else {
+        return NextResponse.json({ success: true, alreadyVerified: true });
       }
-      return NextResponse.json({ success: true, alreadyVerified: true });
     }
 
     if (payment.status === "FAILED") {
@@ -233,109 +237,70 @@ export async function POST(request: NextRequest) {
     }
 
     /* --------------------------------------------------
-       6. Mark payment with provider IDs (PENDING if partial, SUCCESS if full)
-    -------------------------------------------------- */
-    let isPartial = false;
-    let appliedCouponCode = null;
-    let appliedDiscountPercent = null;
-    let discountAmount = null;
-
-    if (payment.purpose === "WORKSHOP") {
-      const { data: workshop } = await supabase
-        .from("workshops")
-        .select("price, coupon_code, coupon_discount_percent")
-        .eq("id", payment.reference_id)
-        .single();
-      if (workshop) {
-        const ticketCount = serverTicketCount;
-        let totalExpected = workshop.price * ticketCount;
-
-        if (couponCode && workshop.coupon_code && couponCode.toUpperCase() === workshop.coupon_code.toUpperCase()) {
-          appliedCouponCode = workshop.coupon_code;
-          appliedDiscountPercent = workshop.coupon_discount_percent || 0;
-          discountAmount = Math.round(totalExpected * (appliedDiscountPercent / 100));
-          totalExpected = Math.max(0, totalExpected - discountAmount);
-        }
-
-        isPartial = payment.amount < totalExpected;
-      }
-    }
-
-    const { error: updateError } = await supabase
-      .from("payments")
-      .update({
-        status: isPartial ? "PENDING" : "SUCCESS",
-        provider_payment_id: razorpay_payment_id,
-        provider_signature: razorpay_signature,
-      })
-      .eq("id", paymentId)
-      .eq("status", "CREATED"); // Extra guard: only update if still CREATED
-
-    if (updateError) {
-      console.error("[verify] Failed to update payment status:", updateError);
-      return NextResponse.json(
-        { error: "Failed to record payment. Please contact support." },
-        { status: 500 }
-      );
-    }
-
-    /* --------------------------------------------------
-       7. Create booking / order record
+       6+7. ATOMIC confirmation via SECURITY DEFINER RPC.
+       Payment → slots → booking happen in ONE transaction:
+       if the booking insert fails, the payment is NOT marked
+       SUCCESS and slots are NOT deducted. No more slot leaks,
+       no more paid-but-unbooked customers, no RLS surprises.
     -------------------------------------------------- */
     let bookingId: string | undefined;
 
     if (payment.purpose === "WORKSHOP") {
-      const ticketCount = serverTicketCount;
+      const { data: confirmResult, error: confirmError } = await supabase.rpc(
+        "confirm_workshop_booking",
+        {
+          p_payment_id: paymentId,
+          p_ticket_count: serverTicketCount,
+          p_attendee_name: attendeeName || user.user_metadata?.full_name || "Guest",
+          p_attendee_email: attendeeEmail || user.email || "",
+          p_attendee_phone: attendeePhone || null,
+          p_coupon_code: couponCode || null,
+          p_provider_payment_id: razorpay_payment_id,
+          p_provider_signature: razorpay_signature,
+        }
+      );
 
-      // Atomically deduct slots
-      const { data: slotResult } = await supabase.rpc("decrement_workshop_slots", {
-        p_workshop_id: payment.reference_id,
-        p_ticket_count: ticketCount,
-      });
+      const result = confirmResult as
+        | { success: boolean; booking_id?: string; code?: string; detail?: string }
+        | null;
 
-      if (!slotResult) {
-        // Slots exhausted — refund would need to happen via Razorpay dashboard
-        await supabase
-          .from("payments")
-          .update({ status: "FAILED" })
-          .eq("id", paymentId);
+      if (confirmError || !result?.success) {
+        console.error("[verify] Atomic booking confirmation failed:", {
+          paymentId,
+          code: result?.code,
+          detail: result?.detail,
+          error: confirmError,
+        });
 
+        if (result?.code === "SOLD_OUT") {
+          return NextResponse.json(
+            {
+              error:
+                "Sorry, these spots were just taken. Please contact support for a refund.",
+            },
+            { status: 409 }
+          );
+        }
+        if (result?.code === "PARTIAL_PAYMENT") {
+          return NextResponse.json(
+            {
+              error:
+                "Payment received. Your booking will be confirmed after the remaining balance is settled.",
+            },
+            { status: 202 }
+          );
+        }
         return NextResponse.json(
-          {
-            error:
-              "Sorry, these spots were just taken. Please contact support for a refund.",
-          },
-          { status: 409 }
-        );
-      }
-
-      const { data: booking, error: bookingError } = await supabase
-        .from("bookings")
-        .insert({
-          user_id: user.id,
-          workshop_id: payment.reference_id,
-          payment_id: paymentId,
-          tickets: ticketCount,
-          attendee_name: attendeeName || user.user_metadata?.full_name || "Guest",
-          attendee_email: attendeeEmail || user.email || "",
-          attendee_phone: attendeePhone || null,
-          status: "CONFIRMED",
-          coupon_code: appliedCouponCode,
-          coupon_discount_percent: appliedDiscountPercent,
-          discount_amount: discountAmount,
-        })
-        .select("id")
-        .single();
-
-      if (bookingError || !booking) {
-        console.error("[verify] Failed to create booking:", bookingError);
-        return NextResponse.json(
-          { error: "Payment received but booking creation failed. Please contact support." },
+          { error: "Payment received but booking confirmation failed. Our team has been notified — please contact support with your payment reference." },
           { status: 500 }
         );
       }
 
-      bookingId = booking.id;
+      bookingId = result.booking_id || "";
+
+      // Provider payment id + signature are recorded inside the RPC
+      // (security definer). A direct update here would be silently dropped
+      // by RLS — no payments_update_own policy exists.
 
       /* --------------------------------------------------
          Send emails — fire and forget but with visible logs
@@ -343,7 +308,7 @@ export async function POST(request: NextRequest) {
       const finalName = attendeeName || user.user_metadata?.full_name || "Guest";
       const finalEmail = attendeeEmail || user.email || "";
 
-      console.log(`[email] Attempting to send emails for booking ${booking.id} to ${finalEmail}`);
+      console.log(`[email] Attempting to send emails for booking ${bookingId} to ${finalEmail}`);
 
       // Fetch workshop details then send both emails
       const sendEmails = async () => {
@@ -383,9 +348,9 @@ export async function POST(request: NextRequest) {
             workshopDate,
             workshopTime,
             workshopVenue,
-            tickets: ticketCount,
+            tickets: serverTicketCount,
             amountPaid: payment.amount,
-            bookingId: booking.id,
+            bookingId: bookingId ?? "",
           });
 
           if (customerRes?.error) {
@@ -405,9 +370,9 @@ export async function POST(request: NextRequest) {
             workshopTitle,
             workshopDate,
             workshopTime,
-            tickets: ticketCount,
+            tickets: serverTicketCount,
             amountPaid: payment.amount,
-            bookingId: booking.id,
+            bookingId: bookingId ?? "",
           });
 
           if (ownerRes?.error) {

@@ -19,7 +19,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import Razorpay from "razorpay";
 import { createClient } from "@/lib/supabase/server";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy_key_for_build",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret_for_build",
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,7 +73,22 @@ export async function POST(request: NextRequest) {
     const eventType = event.event as string;
     const payload = event.payload as Record<string, unknown>;
 
-    const supabase = createClient();
+    // Razorpay posts this endpoint server-to-server: no user cookies, so the
+    // session client cannot read/write payments under RLS. Use the service
+    // role when configured; otherwise log loudly instead of failing silently.
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = serviceKey
+      ? createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          serviceKey,
+          { auth: { persistSession: false } }
+        )
+      : createClient();
+    if (!serviceKey) {
+      console.warn(
+        "[webhook] SUPABASE_SERVICE_ROLE_KEY not set — webhook cannot repair missed payments (RLS blocks anon writes)."
+      );
+    }
 
     /* --------------------------------------------------
        3. Handle event types
@@ -78,28 +100,66 @@ export async function POST(request: NextRequest) {
       const razorpayOrderId = paymentEntity?.order_id as string;
       const razorpayPaymentId = paymentEntity?.id as string;
 
-      if (razorpayOrderId && razorpayPaymentId) {
+      if (razorpayOrderId && razorpayPaymentId && serviceKey) {
         // Find our payment record by provider_order_id
         const { data: payment } = await supabase
           .from("payments")
-          .select("id, status")
+          .select("id, status, purpose, user_id, reference_id")
           .eq("provider_order_id", razorpayOrderId)
           .maybeSingle();
 
         if (payment && payment.status === "CREATED") {
-          // Payment captured but verify endpoint wasn't called (e.g., user closed browser)
-          // Mark payment captured — admin can review and manually confirm booking
-          await supabase
-            .from("payments")
-            .update({
-              status: "CAPTURED",
-              provider_payment_id: razorpayPaymentId,
-            })
-            .eq("id", payment.id);
+          if (payment.purpose === "WORKSHOP") {
+            // Safety net for users who paid but never hit /verify (closed
+            // browser). Run the SAME atomic RPC: it is idempotent, re-checks
+            // the captured amount vs expected, and self-heals missing
+            // profiles. 'CAPTURED' is not a valid payments.status — the RPC
+            // writes SUCCESS / PENDING per payments_status_check.
+            let ticketCount = 1;
+            try {
+              const order = await razorpay.orders.fetch(razorpayOrderId);
+              ticketCount = parseInt(String(order.notes?.ticket_count), 10) || 1;
+            } catch (e) {
+              console.error("[webhook] Could not fetch order notes, defaulting to 1 ticket:", e);
+            }
 
-          console.log(
-            `[webhook] Payment ${payment.id} marked CAPTURED via webhook. Manual review may be needed.`
-          );
+            const { data: profile } = await supabase
+              .from("users_profile")
+              .select("full_name, email")
+              .eq("id", payment.user_id)
+              .maybeSingle();
+
+            const { data: confirmResult, error: confirmError } = await supabase.rpc(
+              "confirm_workshop_booking",
+              {
+                p_payment_id: payment.id,
+                p_ticket_count: ticketCount,
+                p_attendee_name: profile?.full_name || "Guest",
+                p_attendee_email: profile?.email || "",
+                p_attendee_phone: null,
+                p_coupon_code: null,
+                p_provider_payment_id: razorpayPaymentId,
+              }
+            );
+
+            console.log(
+              `[webhook] Workshop payment ${payment.id} auto-confirm via RPC:`,
+              confirmError ? `ERROR ${confirmError.message}` : JSON.stringify(confirmResult)
+            );
+            // NOTE: notification emails are NOT sent from the webhook path;
+            // the verify route owns them. Review admin dashboard for
+            // bookings confirmed here without emails.
+          } else {
+            // Non-workshop (product) capture: record the provider id only.
+            // Status semantics for orders are handled in the verify route.
+            await supabase
+              .from("payments")
+              .update({ provider_payment_id: razorpayPaymentId })
+              .eq("id", payment.id);
+            console.log(
+              `[webhook] Payment ${payment.id} captured but purpose=${payment.purpose}; provider id recorded. Manual review may be needed.`
+            );
+          }
         }
       }
     } else if (eventType === "payment.failed") {
